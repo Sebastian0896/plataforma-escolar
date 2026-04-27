@@ -1,12 +1,17 @@
-// app/admin/planificaciones/page.tsx
 import Link from 'next/link'
 import { getEstructuraCompleta } from '@/lib/wordpress'
+import { auth } from '@/auth'
 import BotonEliminar from '@/components/admin/BotonEliminar'
 
 export const dynamic = 'force-dynamic'
 
 export default async function PlanificacionesPage() {
-  const estructura = await getEstructuraCompleta()
+  const session = await auth()
+  const categoriaSlug = session?.user?.role === 'admin'
+    ? undefined
+    : session?.user?.categoriaDocente || undefined
+
+  const estructura = await getEstructuraCompleta(categoriaSlug)
 
   // Extraer todas las planificaciones de la estructura
   const todasLasPlanificaciones: {
