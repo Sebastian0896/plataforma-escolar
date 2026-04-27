@@ -1,43 +1,74 @@
 // lib/types.ts
 
 export interface Actividad {
-  titulo: string;
-  descripcion: string;
-  contenidoEstudiante?: string;
-  audioTexto?: string;
-  audioTraduccion?: string;
-  recursos?: string;
-  duracion?: string;
+  titulo: string
+  descripcion: string
+  contenidoEstudiante?: string
+  audioTexto?: string
+  audioTraduccion?: string
+  recursos?: string
+  duracion?: string
 }
 
 export interface Momento {
-  tipo: 'inicio' | 'desarrollo' | 'cierre';
-  descripcion: string;
-  contenidoEstudiante?: string;
-  actividades: Actividad[];
+  tipo: 'inicio' | 'desarrollo' | 'cierre'
+  descripcion: string
+  contenidoEstudiante?: string
+  actividades: Actividad[]
 }
 
 export interface Planificacion {
-  slug: string;
-  materia: string;
-  tema: string;
-  competencia: string;
-  indicadorLogro: string;
-  contenidoEstudianteGeneral?: string;
-  momentos: Momento[];
-  maestro: string;
-  coordinadora: string;
-  centroEducativo: string;
-  anoEscolar: string;
+  id: number
+  slug: string
+  materia: string
+  tema: string
+  competencia: string
+  indicadorLogro: string
+  contenidoEstudianteGeneral?: string
+  momentos: Momento[]
+  maestro: string
+  coordinadora: string
+  centroEducativo: string
+  anoEscolar: string
+  // Nuevos campos
+  nivel: string
+  ciclo: string
+  grado: string
+  categoriaDocente: string
 }
 
 export interface Materia {
-  nombre: string;
-  slug: string;
+  nombre: string
+  slug: string
   temas: {
-    slug: string;
-    tema: string;
-  }[];
+    slug: string
+    tema: string
+  }[]
 }
 
-export type Rol = 'estudiante' | 'profesor';
+// Nuevas interfaces para la jerarquía
+export interface GradoInfo {
+  nombre: string
+  slug: string
+  materias: Materia[]
+}
+
+export interface CicloInfo {
+  nombre: string
+  slug: string
+  grados: GradoInfo[]
+}
+
+export interface NivelInfo {
+  nombre: string
+  slug: string
+  ciclos: CicloInfo[]
+}
+
+export interface CategoriaDocente {
+  nombre: string
+  slug: string
+  niveles: NivelInfo[]
+}
+
+export type Rol = 'estudiante' | 'profesor'

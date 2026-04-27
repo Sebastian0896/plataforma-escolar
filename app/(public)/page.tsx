@@ -1,13 +1,25 @@
-// app/page.tsx
-import { redirect } from 'next/navigation';
-import { getMaterias } from '@/lib/wordpress';
+// app/(public)/page.tsx
+import { redirect } from 'next/navigation'
+import { getEstructuraCompleta } from '@/lib/wordpress'
 
 export default async function Home() {
-  const materias = await getMaterias();
+  const estructura = await getEstructuraCompleta()
   
-  if (materias.length > 0 && materias[0].temas.length > 0) {
-    redirect(`/${materias[0].slug}/${materias[0].temas[0].slug}`);
+  const primerNivel = estructura[0]
+  if (primerNivel) {
+    const primerCiclo = primerNivel.ciclos[0]
+    if (primerCiclo) {
+      const primerGrado = primerCiclo.grados[0]
+      if (primerGrado) {
+        const primerMateria = primerGrado.materias[0]
+        if (primerMateria && primerMateria.temas[0]) {
+          redirect(
+            `/${primerNivel.slug}/${primerGrado.slug}/${primerMateria.temas[0].slug}`
+          )
+        }
+      }
+    }
   }
-  
-  return <p>Cargando planificaciones...</p>;
+
+  return <p className="p-8 text-gray-500">No hay planificaciones disponibles.</p>
 }
