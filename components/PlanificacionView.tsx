@@ -24,7 +24,7 @@ export default function PlanificacionView({ planificacion }: { planificacion: Pl
   const [rol, setRol] = useState<Rol>('estudiante');
   const lang = getLang(planificacion.materia);
 
-  console.log('🌐 Materia:', planificacion.materia, '→ Idioma:', lang);
+  //console.log('🌐 Materia:', planificacion.materia, '→ Idioma:', lang);
 
   return (
     <article className="animate-in">
@@ -116,10 +116,10 @@ export default function PlanificacionView({ planificacion }: { planificacion: Pl
                 <span className="text-gray-500 block">Tema</span>
                 <span className="font-medium text-gray-700">{planificacion.tema}</span>
               </div>
-              <div>
+              {/* <div>
                 <span className="text-gray-500 block">Idioma</span>
                 <span className="font-medium text-gray-700">{lang === 'fr-FR' ? 'Francés' : 'Inglés'}</span>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

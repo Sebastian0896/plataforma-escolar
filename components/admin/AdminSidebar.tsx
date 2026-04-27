@@ -11,7 +11,7 @@ export default function AdminSidebar() {
   const user = session?.user
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
-
+console.log('👤 Session:', session)
   const links = [
     {
       href: '/admin',

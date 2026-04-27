@@ -31,13 +31,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           const user = await res.json()
 
+          let categoriaDocente = ''
+          try {
+            const metaRes = await fetch(`${WP_API}/wp/v2/users/${user.id}`, {
+              headers: { Authorization: `Basic ${token}` },
+            })
+            const userData = await metaRes.json()
+            categoriaDocente = userData.categoria_docente || ''
+          } catch {}
+
           return {
             id: String(user.id),
             name: user.name,
             email: user.email || `${user.slug}@wordpress.local`,
             image: user.avatar_urls?.["96"] || null,
             role: user.roles?.includes("administrator") ? "admin" : "profesor",
+            categoriaDocente, // NUEVO
           }
+
         } catch (error) {
           console.error("Error autenticando:", error)
           return null
@@ -49,12 +60,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.role = user.role
+        token.categoriaDocente = user.categoriaDocente
       }
       return token
     },
     async session({ session, token }) {
       if (session.user) {
         session.user.role = token.role as string
+        session.user.categoriaDocente = token.categoriaDocente as string
       }
       return session
     },

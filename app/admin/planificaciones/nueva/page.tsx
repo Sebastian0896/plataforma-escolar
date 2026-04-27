@@ -26,17 +26,25 @@ export default function NuevaPlanificacionPage() {
   const [error, setError] = useState('')
 
   const [form, setForm] = useState({
-    materia: 'frances',
-    tema: '',
-    competencia: '',
-    indicadorLogro: '',
-    estudianteGeneral: '',
-    momentos: [
-      { tipo: 'inicio' as const, descripcion: '', estudiante: '', actividades: [] },
-      { tipo: 'desarrollo' as const, descripcion: '', estudiante: '', actividades: [] },
-      { tipo: 'cierre' as const, descripcion: '', estudiante: '', actividades: [] },
-    ],
-  })
+  materia: 'frances',
+  nivel: 'nivel-secundario',
+  ciclo: 'primer-ciclo',
+  grado: '1ro-secundaria',
+  categoriaDocente: 'idiomas',
+  tema: '',
+  competencia: '',
+  indicadorLogro: '',
+  estudianteGeneral: '',
+  momentos: [
+    { tipo: 'inicio' as const, descripcion: '', estudiante: '', actividades: [] as Actividad[] },
+    { tipo: 'desarrollo' as const, descripcion: '', estudiante: '', actividades: [] as Actividad[] },
+    { tipo: 'cierre' as const, descripcion: '', estudiante: '', actividades: [] as Actividad[] },
+  ],
+  maestro: 'Sebastián González Rodríguez',
+  coordinadora: 'Susana',
+  centroEducativo: 'Salemé Ureña',
+  anoEscolar: '2025-2026',
+})
 
   const agregarActividad = (momentoIndex: number) => {
     const nuevosMomentos = [...form.momentos]
@@ -63,54 +71,63 @@ export default function NuevaPlanificacionPage() {
     setForm({ ...form, momentos: nuevosMomentos })
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSaving(true)
-    setError('')
+ const handleSubmit = async (e: { preventDefault: () => void }) => {
+  e.preventDefault()
+  setSaving(true)
+  setError('')
 
-    try {
-        const data = {
-        title: form.tema,
-        status: 'publish',
-        materia: form.materia,
-        acf: {
-            competencia: form.competencia,
-            indicador_logro: form.indicadorLogro,
-            contenido_estudiante_general: form.estudianteGeneral,
-            maestro: 'Sebastián González Rodríguez',
-            coordinadora: 'Susana',
-            centro_educativo: 'Salemé Ureña',
-            ano_escolar: '2025-2026',
-            m1_descripcion: form.momentos[0].descripcion,
-            m1_estudiante: form.momentos[0].estudiante,
-            m1_actividades: JSON.stringify(form.momentos[0].actividades),
-            m2_descripcion: form.momentos[1].descripcion,
-            m2_estudiante: form.momentos[1].estudiante,
-            m2_actividades: JSON.stringify(form.momentos[1].actividades),
-            m3_descripcion: form.momentos[2].descripcion,
-            m3_estudiante: form.momentos[2].estudiante,
-            m3_actividades: JSON.stringify(form.momentos[2].actividades),
-        },
-        }
-
-        // Llamar a la API route que crearemos
-        const res = await fetch('/api/planificaciones', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-        })
-
-        if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error || 'Error al guardar')
-        }
-
-        router.push('/admin/planificaciones')
-        router.refresh()
-    } catch (err: any) {
-        setError(err.message)
-        setSaving(false)
+  try {
+    const data = {
+      title: form.tema,
+      materia: form.materia,
+      nivel: form.nivel,
+      ciclo: form.ciclo,
+      grado: form.grado,
+      categoriaDocente: form.categoriaDocente,
+      acf: {
+        competencia: form.competencia,
+        indicador_logro: form.indicadorLogro,
+        contenido_estudiante_general: form.estudianteGeneral,
+        maestro: form.maestro,
+        coordinadora: form.coordinadora,
+        centro_educativo: form.centroEducativo,
+        ano_escolar: form.anoEscolar,
+        m1_descripcion: form.momentos[0].descripcion,
+        m1_estudiante: form.momentos[0].estudiante,
+        m1_actividades: JSON.stringify(form.momentos[0].actividades),
+        m2_descripcion: form.momentos[1].descripcion,
+        m2_estudiante: form.momentos[1].estudiante,
+        m2_actividades: JSON.stringify(form.momentos[1].actividades),
+        m3_descripcion: form.momentos[2].descripcion,
+        m3_estudiante: form.momentos[2].estudiante,
+        m3_actividades: JSON.stringify(form.momentos[2].actividades),
+      },
     }
+
+    console.log('📤 Enviando data:', JSON.stringify(data, null, 2))
+
+    const res = await fetch('/api/planificaciones', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    })
+
+    console.log('📥 Respuesta status:', res.status)
+
+    if (!res.ok) {
+      const err = await res.json()
+      console.log('❌ Error respuesta:', err)
+      throw new Error(err.error || 'Error al guardar')
+    }
+
+    router.push('/admin/planificaciones')
+    router.refresh()
+  } catch (err: unknown) {
+    console.log('💥 Catch error:', err)
+    const message = err instanceof Error ? err.message : 'Error al guardar'
+    setError(message)
+    setSaving(false)
+  }
 }
 
   return (
@@ -123,6 +140,42 @@ export default function NuevaPlanificacionPage() {
           <h2 className="font-semibold text-gray-900 mb-4">Datos Generales</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Maestro</label>
+              <input
+                type="text"
+                value={form.maestro}
+                onChange={(e) => setForm({ ...form, maestro: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Coordinadora</label>
+              <input
+                type="text"
+                value={form.coordinadora}
+                onChange={(e) => setForm({ ...form, coordinadora: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Centro Educativo</label>
+              <input
+                type="text"
+                value={form.centroEducativo}
+                onChange={(e) => setForm({ ...form, centroEducativo: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Año Escolar</label>
+              <input
+                type="text"
+                value={form.anoEscolar}
+                onChange={(e) => setForm({ ...form, anoEscolar: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              />
+            </div>
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Materia</label>
               <select
                 value={form.materia}
@@ -132,6 +185,78 @@ export default function NuevaPlanificacionPage() {
                 <option value="frances">Francés</option>
                 <option value="ingles">Inglés</option>
                 <option value="sociales">Sociales</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Materia</label>
+              <select
+                value={form.materia}
+                onChange={(e) => setForm({ ...form, materia: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              >
+                <option value="frances">Francés</option>
+                <option value="ingles">Inglés</option>
+                <option value="sociales">Sociales</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nivel</label>
+              <select
+                value={form.nivel}
+                onChange={(e) => setForm({ ...form, nivel: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              >
+                <option value="nivel-primario">Nivel Primario</option>
+                <option value="nivel-secundario">Nivel Secundario</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Ciclo</label>
+              <select
+                value={form.ciclo}
+                onChange={(e) => setForm({ ...form, ciclo: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              >
+                <option value="primer-ciclo">Primer Ciclo</option>
+                <option value="segundo-ciclo">Segundo Ciclo</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Grado</label>
+              <select
+                value={form.grado}
+                onChange={(e) => setForm({ ...form, grado: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              >
+                <option value="">Seleccionar...</option>
+                <optgroup label="Primaria">
+                  <option value="1ro-primaria">1ro Primaria</option>
+                  <option value="2do-primaria">2do Primaria</option>
+                  <option value="3ro-primaria">3ro Primaria</option>
+                  <option value="4to-primaria">4to Primaria</option>
+                  <option value="5to-primaria">5to Primaria</option>
+                  <option value="6to-primaria">6to Primaria</option>
+                </optgroup>
+                <optgroup label="Secundaria">
+                  <option value="1ro-secundaria">1ro Secundaria</option>
+                  <option value="2do-secundaria">2do Secundaria</option>
+                  <option value="3ro-secundaria">3ro Secundaria</option>
+                  <option value="4to-secundaria">4to Secundaria</option>
+                  <option value="5to-secundaria">5to Secundaria</option>
+                  <option value="6to-secundaria">6to Secundaria</option>
+                </optgroup>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Categoría Docente</label>
+              <select
+                value={form.categoriaDocente}
+                onChange={(e) => setForm({ ...form, categoriaDocente: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+              >
+                <option value="idiomas">Idiomas</option>
+                <option value="materias-basicas">Materias Básicas</option>
+                <option value="otras-materias">Otras Materias</option>
               </select>
             </div>
             <div>

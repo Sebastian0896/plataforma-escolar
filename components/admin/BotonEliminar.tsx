@@ -15,9 +15,10 @@ export default function BotonEliminar({ materiaSlug, temaSlug }: BotonEliminarPr
     if (!confirm('¿Estás seguro de eliminar esta planificación?')) return
 
     try {
-      const res = await fetch(`/api/planificaciones?materia=${materiaSlug}&tema=${temaSlug}`)
-      const data = await res.json()
+      const res = await fetch(`/api/planificaciones?tema=${temaSlug}`)
+      if (!res.ok) throw new Error('No encontrada')
 
+      const data: { id: number } = await res.json()
       const delRes = await fetch(`/api/planificaciones?id=${data.id}`, { method: 'DELETE' })
 
       if (delRes.ok) {
@@ -31,10 +32,7 @@ export default function BotonEliminar({ materiaSlug, temaSlug }: BotonEliminarPr
   }
 
   return (
-    <button
-      onClick={handleDelete}
-      className="text-xs text-red-500 hover:text-red-700 font-medium"
-    >
+    <button onClick={handleDelete} className="text-xs text-red-500 hover:text-red-700 font-medium">
       Eliminar
     </button>
   )
