@@ -1,17 +1,26 @@
-// app/admin/layout.tsx
-import type { Metadata } from 'next'
-import AdminSidebar from '@/components/admin/AdminSidebar'
+import { auth } from "@/auth"
+import { redirect } from "next/navigation"
+import AdminSidebar from "@/components/admin/AdminSidebar"
 
-export const metadata: Metadata = {
-  title: 'Admin - Planificaciones',
-  robots: 'noindex, nofollow',
-}
+export const runtime = "nodejs"
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const session = await auth()
+
+  // No está logueado
+  if (!session) {
+    return redirect("/login")
+  }
+
+  // Está logueado pero no es admin ni docente
+  if (session.user?.role !== 'admin' && session.user?.role !== 'docente') {
+    return redirect("/acceso")
+  }
+
   return (
     <div className="flex min-h-screen">
       <AdminSidebar />

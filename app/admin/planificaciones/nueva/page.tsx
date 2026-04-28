@@ -42,7 +42,7 @@ export default function NuevaPlanificacionPage() {
   ],
   maestro: 'Sebastián González Rodríguez',
   coordinadora: 'Susana',
-  centroEducativo: 'Salemé Ureña',
+  centroEducativo: 'Salomé Ureña',
   anoEscolar: '2025-2026',
 })
 
