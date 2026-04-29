@@ -1,26 +1,34 @@
-// middleware.ts
-// middleware.ts
-import { auth } from "./auth"
-import { NextResponse } from "next/server"
-export const runtime = "nodejs"
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
-export default auth((req) => {
-  const isLoggedIn = !!req.auth
-  const { pathname } = req.nextUrl
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
 
-  // Si no está logueado y no está en login, redirigir a login
-  if (!isLoggedIn && pathname !== "/admin/login") {
-    return NextResponse.redirect(new URL("/admin/login", req.url))
+  if (
+    pathname === '/' ||
+    pathname.startsWith('/login') ||
+    pathname.startsWith('/acceso') ||
+    pathname.startsWith('/registro') ||
+     pathname.startsWith('/estudiante') ||
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/_next') ||
+    pathname.includes('.')
+  ) {
+    return NextResponse.next()
   }
 
-  // Si está logueado y está en login, redirigir a admin
-  if (isLoggedIn && pathname === "/admin/login") {
-    return NextResponse.redirect(new URL("/admin", req.url))
+  const sessionToken =
+    request.cookies.get('next-auth.session-token')?.value ||
+    request.cookies.get('__Secure-next-auth.session-token')?.value ||
+    request.cookies.get('authjs.session-token')?.value
+
+  if (!sessionToken) {
+    return NextResponse.redirect(new URL('/login', request.url))
   }
 
   return NextResponse.next()
-})
+}
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ['/((?!_next).*)'],
 }

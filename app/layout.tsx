@@ -1,23 +1,25 @@
-// app/layout.tsx
 import type { Metadata } from 'next'
 import './globals.css'
 import SessionProvider from '@/components/SessionProvider'
+import ThemeProvider from '@/components/ThemeProvider'
+import PWAInstall from '@/components/PWAInstall'
 
 export const metadata: Metadata = {
-  title: 'Planificaciones Docentes',
-  description: 'Sistema de planificaciones en línea',
+  title: 'Plataforma Educativa — Salomé Ureña',
+  description: 'Sistema de planificaciones docentes',
+  manifest: '/manifest.json',
+  themeColor: '#2563eb',
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es">
-      <body className="bg-gray-100" suppressHydrationWarning>
+    <html lang="es" suppressHydrationWarning>
+      <body className="bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-gray-100">
         <SessionProvider>
-          {children}
+          <ThemeProvider>
+            <PWAInstall />
+            {children}
+          </ThemeProvider>
         </SessionProvider>
       </body>
     </html>

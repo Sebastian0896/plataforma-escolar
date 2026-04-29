@@ -7,6 +7,8 @@ import MomentoSection from './MomentoSection'
 import { useSession } from 'next-auth/react'
 import Image from 'next/image'
 
+import BotonPDF from './BotonPDF'
+
 const getLang = (materia: string): string => {
   const langMap: Record<string, string> = {
     'Francés': 'fr-FR',
@@ -41,22 +43,22 @@ export default function PlanificacionView({
   return (
     <article className="animate-in">
       <header className="mb-6">
-        <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
+        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-300 mb-4">
           <span>{planificacion.materia}</span>
           <span>/</span>
           <span>{planificacion.tema}</span>
           {!soloEstudiante && session && (
-            <span className="ml-auto text-xs bg-gray-100 px-2 py-1 rounded">
+            <span className="ml-auto text-xs bg-gray-50 dark:bg-slate-800/50 px-2 py-1 rounded">
               👩‍🏫 Vista docente
             </span>
           )}
         </div>
 
         {/* Cabecera institucional */}
-        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden mb-4">
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden mb-4">
           <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-5 py-4 flex items-center gap-4">
                         
-            <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center flex-shrink-0 shadow-md overflow-hidden relative">
+            <div className="w-14 h-14 bg-white dark:bg-slate-800 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md overflow-hidden relative">
               <Image
                 src="/logo-salome-urena.png"
                 alt="Logo Centro Educativo Salomé Ureña"
@@ -72,6 +74,7 @@ export default function PlanificacionView({
               </h2>
               <p className="text-blue-100 text-xs">Formando el futuro con excelencia</p>
             </div>
+            
           </div>
 
           <div className="p-5">
@@ -92,8 +95,8 @@ export default function PlanificacionView({
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-900">Maestro</h3>
-                  <p className="text-sm text-gray-700">
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Maestro</h3>
+                  <p className="text-sm text-gray-700 dark:text-gray-200">
                     {planificacion.maestro || 'Sebastián González Rodríguez'}
                   </p>
                 </div>
@@ -115,8 +118,8 @@ export default function PlanificacionView({
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-sm font-semibold text-gray-900">Coordinadora</h3>
-                  <p className="text-sm text-gray-700">
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Coordinadora</h3>
+                  <p className="text-sm text-gray-700text-gray-700 dark:text-gray-200">
                     {planificacion.coordinadora || 'Susana'}
                   </p>
                 </div>
@@ -125,52 +128,56 @@ export default function PlanificacionView({
 
             <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
               <div>
-                <span className="text-gray-500 block">Año escolar</span>
-                <span className="font-medium text-gray-700">
+                <span className="text-gray-500 dark:text-gray-400 block">Año escolar</span>
+                <span className="font-medium text-gray-700 dark:text-gray-200">
                   {planificacion.anoEscolar || '2025-2026'}
                 </span>
               </div>
               <div>
-                <span className="text-gray-500 block">Asignatura</span>
-                <span className="font-medium text-gray-700">{planificacion.materia}</span>
+                <span className="text-gray-500 dark:text-gray-400 block">Asignatura</span>
+                <span className="font-medium text-gray-700 dark:text-gray-200">{planificacion.materia}</span>
               </div>
               <div>
-                <span className="text-gray-500 block">Tema</span>
-                <span className="font-medium text-gray-700">{planificacion.tema}</span>
+                <span className="text-gray-500 dark:text-gray-400 block">Tema</span>
+                <span className="font-medium text-gray-700 dark:text-gray-200">{planificacion.tema}</span>
               </div>
             </div>
           </div>
         </div>
 
-        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-3">
+        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3">
           {planificacion.tema}
         </h1>
 
-        <div className="grid gap-2 bg-white p-4 rounded-xl border border-gray-200">
+        <div className="grid gap-2 bg-white dark:bg-slate-800 p-4 rounded-xl border border-gray-200 dark:border-slate-700">
           <div>
-            <span className="text-xs font-semibold uppercase text-gray-500 tracking-wide">
+            <span className="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 tracking-wide">
               Competencia
             </span>
-            <p className="text-sm text-gray-800 mt-0.5">{planificacion.competencia}</p>
+            <p className="text-sm text-gray-800text-gray-800 dark:text-gray-100 mt-0.5">{planificacion.competencia}</p>
           </div>
           <div>
-            <span className="text-xs font-semibold uppercase text-gray-500 tracking-wide">
+            <span className="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 tracking-wide">
               Indicador de Logro
             </span>
-            <p className="text-sm text-gray-800 mt-0.5">{planificacion.indicadorLogro}</p>
+            <p className="text-sm text-gray-800 dark:text-gray-100 mt-0.5">{planificacion.indicadorLogro}</p>
           </div>
           {planificacion.contenidoEstudianteGeneral && (
             <div>
-              <span className="text-xs font-semibold uppercase text-gray-500 tracking-wide">
+              <span className="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 tracking-wide">
                 📖 Para los estudiantes
               </span>
-              <p className="text-sm text-gray-800 mt-0.5">
+              <p className="text-sm text-gray-800 dark:text-gray-100 mt-0.5">
                 {planificacion.contenidoEstudianteGeneral}
               </p>
             </div>
           )}
         </div>
       </header>
+      <div className="flex items-center justify-between mb-4">
+        <h1 className="text-2xl font-bold">{planificacion.tema}</h1>
+        <BotonPDF slug={planificacion.slug} grado={planificacion.grado} />
+      </div>
 
       {/* Momentos */}
       <div className="space-y-4">

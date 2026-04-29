@@ -1,25 +1,3 @@
-/* import { DefaultSession } from "next-auth"
-
-declare module "next-auth" {
-  interface Session {
-    user: {
-      role?: string
-      categoriaDocente?: string
-    } & DefaultSession["user"]
-  }
-  interface User {
-    role?: string
-    categoriaDocente?: string
-  }
-}
-
-declare module "next-auth/jwt" {
-  interface JWT {
-    role?: string
-    categoriaDocente?: string
-  }
-} */
-
 import { DefaultSession } from "next-auth"
 
 declare module "next-auth" {
@@ -28,6 +6,8 @@ declare module "next-auth" {
       role?: string
       categoriaDocente?: string
       grado?: string
+      grados?: string[]
+      materias?: string[]
       centroId?: string
     } & DefaultSession["user"]
   }
@@ -35,6 +15,8 @@ declare module "next-auth" {
     role?: string
     categoriaDocente?: string
     grado?: string
+    grados?: string[]
+    materias?: string[]
     centroId?: string
   }
 }
@@ -44,6 +26,8 @@ declare module "next-auth/jwt" {
     role?: string
     categoriaDocente?: string
     grado?: string
+    grados?: string[]
+    materias?: string[]
     centroId?: string
   }
 }

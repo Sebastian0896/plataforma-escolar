@@ -1,6 +1,6 @@
 // lib/types.ts
 
-export interface Actividad {
+/* export interface Actividad {
   titulo: string
   descripcion: string
   contenidoEstudiante?: string
@@ -8,7 +8,24 @@ export interface Actividad {
   audioTraduccion?: string
   recursos?: string
   duracion?: string
+} */
+
+export interface Recurso {
+  tipo: 'audio' | 'imagen' | 'pdf' | 'video' | 'enlace'
+  url?: string
+  texto?: string
+  traduccion?: string
+  descripcion?: string
 }
+
+export interface Actividad {
+  titulo: string
+  descripcion: string
+  contenidoEstudiante?: string
+  recursos: Recurso[]
+  duracion?: string
+}
+
 
 export interface Momento {
   tipo: 'inicio' | 'desarrollo' | 'cierre'
@@ -70,5 +87,6 @@ export interface CategoriaDocente {
   slug: string
   niveles: NivelInfo[]
 }
+
 
 export type Rol = 'estudiante' | 'profesor'

@@ -1,6 +1,7 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import AdminSidebar from "@/components/admin/AdminSidebar"
+import Navbar from "@/components/Navbar"
 
 export const runtime = "nodejs"
 
@@ -11,22 +12,18 @@ export default async function AdminLayout({
 }) {
   const session = await auth()
 
-  // No está logueado
-  if (!session) {
-    return redirect("/login")
-  }
-
-  // Está logueado pero no es admin ni docente
-  if (session.user?.role !== 'admin' && session.user?.role !== 'docente') {
-    return redirect("/acceso")
-  }
+  if (!session) return redirect("/login")
+  if (session.user?.role !== 'admin' && session.user?.role !== 'docente') return redirect("/dashboard")
 
   return (
-    <div className="flex min-h-screen">
-      <AdminSidebar />
-      <main className="flex-1 p-6 lg:p-8 max-w-6xl mx-auto w-full">
-        {children}
-      </main>
+    <div className="min-h-screen">
+      <Navbar />
+      <div className="flex">
+        <AdminSidebar />
+        <main className="flex-1 p-6 lg:p-8 max-w-6xl mx-auto w-full bg-gray-50 dark:bg-slate-950">
+          {children}
+        </main>
+      </div>
     </div>
   )
 }

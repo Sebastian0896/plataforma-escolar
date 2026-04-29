@@ -1,12 +1,18 @@
 import mongoose, { Schema, Document } from 'mongoose'
 
+export interface IRecurso {
+  tipo: 'audio' | 'imagen' | 'pdf' | 'video' | 'enlace'
+  url?: string
+  texto?: string
+  traduccion?: string
+  descripcion?: string
+}
+
 interface IActividad {
   titulo: string
   descripcion: string
   contenidoEstudiante?: string
-  audioTexto?: string
-  audioTraduccion?: string
-  recursos?: string
+  recursos: IRecurso[]
   duracion?: string
 }
 
@@ -36,22 +42,28 @@ export interface IPlanificacion extends Document {
   momentos: IMomento[]
 }
 
+const RecursoSchema = new Schema<IRecurso>({
+  tipo: { type: String, enum: ['audio', 'imagen', 'pdf', 'video', 'enlace'], required: true },
+  url: { type: String },
+  texto: { type: String },
+  traduccion: { type: String },
+  descripcion: { type: String },
+}, { _id: false })
+
 const ActividadSchema = new Schema<IActividad>({
   titulo: { type: String, required: true },
   descripcion: { type: String, default: '' },
   contenidoEstudiante: { type: String },
-  audioTexto: { type: String },
-  audioTraduccion: { type: String },
-  recursos: { type: String },
+  recursos: [RecursoSchema],
   duracion: { type: String },
-})
+}, { _id: false })
 
 const MomentoSchema = new Schema<IMomento>({
   tipo: { type: String, enum: ['inicio', 'desarrollo', 'cierre'], required: true },
   descripcion: { type: String, default: '' },
   contenidoEstudiante: { type: String },
   actividades: [ActividadSchema],
-})
+}, { _id: false })
 
 const PlanificacionSchema = new Schema<IPlanificacion>({
   slug: { type: String, required: true, unique: true },

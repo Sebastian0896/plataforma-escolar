@@ -1,47 +1,51 @@
-import connectDB from '../lib/db'
+// scripts/seed.ts
+import { connectDB } from '../lib/db'
 import Centro from '../lib/models/Centro'
 import Usuario from '../lib/models/Usuario'
 import bcrypt from 'bcryptjs'
+import 'dotenv/config'
 
 async function seed() {
   await connectDB()
-  console.log('📦 Conectado a MongoDB')
 
-  // Limpiar colecciones existentes
   await Centro.deleteMany({})
   await Usuario.deleteMany({})
 
-  // Crear centro
   const centro = await Centro.create({
-    nombre: 'Centro Educativo Salemé Ureña',
+    nombre: 'Centro Educativo Salomé Ureña',
     codigo: 'SALE2025',
   })
 
-  // Crear admin
-  const passwordHash = await bcrypt.hash('admin123', 10)
-  await Usuario.create({
-    nombre: 'Sebastián González Rodríguez',
-    email: 'admin@salome.edu.do',
-    password: passwordHash,
-    rol: 'admin',
-    centroId: centro._id,
-  })
+  const hash = await bcrypt.hash('admin123', 10)
 
-  // Crear docente idiomas
-  const passDocente = await bcrypt.hash('docente123', 10)
-  await Usuario.create({
-    nombre: 'María Profesora',
+  const usuarios = [
+    { nombre: 'Sebastián González', email: 'admin@salome.edu.do', password: hash, rol: 'admin', centroId: centro._id },
+   {
+    nombre: 'María Docente',
     email: 'maria@salome.edu.do',
-    password: passDocente,
+    password: hash,
     rol: 'docente',
     categoriaDocente: 'idiomas',
+    grados: ['1ro-secundaria', '2do-secundaria'],
+    materias: ['ingles', 'frances'],
     centroId: centro._id,
-  })
+  },
+    { nombre: 'Juan Estudiante', email: 'juan@salome.edu.do', password: hash, rol: 'estudiante', grado: '1ro-secundaria', rne: 'RNE-2025-001', centroId: centro._id },
+    { nombre: 'Ana Coordinadora', email: 'ana@salome.edu.do', password: hash, rol: 'coordinador', centroId: centro._id },
+    { nombre: 'Carlos Técnico', email: 'carlos@salome.edu.do', password: hash, rol: 'tecnico_distrital', centroId: centro._id },
+  ]
+
+  for (const u of usuarios) {
+    await Usuario.create(u)
+  }
 
   console.log('✅ Seed completado')
-  console.log('   Admin: admin@salome.edu.do / admin123')
-  console.log('   Docente: maria@saleme.edu.do / docente123')
+  console.log('   admin@salome.edu.do / admin123 (admin)')
+  console.log('   maria@salome.edu.do / admin123 (docente idiomas)')
+  console.log('   juan@salome.edu.do / admin123 (estudiante)')
+  console.log('   ana@salome.edu.do / admin123 (coordinadora)')
+  console.log('   carlos@salome.edu.do / admin123 (técnico distrital)')
   process.exit(0)
 }
 
-seed().catch(console.error)
+seed()

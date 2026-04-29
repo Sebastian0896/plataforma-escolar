@@ -8,70 +8,53 @@ export const runtime = "nodejs"
 
 export async function POST(request: Request) {
   try {
-    const { nombre, email, password, codigo, grado, rne } = await request.json()
+     const body = await request.json()
+    console.log('📦 Body recibido:', body)
 
-    if (!nombre || !email || !password || !codigo || !grado || !rne) {
-      return NextResponse.json(
-        { error: 'Todos los campos son requeridos' },
-        { status: 400 }
-      )
+    const { nombre, email, password, codigo, rol, grado, rne, categoriaDocente, grados, materias } = body
+
+    if (!nombre || !email || !password || !codigo || !rol) {
+      return NextResponse.json({ error: 'Campos requeridos' }, { status: 400 })
     }
 
     await connectDB()
 
-    // Validar código de centro
-    const centro = await Centro.findOne({
-      codigo: codigo.toUpperCase(),
-      activo: true,
-    })
+    const centro = await Centro.findOne({ codigo: codigo.toUpperCase(), activo: true })
+    if (!centro) return NextResponse.json({ error: 'Código de centro inválido' }, { status: 401 })
 
-    if (!centro) {
-      return NextResponse.json(
-        { error: 'Código de centro inválido' },
-        { status: 401 }
-      )
-    }
-
-    // Verificar si el email ya existe
     const existe = await Usuario.findOne({ email })
-    if (existe) {
-      return NextResponse.json(
-        { error: 'Este email ya está registrado' },
-        { status: 409 }
-      )
+    if (existe) return NextResponse.json({ error: 'Este email ya está registrado' }, { status: 409 })
+
+    const passwordHash = await bcrypt.hash(password, 10)
+
+    const usuario: any = {
+      nombre,
+      email,
+      password: passwordHash,
+      rol,
+      centroId: centro._id,
+      materias
     }
 
-    // Crear usuario
-    const passwordHash = await bcrypt.hash(password, 10)
-    const usuario = await Usuario.create({
-        nombre,
-        email,
-        password: passwordHash,
-        rol: 'estudiante',
-        grado,
-        rne,
-        centroId: centro._id,
-    })
+    if (rol === 'estudiante') {
+      usuario.grado = grado
+      usuario.rne = rne
+    }
 
-    return NextResponse.json(
-      {
-        id: usuario._id.toString(),
-        nombre: usuario.nombre,
-        email: usuario.email,
-        grado: usuario.grado,
-      },
-      { status: 201 }
-    )
+    if (rol === 'docente') {
+      usuario.categoriaDocente = categoriaDocente
+      usuario.grados = grados || []
+      usuario.materias = materias || [] // ← Agregar
+    }
+
+    await Usuario.create(usuario)
+
+    return NextResponse.json({ success: true }, { status: 201 })
   } catch (error: any) {
     if (error.code === 11000) {
-      return NextResponse.json(
-        { error: 'Este email ya está registrado' },
-        { status: 409 }
-      )
+      return NextResponse.json({ error: 'Email o RNE ya registrado' }, { status: 409 })
     }
-    return NextResponse.json(
-      { error: 'Error del servidor' },
-      { status: 500 }
-    )
+    console.error('❌ Error registro:', error) // ← Agregar
+    return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
   }
 }

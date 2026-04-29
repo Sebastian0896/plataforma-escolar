@@ -10,12 +10,20 @@
     "seed": "tsx scripts/seed.ts"
   },
   "dependencies": {
+    "@types/formidable": "^3.5.1",
+    "@types/multer": "^2.1.0",
     "bcryptjs": "^3.0.3",
+    "dotenv": "^17.4.2",
+    "formidable": "^3.5.4",
+    "jspdf": "^4.2.1",
     "mongoose": "^9.6.0",
+    "multer": "^2.1.1",
     "next": "16.2.4",
     "next-auth": "^5.0.0-beta.31",
+    "next-themes": "^0.4.6",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

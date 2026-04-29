@@ -1,4 +1,4 @@
-import { getPlanificacion } from '@/lib/wordpress'
+import { getPlanificacion } from '@/lib/planificaciones'
 import PlanificacionView from '@/components/PlanificacionView'
 
 type Params = Promise<{ grado: string; tema: string }>

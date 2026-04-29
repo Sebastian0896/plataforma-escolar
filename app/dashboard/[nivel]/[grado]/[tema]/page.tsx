@@ -1,6 +1,6 @@
 // app/(public)/[nivel]/[grado]/[tema]/page.tsx
 import { notFound } from 'next/navigation'
-import { getPlanificacion } from '@/lib/wordpress'
+import { getPlanificacion } from '@/lib/planificaciones'
 import PlanificacionView from '@/components/PlanificacionView'
 
 type Params = Promise<{ nivel: string; grado: string; tema: string }>

@@ -7,24 +7,27 @@ import { useState } from 'react';
 
 const momentoConfig = {
   inicio: {
-    color: 'bg-green-50 border-green-200',
+    color: 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800',
+    label: 'text-green-800 dark:text-green-300',
     dot: 'bg-green-500',
-    label: 'Inicio',
+    titulo: 'Inicio',
     icon: '🚀',
   },
   desarrollo: {
-    color: 'bg-blue-50 border-blue-200',
+    color: 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800',
+    label: 'text-blue-800 dark:text-blue-300',
     dot: 'bg-blue-500',
-    label: 'Desarrollo',
+    titulo: 'Desarrollo',
     icon: '📝',
   },
   cierre: {
-    color: 'bg-purple-50 border-purple-200',
+    color: 'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800',
+    label: 'text-purple-800 dark:text-purple-300',
     dot: 'bg-purple-500',
-    label: 'Cierre',
+    titulo: 'Cierre',
     icon: '🎯',
   },
-};
+}
 
 interface MomentoSectionProps {
   momento: Momento;
@@ -45,8 +48,8 @@ export default function MomentoSection({ momento, rol = 'estudiante', lang = "fr
       <div className="flex items-center justify-between gap-2 mb-2">
         <div className="flex items-center gap-2">
           <span className={`w-3 h-3 rounded-full ${config.dot}`} />
-          <h3 className="font-semibold text-gray-900">
-            {config.icon} {config.label}
+          <h3 className={`font-semibold ${config.label}`}>
+            {config.icon} {config.titulo}
           </h3>
         </div>
         {rol === 'profesor' && momento.contenidoEstudiante && (
@@ -59,7 +62,7 @@ export default function MomentoSection({ momento, rol = 'estudiante', lang = "fr
         )}
       </div>
       
-      <p className="text-md text-gray-700 mb-3">{descripcionVisible}</p>
+      <p className="text-md text-blue-800 dark:text-blue-300 mt-1 whitespace-pre-line mb-3">{descripcionVisible}</p>
       
       {expanded && rol === 'profesor' && (
         <div className="mb-3 p-3 bg-white/70 border border-dashed border-purple-300 rounded-lg">

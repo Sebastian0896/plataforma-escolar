@@ -1,4 +1,4 @@
-import { getEstructuraCompleta } from '@/lib/wordpress'
+import { getEstructuraCompleta } from '@/lib/planificaciones'
 import SidebarEstudiante from '@/components/estudiante/SidebarEstudiante'
 
 type Params = Promise<{ grado: string }>
@@ -14,9 +14,9 @@ export default async function EstudianteLayout({
   const estructura = await getEstructuraCompleta()
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex">
       <SidebarEstudiante estructura={estructura} grado={grado} />
-      <main className="flex-1 p-6 max-w-8xl mx-auto w-full">
+      <main className="flex-1 p-6 max-w-6xl mx-auto w-full">
         {children}
       </main>
     </div>
