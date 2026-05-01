@@ -2,15 +2,21 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 
 interface Props {
-  rol?: string
-  grado?: string
   onClick?: () => void
 }
 
-export default function NavLinks({ rol, grado, onClick }: Props) {
+export default function NavLinks({ onClick }: Props) {
+  const { data: session, status } = useSession()
   const pathname = usePathname()
+
+  // ⏳ Mientras carga sesión, no renderizamos nada
+  if (status === 'loading') return null
+
+  const rol = session?.user?.role
+  const grado = session?.user?.grado
 
   return (
     <>
@@ -56,7 +62,7 @@ export default function NavLinks({ rol, grado, onClick }: Props) {
         </Link>
       )}
 
-      {rol === 'estudiante' && (
+      {rol === 'estudiante' && grado && (
         <Link
           href={`/estudiante/${grado}`}
           onClick={onClick}

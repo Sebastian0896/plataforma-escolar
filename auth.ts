@@ -9,7 +9,10 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
   cookies: {
     sessionToken: {
-      name: `__Secure-next-auth.session-token`,
+      name:
+        process.env.NODE_ENV === "production"
+          ? "__Secure-next-auth.session-token"
+          : "next-auth.session-token",
       options: {
         httpOnly: true,
         sameSite: "lax",
@@ -26,13 +29,29 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: "Contraseña", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null
+        console.log("Credenciales:", credentials)
+
+        if (!credentials?.email || !credentials?.password) {
+          console.log("Faltan credenciales")
+          return null
+        }
+
         try {
           await connectDB()
+
           const usuario = await Usuario.findOne({ email: credentials.email, activo: true })
-          if (!usuario) return null
+          console.log("Usuario:", usuario)
+
+          if (!usuario) {
+            console.log("Usuario no encontrado")
+            return null
+          }
+
           const ok = await bcrypt.compare(credentials.password, usuario.password)
+          console.log("Password válida:", ok)
+
           if (!ok) return null
+
           return {
             id: usuario._id.toString(),
             name: usuario.nombre,
@@ -42,12 +61,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             grado: usuario.grado || "",
             grados: JSON.stringify(usuario.grados || []),
             materias: JSON.stringify(usuario.materias || []),
-            centroId: usuario.centroId.toString(),
+            centroId: usuario.centroId?.toString() || "",
           }
-        } catch {
-          return null
+        } catch (error) {
+          console.error("ERROR REAL:", error)
+          throw new Error("Error en login")
         }
-      },
+      }
     }),
   ],
   callbacks: {
