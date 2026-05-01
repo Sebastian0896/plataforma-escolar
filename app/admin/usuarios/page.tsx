@@ -2,10 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 
 export default function UsuariosPage() {
-  const router = useRouter()
   const [usuarios, setUsuarios] = useState<any[]>([])
   const [mostrarInactivos, setMostrarInactivos] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -35,7 +33,7 @@ export default function UsuariosPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setMostrarInactivos(!mostrarInactivos)}
-            className={`text-xs px-3 py-2 rounded-lg border ${mostrarInactivos ? 'bg-gray-100 dark:bg-slate-700' : ''}`}
+            className="text-xs px-3 py-2 rounded-lg border dark:border-slate-600"
           >
             {mostrarInactivos ? 'Ver activos' : 'Ver inactivos'}
           </button>
@@ -45,7 +43,7 @@ export default function UsuariosPage() {
       </div>
 
       {loading ? (
-        <p className="text-gray-500">Cargando...</p>
+        <p className="text-gray-500 dark:text-gray-400">Cargando...</p>
       ) : (
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
           <div className="divide-y divide-gray-100 dark:divide-slate-700">
@@ -61,9 +59,11 @@ export default function UsuariosPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-3 text-xs">
-                  {u.grado && <span className="text-gray-500">{u.grado?.replace('-', ' ')}</span>}
-                  {u.categoriaDocente && <span className="text-gray-500 capitalize">{u.categoriaDocente?.replace('-', ' ')}</span>}
-                  <Link href={`/admin/usuarios/editar/${u._id}`} className="text-blue-600 hover:underline">Editar</Link>
+                  {u.grado && <span className="text-gray-500 dark:text-gray-400">{u.grado?.replace('-', ' ')}</span>}
+                  {u.categoriaDocente && <span className="text-gray-500 dark:text-gray-400 capitalize">{u.categoriaDocente?.replace('-', ' ')}</span>}
+                  {u.activo && (
+                    <Link href={`/admin/usuarios/editar/${u._id}`} className="text-blue-600 hover:underline">Editar</Link>
+                  )}
                   <button
                     onClick={() => toggleEstado(u._id, !u.activo)}
                     className={u.activo ? 'text-red-500 hover:text-red-700' : 'text-green-500 hover:text-green-700'}
