@@ -1,15 +1,23 @@
 'use client'
 
-import Link from 'next/link'
 import { useSession } from 'next-auth/react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import NavLinks from './NavLinks'
 import UserMenu from './UserMenu'
 import MobileMenu from './MobileMenu'
 
 export default function Navbar() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => { setMounted(true) }, [])
+
+  // Esperar a que la sesión cargue completamente
+  const isLoading = status === 'loading'
+
+  if (!mounted) return null
 
   return (
     <nav className="bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-700 sticky top-0 z-30">
@@ -21,18 +29,16 @@ export default function Navbar() {
           </Link>
 
           <div className="hidden md:flex items-center gap-1">
-            <NavLinks
-              rol={session?.user?.role}
-              grado={session?.user?.grado}
-            />
+            {!isLoading && (
+              <NavLinks rol={session?.user?.role} grado={session?.user?.grado} />
+            )}
           </div>
 
           <div className="flex items-center gap-3">
-            <UserMenu name={session?.user?.name} rol={session?.user?.role} />
-            <button
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="md:hidden p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg"
-            >
+            {!isLoading && (
+              <UserMenu name={session?.user?.name} rol={session?.user?.role} />
+            )}
+            <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden p-2 text-gray-500 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
               </svg>
@@ -41,11 +47,9 @@ export default function Navbar() {
         </div>
 
         <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)}>
-          <NavLinks
-            rol={session?.user?.role}
-            grado={session?.user?.grado}
-            onClick={() => setMenuOpen(false)}
-          />
+          {!isLoading && (
+            <NavLinks rol={session?.user?.role} grado={session?.user?.grado} onClick={() => setMenuOpen(false)} />
+          )}
         </MobileMenu>
       </div>
     </nav>
