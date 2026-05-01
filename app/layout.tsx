@@ -2,7 +2,6 @@ import type { Metadata } from 'next'
 import './globals.css'
 import SessionProvider from '@/components/SessionProvider'
 import ThemeProvider from '@/components/ThemeProvider'
-import PWAInstall from '@/components/PWAInstall'
 
 export const viewport: Metadata = {
   title: 'Plataforma Educativa — Salomé Ureña',
