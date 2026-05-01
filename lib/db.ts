@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 import "dotenv/config"
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/planificaciones'
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://sgrx245_db_user:GiZB5VbRsxmRVCjq@ac-m67jijy-shard-00-00.pxxvkbe.mongodb.net:27017,ac-m67jijy-shard-00-01.pxxvkbe.mongodb.net:27017,ac-m67jijy-shard-00-02.pxxvkbe.mongodb.net:27017/?ssl=true&replicaSet=atlas-z826oo-shard-0&authSource=admin&appName=plataforma-escolar'
 
 let cached = (globalThis as any)._mongooseCache
 
