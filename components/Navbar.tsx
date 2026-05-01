@@ -9,6 +9,8 @@ import MobileMenu from './MobileMenu'
 
 export default function Navbar() {
   const { data: session } = useSession()
+
+  
   const [menuOpen, setMenuOpen] = useState(false)
   const rol = session?.user?.role
   const grado = session?.user?.grado
