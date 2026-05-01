@@ -7,15 +7,14 @@ import Usuario from "@/lib/models/Usuario"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
-  basePath: "/api/auth",
   cookies: {
     sessionToken: {
-      name: `next-auth.session-token`,
+      name: `__Secure-next-auth.session-token`,
       options: {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: true,
+        secure: process.env.NODE_ENV === "production",
       },
     },
   },
