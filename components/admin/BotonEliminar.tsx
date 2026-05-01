@@ -37,3 +37,4 @@ export default function BotonEliminar({ materiaSlug, temaSlug }: BotonEliminarPr
     </button>
   )
 }
+

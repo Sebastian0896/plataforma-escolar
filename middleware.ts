@@ -1,3 +1,4 @@
+// middleware.ts
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
@@ -7,9 +8,7 @@ export function middleware(request: NextRequest) {
   if (
     pathname === '/' ||
     pathname.startsWith('/login') ||
-    pathname.startsWith('/acceso') ||
-    pathname.startsWith('/registro') ||
-     pathname.startsWith('/estudiante') ||
+    pathname.startsWith('/estudiante') ||
     pathname.startsWith('/api') ||
     pathname.startsWith('/_next') ||
     pathname.includes('.')

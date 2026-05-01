@@ -21,6 +21,7 @@ const getLang = (materia: string): string => {
     'ingles': 'en-US',
   }
 
+  
   return langMap[materia] || 'fr-FR'
 }
 
@@ -35,16 +36,23 @@ export default function PlanificacionView({
 }: PlanificacionViewProps) {
   const { data: session } = useSession()
   const lang = getLang(planificacion.materia)
-
+  
   const rol: Rol = soloEstudiante
-    ? 'estudiante'
-    : session ? 'profesor' : 'estudiante'
-
+  ? 'estudiante'
+  : session ? 'profesor' : 'estudiante'
+  
+  function formatear(texto: string): string {
+  if (!texto) return ''
+  return texto
+    .split('-')
+    .map((palabra) => palabra.charAt(0).toUpperCase() + palabra.slice(1))
+    .join(' ')
+  }
   return (
     <article className="animate-in">
       <header className="mb-6">
         <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-300 mb-4">
-          <span>{planificacion.materia}</span>
+          <span>{formatear(planificacion.materia)}</span>
           <span>/</span>
           <span>{planificacion.tema}</span>
           {!soloEstudiante && session && (
@@ -135,7 +143,7 @@ export default function PlanificacionView({
               </div>
               <div>
                 <span className="text-gray-500 dark:text-gray-400 block">Asignatura</span>
-                <span className="font-medium text-gray-700 dark:text-gray-200">{planificacion.materia}</span>
+                <span className="font-medium text-gray-700 dark:text-gray-200">{formatear(planificacion.materia)}</span>
               </div>
               <div>
                 <span className="text-gray-500 dark:text-gray-400 block">Tema</span>

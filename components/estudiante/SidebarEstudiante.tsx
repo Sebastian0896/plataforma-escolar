@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
 import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import type { NivelInfo } from '@/lib/types'
@@ -11,13 +12,17 @@ interface SidebarEstudianteProps {
 }
 
 export default function SidebarEstudiante({ estructura, grado }: SidebarEstudianteProps) {
+  const { data: session } = useSession()
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
   const [nivelExpandido, setNivelExpandido] = useState(true)
- 
-  const nombre = typeof window !== 'undefined' 
-  ? sessionStorage.getItem('estudiante_nombre') || 'Estudiante' 
-  : 'Estudiante'
+
+  // Obtener nombre de la sesión o de sessionStorage
+  const nombre = session?.user?.name || 
+    (typeof window !== 'undefined' ? sessionStorage.getItem('estudiante_nombre') : null) || 
+    'Estudiante'
+
+  console.log("Viendo el nombre de estudiante: ", nombre)
 
   // Filtrar solo el grado del estudiante
   const gradoActual = estructura
@@ -76,7 +81,7 @@ export default function SidebarEstudiante({ estructura, grado }: SidebarEstudian
                   {gradoActual.materias.map((materia) => (
                     <div key={materia.slug}>
                       <p className="px-3 py-1.5 text-sm font-medium text-gray-500">
-                        {materia.nombre}
+                        {materia.nombre.charAt(0).toUpperCase() + materia.nombre.slice(1)}
                       </p>
                       <div className="ml-3 space-y-0.5">
                         {materia.temas.map((tema) => {
@@ -111,12 +116,12 @@ export default function SidebarEstudiante({ estructura, grado }: SidebarEstudian
           )}
         </nav>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-gray-50">
+        <div className=" bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-gray-50">
           <Link
-            href="/acceso"
+            href="/login"
             className="text-xs text-blue-600 hover:text-blue-800 block text-center"
           >
-            ← Cambiar de grado
+            Salir
           </Link>
         </div>
       </aside>

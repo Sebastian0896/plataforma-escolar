@@ -76,7 +76,7 @@ export default function NuevaPlanificacionPage() {
   const actualizarRecurso = (mIdx: number, aIdx: number, rIdx: number, campo: string, valor: string) => {
     setForm((prev) => {
       const nuevos = [...prev.momentos]
-      ;(nuevos[mIdx].actividades[aIdx].recursos[rIdx] as any)[campo] = valor
+        ; (nuevos[mIdx].actividades[aIdx].recursos[rIdx] as any)[campo] = valor
       return { ...prev, momentos: nuevos }
     })
   }

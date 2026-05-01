@@ -4,7 +4,7 @@ import SessionProvider from '@/components/SessionProvider'
 import ThemeProvider from '@/components/ThemeProvider'
 import PWAInstall from '@/components/PWAInstall'
 
-export const metadata: Metadata = {
+export const viewport: Metadata = {
   title: 'Plataforma Educativa — Salomé Ureña',
   description: 'Sistema de planificaciones docentes',
   manifest: '/manifest.json',

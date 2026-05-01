@@ -1,3 +1,4 @@
+// auth.ts (raíz del proyecto)
 import NextAuth from "next-auth"
 import Credentials from "next-auth/providers/credentials"
 import bcrypt from "bcryptjs"
@@ -6,6 +7,22 @@ import Usuario from "@/lib/models/Usuario"
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
+  cookies: {
+    csrfToken: {
+      name: "next-auth.csrf-token",
+      options: {
+        sameSite: "lax",
+        path: "/",
+      },
+    },
+    sessionToken: {
+      name: "next-auth.session-token",
+      options: {
+        sameSite: "lax",
+        path: "/",
+      },
+    },
+  },
   providers: [
     Credentials({
       name: "Login",
@@ -15,38 +32,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null
-
         try {
           await connectDB()
-
-          const usuario = await Usuario.findOne({
-            email: credentials.email,
-            activo: true,
-          })
-
+          const usuario = await Usuario.findOne({ email: credentials.email, activo: true })
           if (!usuario) return null
-
-          const passwordValida = await bcrypt.compare(
-            credentials.password,
-            usuario.password
-          )
-
-          if (!passwordValida) return null
-
+          const ok = await bcrypt.compare(credentials.password, usuario.password)
+          if (!ok) return null
           return {
-          id: usuario._id.toString(),
-          name: usuario.nombre,
-          email: usuario.email,
-          role: usuario.rol,
-          categoriaDocente: usuario.categoriaDocente || "",
-          grado: usuario.grado || "",
-          grados: JSON.stringify(usuario.grados || []), // ← String
-          centroId: usuario.centroId.toString(),
-          materias: JSON.stringify(usuario.materias || []),
-        }
-      
-      } catch (error) {
-          console.error("Error:", error)
+            id: usuario._id.toString(),
+            name: usuario.nombre,
+            email: usuario.email,
+            role: usuario.rol,
+            categoriaDocente: usuario.categoriaDocente || "",
+            grado: usuario.grado || "",
+            grados: JSON.stringify(usuario.grados || []),
+            materias: JSON.stringify(usuario.materias || []),
+            centroId: usuario.centroId.toString(),
+          }
+        } catch {
           return null
         }
       },
@@ -64,9 +67,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.role = user.role
         token.categoriaDocente = user.categoriaDocente
         token.grado = user.grado
-        token.grados = user.grados // string
-        token.centroId = user.centroId
+        token.grados = user.grados
         token.materias = user.materias
+        token.centroId = user.centroId
       }
       return token
     },
@@ -75,9 +78,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.role = token.role as string
         session.user.categoriaDocente = token.categoriaDocente as string
         session.user.grado = token.grado as string
-        session.user.grados = token.grados ? JSON.parse(token.grados as string) : [] // ← Parsear de vuelta
-        session.user.centroId = token.centroId as string
+        session.user.grados = token.grados ? JSON.parse(token.grados as string) : []
         session.user.materias = token.materias ? JSON.parse(token.materias as string) : []
+        session.user.centroId = token.centroId as string
       }
       return session
     },

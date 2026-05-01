@@ -7,7 +7,7 @@ export default async function DashboardPage() {
   if (!session) redirect('/login')
 
   if (session.user?.role === 'estudiante') {
-    redirect(`/dashboard/estudiante/${session.user.grado}`)
+    redirect(`/estudiante/${session.user.grado}`)
   }
 
   // Admin, docente, coordinador, técnico: se quedan viendo el sidebar

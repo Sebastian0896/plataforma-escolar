@@ -12,6 +12,8 @@ export interface IUsuario extends Document {
   rne?: string
   activo: boolean
   centroId: mongoose.Types.ObjectId
+  niveles?: string[],
+  ciclos?: string[],
 }
 
 const UsuarioSchema = new Schema<IUsuario>({
@@ -26,6 +28,8 @@ const UsuarioSchema = new Schema<IUsuario>({
   rne: { type: String, unique: true, sparse: true },
   activo: { type: Boolean, default: true },
   centroId: { type: Schema.Types.ObjectId, ref: 'Centro', required: true },
+  niveles: [{ type: String }],  
+  ciclos: [{ type: String }], 
 }, { timestamps: true })
 
 export default mongoose.models.Usuario || mongoose.model<IUsuario>('Usuario', UsuarioSchema)
