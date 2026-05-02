@@ -58,6 +58,7 @@ export interface Materia {
   nombre: string
   slug: string
   temas: {
+    id?: string
     slug: string
     tema: string
   }[]

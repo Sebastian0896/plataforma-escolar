@@ -1,4 +1,5 @@
 // scripts/seed.ts
+import Materia from '../lib/models/Materia'
 import { connectDB } from '../lib/db'
 import Centro from '../lib/models/Centro'
 import Usuario from '../lib/models/Usuario'
@@ -8,10 +9,11 @@ import 'dotenv/config'
 async function seed() {
   await connectDB()
 
-  await Centro.deleteMany({})
-  await Usuario.deleteMany({})
+  //await Centro.deleteMany({})
+  //await Usuario.deleteMany({})
 
-  const centro = await Centro.create({
+  /* const centro = await Centro.create({
+
     nombre: 'Centro Educativo Salomé Ureña',
     codigo: 'SALE2025',
   })
@@ -44,7 +46,27 @@ async function seed() {
   console.log('   maria@salome.edu.do / admin123 (docente idiomas)')
   console.log('   juan@salome.edu.do / admin123 (estudiante)')
   console.log('   ana@salome.edu.do / admin123 (coordinadora)')
-  console.log('   carlos@salome.edu.do / admin123 (técnico distrital)')
+  console.log('   carlos@salome.edu.do / admin123 (técnico distrital)') */
+
+
+await Materia.deleteMany({})
+
+const materias = [
+  { nombre: 'Francés', slug: 'frances', categoriaDocente: 'idiomas' },
+  { nombre: 'Inglés', slug: 'ingles', categoriaDocente: 'idiomas' },
+  { nombre: 'Lengua Española', slug: 'lengua-espanola', categoriaDocente: 'materias-basicas' },
+  { nombre: 'Matemática', slug: 'matematica', categoriaDocente: 'materias-basicas' },
+  { nombre: 'Ciencias Sociales', slug: 'ciencias-sociales', categoriaDocente: 'materias-basicas' },
+  { nombre: 'Ciencias Naturales', slug: 'ciencias-naturales', categoriaDocente: 'materias-basicas' },
+  { nombre: 'Educación Física', slug: 'educacion-fisica', categoriaDocente: 'otras-materias' },
+  { nombre: 'Artística', slug: 'artistica', categoriaDocente: 'otras-materias' },
+]
+
+for (const m of materias) {
+  await Materia.create(m)
+}
+
+console.log('✅ Materias creadas')
   process.exit(0)
 }
 

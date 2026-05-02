@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import mongoose from 'mongoose'
 import { getEstructuraCompleta } from '@/lib/planificaciones'
 import { auth } from '@/auth'
 import BotonEliminar from '@/components/admin/BotonEliminar'
@@ -13,11 +14,23 @@ export default async function PlanificacionesPage() {
   const materias = session?.user?.materias || []
   const esAdmin = rol === 'admin' || rol === 'coordinador' || rol === 'tecnico_distrital'
 
+  const miId = session?.user?.id || session?.user?.centroId // el que funcione
+console.log('👤 Mi session.id:', miId)
+
+  const creadoPorId = rol === 'docente' && session?.user?.id
+    ? new mongoose.Types.ObjectId(session?.user?.id)
+    : undefined
+
+console.log('👤 Mi session.id:', session?.user?.id)
+console.log('🆔 creadoPorId:', creadoPorId?.toString())
   const estructura = await getEstructuraCompleta(
-    esAdmin ? undefined : (materias.length > 0 ? undefined : categoria),
-    esAdmin ? undefined : (grados.length > 0 ? grados : undefined),
-    esAdmin ? undefined : (materias.length > 0 ? materias : undefined)
+  esAdmin ? undefined : categoria,
+  esAdmin ? undefined : (grados.length > 0 ? grados : undefined),
+  esAdmin ? undefined : (materias.length > 0 ? materias : undefined),
+  creadoPorId
   )
+
+  
 
   const todasLasPlanificaciones: any[] = []
   estructura.forEach((nivel) => {
@@ -31,6 +44,7 @@ export default async function PlanificacionesPage() {
       })
     })
   })
+//console.log('📊 todasLasPlanificaciones:', todasLasPlanificaciones.length)
 
   return (
     <div>
@@ -71,7 +85,7 @@ export default async function PlanificacionesPage() {
                   >
                     Editar
                   </Link>
-                  <BotonEliminar materiaSlug={plan.materia.slug} temaSlug={plan.tema.slug} />
+                  <BotonEliminar id={plan.tema.id} />
                 </div>
               </div>
             ))}

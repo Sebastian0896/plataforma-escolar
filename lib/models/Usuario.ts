@@ -5,6 +5,7 @@ export interface IUsuario extends Document {
   email: string
   password: string
   rol: string
+  genero: string
   grado?: string
   grados?: string[]
   categoriaDocente?: string
@@ -21,6 +22,7 @@ const UsuarioSchema = new Schema<IUsuario>({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   rol: { type: String, default: 'estudiante' },
+  genero: { type: String, default: '' },
   grado: { type: String },
   grados: [{ type: String }],
   categoriaDocente: { type: String },

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import FormDatosGenerales from '@/components/planificacion/FormDatosGenerales'
 import FormMomento from '@/components/planificacion/FormMomento'
 import type { DatosGenerales, Momento } from '@/components/planificacion/formTypes'
@@ -21,7 +22,9 @@ export default function EditarPlanificacionPage() {
   const [postId, setPostId] = useState<string | null>(null)
   const [datos, setDatos] = useState<DatosGenerales>({} as DatosGenerales)
   const [momentos, setMomentos] = useState<Momento[]>(MOMENTOS_VACIOS)
-
+  
+  const { data: session } = useSession()
+  
   useEffect(() => {
     const cargar = async () => {
       try {
@@ -29,7 +32,6 @@ export default function EditarPlanificacionPage() {
         if (!res.ok) throw new Error('No encontrada')
         const data = await res.json()
         setPostId(data._id || data.id)
-
         setDatos({
           materia: data.materia || '', nivel: data.nivel || '', ciclo: data.ciclo || '',
           grado: data.grado || '', categoriaDocente: data.categoriaDocente || '',
@@ -37,7 +39,7 @@ export default function EditarPlanificacionPage() {
           competencia: data.competencia || data.acf?.competencia || '',
           indicadorLogro: data.indicadorLogro || data.acf?.indicador_logro || '',
           estudianteGeneral: data.contenidoEstudiante || data.acf?.contenido_estudiante_general || '',
-          maestro: data.maestro || data.acf?.maestro || '',
+          maestro: session?.user.name?.toUpperCase() || data.maestro || data.acf?.maestro || '',
           coordinadora: data.coordinadora || data.acf?.coordinadora || '',
           centroEducativo: data.centroEducativo || data.acf?.centro_educativo || '',
           anoEscolar: data.anoEscolar || data.acf?.ano_escolar || '',

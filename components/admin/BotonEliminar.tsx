@@ -4,28 +4,19 @@
 import { useRouter } from 'next/navigation'
 
 interface BotonEliminarProps {
-  materiaSlug: string
-  temaSlug: string
+  id: string
 }
 
-export default function BotonEliminar({ materiaSlug, temaSlug }: BotonEliminarProps) {
+export default function BotonEliminar({ id }: BotonEliminarProps) {
   const router = useRouter()
 
   const handleDelete = async () => {
     if (!confirm('¿Estás seguro de eliminar esta planificación?')) return
 
     try {
-      const res = await fetch(`/api/planificaciones?tema=${temaSlug}`)
-      if (!res.ok) throw new Error('No encontrada')
-
-      const data: { id: number } = await res.json()
-      const delRes = await fetch(`/api/planificaciones?id=${data.id}`, { method: 'DELETE' })
-
-      if (delRes.ok) {
+        await fetch(`/api/planificaciones?id=${id}`, { method: 'DELETE' })
+        console.log("Eliminando la planificacion: ", id)
         router.refresh()
-      } else {
-        alert('Error al eliminar')
-      }
     } catch {
       alert('Error al eliminar')
     }

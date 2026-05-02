@@ -3,6 +3,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
+import { getCicloByGrado } from '@/lib/utils'
 
 const MATERIAS_DISPONIBLES = [
   { slug: 'frances', label: 'Francés' },
@@ -26,7 +27,7 @@ export default function EditarUsuarioPage() {
   const [error, setError] = useState('')
 
   const [form, setForm] = useState({
-    nombre: '', email: '', password: '', rol: '',
+    nombre: '', email: '', password: '', rol: '', genero: '',
     nivel: '', ciclo: '', grado: '', rne: '',
     categoriaDocente: '',
     niveles: [] as string[],
@@ -42,7 +43,7 @@ export default function EditarUsuarioPage() {
         if (!res.ok) throw new Error('No encontrado')
         const data = await res.json()
         setForm({
-          nombre: data.nombre || '', email: data.email || '', password: '', rol: data.rol || '',
+          nombre: data.nombre || '', email: data.email || '', password: '', rol: data.rol || '', genero: data.genero || '',
           nivel: data.nivel || '', ciclo: data.ciclo || '', grado: data.grado || '', rne: data.rne || '',
           categoriaDocente: data.categoriaDocente || '',
           niveles: data.niveles || [],
@@ -81,6 +82,7 @@ export default function EditarUsuarioPage() {
       nombre: form.nombre,
       email: form.email,
       rol: form.rol,
+      genero: form.genero
     }
     if (form.password) body.password = form.password
 
@@ -128,6 +130,15 @@ export default function EditarUsuarioPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div><label className={labelClass}>Nombre</label><input type="text" value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} className={inputClass} required /></div>
             <div><label className={labelClass}>Email</label><input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className={inputClass} required /></div>
+            <div>
+              <label className={labelClass}>Género</label>
+              <select value={form.genero} onChange={(e) => setForm({ ...form, genero: e.target.value })} className={inputClass}>
+                <option value="">Seleccionar...</option>
+                <option value="masculino">Masculino</option>
+                <option value="femenino">Femenino</option>
+                <option value="otro">Otro</option>
+              </select>
+            </div>
             <div><label className={labelClass}>Contraseña (dejar vacío)</label><input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className={inputClass} placeholder="••••••••" /></div>
             <div>
               <label className={labelClass}>Rol</label>
@@ -168,7 +179,12 @@ export default function EditarUsuarioPage() {
                 </div>
                 <div>
                   <label className={labelClass}>Grado</label>
-                  <select value={form.grado} onChange={(e) => setForm({ ...form, grado: e.target.value })} className={inputClass} required disabled={!form.nivel}>
+                  <select value={form.grado} 
+                  onChange={(e) => {
+                    const grado = e.target.value
+                    setForm({ ...form, grado, ciclo: getCicloByGrado(grado) })
+                  }} 
+                  className={inputClass} required disabled={!form.nivel}>
                     <option value="">Seleccionar...</option>
                     {(form.nivel === 'nivel-primario' ? GRADOS_PRIMARIA : GRADOS_SECUNDARIA).map((g) => (
                       <option key={g} value={g}>{g.replace('-', ' ')}</option>

@@ -14,6 +14,12 @@ const MATERIAS_DISPONIBLES = [
   { slug: 'artistica', label: 'Artística' },
 ]
 
+const MATERIAS_POR_CATEGORIA: Record<string, string[]> = {
+  idiomas: ['frances', 'ingles'],
+  'materias-basicas': ['lengua-espanola', 'matematica', 'ciencias-sociales', 'ciencias-naturales'],
+  'otras-materias': ['educacion-fisica', 'artistica'],
+}
+
 const GRADOS_PRIMARIA = ['1ro-primaria', '2do-primaria', '3ro-primaria', '4to-primaria', '5to-primaria', '6to-primaria']
 const GRADOS_SECUNDARIA = ['1ro-secundaria', '2do-secundaria', '3ro-secundaria', '4to-secundaria', '5to-secundaria', '6to-secundaria']
 
@@ -25,6 +31,7 @@ export default function NuevoDocentePage() {
     nombre: '',
     email: '',
     password: '',
+    genero: '',
     niveles: [] as string[],
     ciclos: [] as string[],
     categoriaDocente: '',
@@ -45,7 +52,7 @@ export default function NuevoDocentePage() {
     n === 'nivel-primario' ? GRADOS_PRIMARIA : GRADOS_SECUNDARIA
   )
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
@@ -81,6 +88,15 @@ export default function NuevoDocentePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div><label className={labelClass}>Nombre</label><input type="text" value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} className={inputClass} required /></div>
             <div><label className={labelClass}>Email</label><input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className={inputClass} required /></div>
+            <div>
+            <label className={labelClass}>Género</label>
+            <select value={form.genero} onChange={(e) => setForm({ ...form, genero: e.target.value })} className={inputClass}>
+              <option value="">Seleccionar...</option>
+              <option value="masculino">Masculino</option>
+              <option value="femenino">Femenino</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
             <div><label className={labelClass}>Contraseña</label><input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className={inputClass} required minLength={6} /></div>
             <div>
               <label className={labelClass}>Categoría</label>
@@ -124,19 +140,24 @@ export default function NuevoDocentePage() {
           </div>
 
           {/* Materias */}
-          <div className="mt-4">
-            <label className={labelClass}>Materias que imparte</label>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-              {MATERIAS_DISPONIBLES.map((m) => (
-                <label key={m.slug} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs border cursor-pointer ${
-                  form.materias.includes(m.slug) ? 'bg-green-50 dark:bg-green-900/20 border-green-300 text-green-700 dark:text-green-400' : 'border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-400'
-                }`}>
-                  <input type="checkbox" checked={form.materias.includes(m.slug)} onChange={() => toggleArray('materias', m.slug)} className="sr-only" />
-                  {m.label}
-                </label>
-              ))}
-            </div>
-          </div>
+          {/* Materias — solo se muestran si hay categoría seleccionada */}
+            {form.categoriaDocente && (
+              <div className="mt-4">
+                <label className={labelClass}>Materias que imparte</label>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  {MATERIAS_DISPONIBLES
+                    .filter((m) => MATERIAS_POR_CATEGORIA[form.categoriaDocente]?.includes(m.slug))
+                    .map((m) => (
+                      <label key={m.slug} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs border cursor-pointer ${
+                        form.materias.includes(m.slug) ? 'bg-green-50 dark:bg-green-900/20 border-green-300 text-green-700 dark:text-green-400' : 'border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-400'
+                      }`}>
+                        <input type="checkbox" checked={form.materias.includes(m.slug)} onChange={() => toggleArray('materias', m.slug)} className="sr-only" />
+                        {m.label}
+                      </label>
+                    ))}
+                </div>
+              </div>
+            )}
 
           {/* Grados */}
           {form.niveles.length > 0 && (

@@ -1,49 +1,38 @@
 import { connectDB } from './db'
 import Planificacion from './models/Planificacion'
 import type { Planificacion as IPlanificacion, NivelInfo } from './types'
-
+import mongoose from 'mongoose'
 export async function getEstructuraCompleta(
   categoriaDocenteSlug?: string,
   gradosPermitidos?: string[],
-  materiasPermitidas?: string[]
+  materiasPermitidas?: string[],
+  creadoPorId?: any
 ): Promise<NivelInfo[]> {
   await connectDB()
 
-  let filter: any = { publicado: true }
+    const filter: any = { publicado: true }
 
-  if (categoriaDocenteSlug) {
-    filter.categoriaDocente = categoriaDocenteSlug
-  }
-
-  if (gradosPermitidos && gradosPermitidos.length > 0) {
-    filter.grado = { $in: gradosPermitidos }
-  }
-
-  if (materiasPermitidas && materiasPermitidas.length > 0) {
-    filter.materia = { $in: materiasPermitidas }
-  }
+    if (categoriaDocenteSlug) filter.categoriaDocente = categoriaDocenteSlug
+    if (gradosPermitidos?.length) filter.grado = { $in: gradosPermitidos }
+    if (materiasPermitidas?.length) filter.materia = { $in: materiasPermitidas }
+    if (creadoPorId) filter.creadoPor = creadoPorId
+  
+  console.log('🔍 Filter completo:', JSON.stringify(filter))
 
   const planificaciones = await Planificacion.find(filter).lean()
 
-  if (!planificaciones || planificaciones.length === 0) return []
+console.log('📊 Con filtro:', planificaciones.length)
 
-  const nivelesMap = new Map<string, NivelInfo>()
+  if (!planificaciones?.length) return []
+
+  const nivelesMap = new Map<string, any>()
 
   for (const p of planificaciones) {
-    const nivelKey = p.nivel
-    const cicloKey = `${p.nivel}-${p.ciclo}`
-    const gradoKey = `${p.nivel}-${p.ciclo}-${p.grado}`
-    const materiaKey = `${p.nivel}-${p.ciclo}-${p.grado}-${p.materia}`
-
-    if (!nivelesMap.has(nivelKey)) {
-      nivelesMap.set(nivelKey, { 
-        nombre: p.nivel, 
-        slug: p.nivel, 
-        ciclos: [] 
-      })
+    
+    if (!nivelesMap.has(p.nivel)) {
+      nivelesMap.set(p.nivel, { nombre: p.nivel, slug: p.nivel, ciclos: [] })
     }
-
-    const nivel = nivelesMap.get(nivelKey)!
+    const nivel = nivelesMap.get(p.nivel)
 
     let ciclo = nivel.ciclos.find((c: any) => c.slug === p.ciclo)
     if (!ciclo) {
@@ -63,7 +52,7 @@ export async function getEstructuraCompleta(
       grado.materias.push(materia)
     }
 
-    materia.temas.push({ slug: p.slug, tema: p.tema })
+    materia.temas.push({ id: p._id.toString(), slug: p.slug, tema: p.tema })
   }
 
   return Array.from(nivelesMap.values())

@@ -79,6 +79,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     async jwt({ token, user }) {
       if (user) {
+        token.id = user.id
         token.role = user.role
         token.categoriaDocente = user.categoriaDocente
         token.grado = user.grado
@@ -90,6 +91,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     },
     async session({ session, token }) {
       if (session.user) {
+        session.user.id = token.id as string ||  token.sub as string
         session.user.role = token.role as string
         session.user.categoriaDocente = token.categoriaDocente as string
         session.user.grado = token.grado as string

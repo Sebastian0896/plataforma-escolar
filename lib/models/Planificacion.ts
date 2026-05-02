@@ -40,6 +40,7 @@ export interface IPlanificacion extends Document {
   anoEscolar: string
   publicado: boolean
   momentos: IMomento[]
+  creadoPor?: mongoose.Types.ObjectId
 }
 
 const RecursoSchema = new Schema<IRecurso>({
@@ -82,6 +83,7 @@ const PlanificacionSchema = new Schema<IPlanificacion>({
   anoEscolar: { type: String, default: '2025-2026' },
   publicado: { type: Boolean, default: true },
   momentos: [MomentoSchema],
+  creadoPor: { type: Schema.Types.ObjectId, ref: 'Usuario' },
 }, { timestamps: true })
 
 export default mongoose.models.Planificacion || mongoose.model<IPlanificacion>('Planificacion', PlanificacionSchema)

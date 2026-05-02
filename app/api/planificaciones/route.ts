@@ -57,6 +57,7 @@ export async function POST(request: Request) {
       coordinadora: data.acf.coordinadora,
       centroEducativo: data.acf.centro_educativo,
       anoEscolar: data.acf.ano_escolar,
+      creadoPor: session.user?.id, // ← NUEVO
       momentos: [
         {
           tipo: 'inicio',
@@ -78,6 +79,8 @@ export async function POST(request: Request) {
         },
       ],
     })
+
+    console.log("Imprimiendo plan creada: ", plan)
 
     return NextResponse.json(plan, { status: 201 })
   } catch (error: unknown) {

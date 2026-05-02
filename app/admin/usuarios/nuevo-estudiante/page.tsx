@@ -2,13 +2,14 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { getCicloByGrado } from '@/lib/utils'
 
 export default function NuevoEstudiantePage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [form, setForm] = useState({
-    nombre: '', email: '', password: '',
+    nombre: '', email: '', genero: '', password: '',
     nivel: '', ciclo: '', grado: '', rne: '',
   })
 
@@ -51,6 +52,15 @@ export default function NuevoEstudiantePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div><label className={labelClass}>Nombre</label><input type="text" value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} className={inputClass} required /></div>
             <div><label className={labelClass}>Email</label><input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className={inputClass} required /></div>
+            <div>
+            <label className={labelClass}>Género</label>
+            <select value={form.genero} onChange={(e) => setForm({ ...form, genero: e.target.value })} className={inputClass}>
+              <option value="">Seleccionar...</option>
+              <option value="masculino">Masculino</option>
+              <option value="femenino">Femenino</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
             <div><label className={labelClass}>Contraseña</label><input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className={inputClass} required minLength={6} /></div>
             <div><label className={labelClass}>RNE</label><input type="text" value={form.rne} onChange={(e) => setForm({ ...form, rne: e.target.value })} className={inputClass} required /></div>
             <div>
@@ -71,7 +81,12 @@ export default function NuevoEstudiantePage() {
             </div>
             <div>
               <label className={labelClass}>Grado</label>
-              <select value={form.grado} onChange={(e) => setForm({ ...form, grado: e.target.value })} className={inputClass} required disabled={!form.nivel}>
+              <select value={form.grado} 
+              onChange={(e) => {
+                const grado = e.target.value
+                setForm({ ...form, grado, ciclo: getCicloByGrado(grado) })
+              }} 
+              className={inputClass} required disabled={!form.nivel}>
                 <option value="">Seleccionar...</option>
                 {gradosFiltrados.map((g) => (
                   <option key={g} value={g}>{g.replace('-', ' ')}</option>

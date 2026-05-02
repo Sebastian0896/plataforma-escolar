@@ -6,12 +6,20 @@ import Usuario from '@/lib/models/Usuario'
 
 export const runtime = "nodejs"
 
-// GET — Listar usuarios (activos o inactivos)
+// Verificar permiso
+async function verificarAdmin() {
+  const session = await auth()
+  if (!session || (session.user?.role !== 'admin' && session.user?.role !== 'admin_centro')) {
+    return null
+  }
+  return session
+}
+
+// GET
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const id = searchParams.get('id')
 
-  // Buscar uno solo
   if (id) {
     await connectDB()
     const usuario = await Usuario.findById(id).lean()
@@ -19,8 +27,7 @@ export async function GET(request: Request) {
     return NextResponse.json(usuario)
   }
 
-  // Listar todos
-  const session = await auth()
+  const session = await verificarAdmin()
   if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
   const mostrarInactivos = searchParams.get('inactivos') === 'true'
@@ -34,15 +41,14 @@ export async function GET(request: Request) {
   return NextResponse.json(usuarios)
 }
 
+// POST
 export async function POST(request: Request) {
-  const session = await auth()
-  if (!session || (session.user?.role !== 'admin' && session.user?.role !== 'admin_centro')) {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-  }
+  const session = await verificarAdmin()
+  if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
   try {
     const body = await request.json()
-    const { nombre, email, password, rol, niveles, ciclos, grado, rne, categoriaDocente, materias, grados } = body
+    const { nombre, email, password, rol, genero, nivel, ciclo, grado, rne, categoriaDocente, materias, niveles, ciclos, grados } = body
 
     if (!nombre || !email || !password || !rol) {
       return NextResponse.json({ error: 'Campos requeridos' }, { status: 400 })
@@ -57,24 +63,26 @@ export async function POST(request: Request) {
 
     const usuario: any = {
       nombre, email, password: passwordHash, rol,
+      genero: genero || '',
       centroId: session.user.centroId,
     }
 
     if (rol === 'estudiante') {
-      usuario.niveles = niveles
-      usuario.ciclos = ciclos
+      usuario.nivel = nivel
+      usuario.ciclo = ciclo
       usuario.grado = grado
       usuario.rne = rne
     }
 
     if (rol === 'docente') {
-      usuario.niveles = niveles
-      usuario.ciclos = ciclos
-      usuario.grados = grados
+      usuario.niveles = niveles || []
+      usuario.ciclos = ciclos || []
+      usuario.grados = grados || []
       usuario.categoriaDocente = categoriaDocente
-      usuario.materias = materias
+      usuario.materias = materias || []
     }
 
+    console.log('📦 usuario a crear:', JSON.stringify(usuario))
     await Usuario.create(usuario)
     return NextResponse.json({ success: true }, { status: 201 })
   } catch (error: any) {
@@ -83,23 +91,23 @@ export async function POST(request: Request) {
   }
 }
 
-
-// PUT — Actualizar usuario
+// PUT
 export async function PUT(request: Request) {
-  const session = await auth()
-  if (!session || (session.user?.role !== 'admin' && session.user?.role !== 'admin_centro')) {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-  }
+  const session = await verificarAdmin()
+  if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
   try {
     const body = await request.json()
-    const { id, password, ...updateData } = body
+    const { id, password, genero, ...updateData } = body
 
     if (password) {
       updateData.password = await bcrypt.hash(password, 10)
     }
 
-    // Campos a eliminar según el rol
+    if(genero !== undefined){
+      updateData.genero = genero
+    }
+
     const unset: any = {}
 
     if (updateData.rol === 'estudiante') {
@@ -131,12 +139,12 @@ export async function PUT(request: Request) {
 
     await connectDB()
 
-    // Primero eliminar campos que no corresponden
     if (Object.keys(unset).length > 0) {
       await Usuario.findByIdAndUpdate(id, { $unset: unset })
     }
 
-    // Luego actualizar con los nuevos datos
+     console.log('📦 usuario a actualizar:', JSON.stringify(updateData))
+
     await Usuario.findByIdAndUpdate(id, updateData)
 
     return NextResponse.json({ success: true })
@@ -145,16 +153,14 @@ export async function PUT(request: Request) {
   }
 }
 
-// DELETE — Soft delete (desactivar)
+// DELETE
 export async function DELETE(request: Request) {
-  const session = await auth()
-  if (!session || (session.user?.role !== 'admin' && session.user?.role !== 'admin_centro')) {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-  }
+  const session = await verificarAdmin()
+  if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
   const { searchParams } = new URL(request.url)
   const id = searchParams.get('id')
-  const accion = searchParams.get('accion') // 'desactivar' o 'activar'
+  const accion = searchParams.get('accion')
 
   if (!id) return NextResponse.json({ error: 'ID requerido' }, { status: 400 })
 

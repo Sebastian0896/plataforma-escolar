@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import FormDatosGenerales from '@/components/planificacion/FormDatosGenerales'
 import FormMomento from '@/components/planificacion/FormMomento'
 import type { DatosGenerales, Momento } from '@/components/planificacion/formTypes'
@@ -14,9 +15,9 @@ const MOMENTOS_INICIALES: Momento[] = [
 
 const DATOS_INICIALES: DatosGenerales = {
   materia: 'frances', nivel: 'nivel-secundario', ciclo: 'primer-ciclo',
-  grado: '1ro-secundaria', categoriaDocente: 'idiomas',
+  grado: '1ro-secundaria', categoriaDocente: '',
   tema: '', competencia: '', indicadorLogro: '', estudianteGeneral: '',
-  maestro: 'Sebastián González Rodríguez', coordinadora: 'Susana',
+  maestro: '', coordinadora: 'Susana',
   centroEducativo: 'Salomé Ureña', anoEscolar: '2025-2026',
 }
 
@@ -26,6 +27,7 @@ export default function NuevaPlanificacionPage() {
   const [error, setError] = useState('')
   const [datos, setDatos] = useState<DatosGenerales>(DATOS_INICIALES)
   const [momentos, setMomentos] = useState<Momento[]>(MOMENTOS_INICIALES)
+  const { data: session } = useSession()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -47,7 +49,7 @@ export default function NuevaPlanificacionPage() {
             competencia: datos.competencia,
             indicador_logro: datos.indicadorLogro,
             contenido_estudiante_general: datos.estudianteGeneral,
-            maestro: datos.maestro,
+            maestro: session?.user.name?.toUpperCase(),
             coordinadora: datos.coordinadora,
             centro_educativo: datos.centroEducativo,
             ano_escolar: datos.anoEscolar,
