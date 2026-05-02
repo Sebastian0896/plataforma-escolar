@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { getCicloByGrado } from '@/lib/utils'
+import BotonVolver from '@/components/BotonVolver'
 
 const MATERIAS_DISPONIBLES = [
   { slug: 'frances', label: 'Francés' },
@@ -124,6 +125,7 @@ export default function EditarUsuarioPage() {
 
   return (
     <div>
+      <BotonVolver label="Volver a planificaciones" />
       <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Editar Usuario</h1>
       <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
         <div className={cardClass}>

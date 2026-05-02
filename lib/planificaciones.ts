@@ -1,7 +1,16 @@
 import { connectDB } from './db'
 import Planificacion from './models/Planificacion'
 import type { Planificacion as IPlanificacion, NivelInfo } from './types'
-import mongoose from 'mongoose'
+
+
+function formatear(texto: string): string {
+  if (!texto) return ''
+  return texto
+    .split('-')
+    .map(p => p.charAt(0).toUpperCase() + p.slice(1))
+    .join(' ')
+}
+
 export async function getEstructuraCompleta(
   categoriaDocenteSlug?: string,
   gradosPermitidos?: string[],
@@ -30,25 +39,30 @@ console.log('📊 Con filtro:', planificaciones.length)
   for (const p of planificaciones) {
     
     if (!nivelesMap.has(p.nivel)) {
-      nivelesMap.set(p.nivel, { nombre: p.nivel, slug: p.nivel, ciclos: [] })
+      nivelesMap.set(p.nivel, { 
+        nombre: formatear(p.nivel), // ← Aplicar formatear
+        slug: p.nivel, 
+        ciclos: [] 
+      })
     }
+
     const nivel = nivelesMap.get(p.nivel)
 
     let ciclo = nivel.ciclos.find((c: any) => c.slug === p.ciclo)
     if (!ciclo) {
-      ciclo = { nombre: p.ciclo, slug: p.ciclo, grados: [] }
+      ciclo = { nombre: formatear(p.ciclo), slug: p.ciclo, grados: [] }
       nivel.ciclos.push(ciclo)
     }
 
     let grado = ciclo.grados.find((g: any) => g.slug === p.grado)
     if (!grado) {
-      grado = { nombre: p.grado, slug: p.grado, materias: [] }
+      grado = { nombre: formatear(p.grado), slug: p.grado, materias: [] }
       ciclo.grados.push(grado)
     }
 
     let materia = grado.materias.find((m: any) => m.slug === p.materia)
     if (!materia) {
-      materia = { nombre: p.materia, slug: p.materia, temas: [] }
+      materia = { nombre: formatear(p.materia), slug: p.materia, temas: [] }
       grado.materias.push(materia)
     }
 

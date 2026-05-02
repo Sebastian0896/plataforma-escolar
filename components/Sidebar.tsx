@@ -4,6 +4,14 @@ import { useState } from 'react'
 import type { NivelInfo } from '@/lib/types'
 import SidebarNivel from './sidebar/SidebarNivel'
 
+function formatear(texto: string): string {
+  if (!texto) return ''
+  return texto
+    .split('-')
+    .map(p => p.charAt(0).toUpperCase() + p.slice(1))
+    .join(' ')
+}
+
 interface SidebarProps {
   estructura: NivelInfo[]
 }
@@ -30,9 +38,10 @@ export default function Sidebar({ estructura }: SidebarProps) {
         lg:translate-x-0 lg:static lg:z-auto
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <div className="p-4 border-b border-gray-200 dark:border-slate-700">
-          <h1 className="text-lg font-bold text-gray-900 dark:text-white">📚 Planificaciones</h1>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Sistema Educativo Dominicano</p>
+        {/* Header con gradiente */}
+        <div className="p-4 bg-gradient-to-r from-blue-600 to-indigo-600">
+          <h1 className="text-lg font-bold text-white">📚 Planificaciones</h1>
+          <p className="text-xs text-blue-100 mt-0.5">Sistema Educativo Dominicano</p>
         </div>
 
         <nav className="p-3">
@@ -42,7 +51,9 @@ export default function Sidebar({ estructura }: SidebarProps) {
         </nav>
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800">
-          <p className="text-xs text-gray-500 dark:text-gray-400 text-center">Centro Educativo Salomé Ureña</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+            Centro Educativo Salomé Ureña
+          </p>
         </div>
       </aside>
     </>

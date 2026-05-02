@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-
+import BotonVolver from '@/components/BotonVolver'
 const MATERIAS_DISPONIBLES = [
   { slug: 'frances', label: 'Francés' },
   { slug: 'ingles', label: 'Inglés' },

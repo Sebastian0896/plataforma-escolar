@@ -1,23 +1,15 @@
 import { getPlanificacion } from '@/lib/planificaciones'
-import PlanificacionView from '@/components/PlanificacionView'
+import EstudianteView from '@/components/EstudianteView'
+import { notFound } from 'next/navigation'
 
 type Params = Promise<{ grado: string; tema: string }>
 
 export default async function EstudianteTemaPage({ params }: { params: Params }) {
   const { grado, tema } = await params
-
-  // Obtener el nivel del grado
-  const nivel = grado.includes('primaria') ? 'nivel-primario' : 'nivel-secundario'
-
+  const nivel = grado?.includes('primaria') ? 'nivel-primario' : 'nivel-secundario'
   const planificacion = await getPlanificacion(nivel, grado, tema)
 
-  if (!planificacion) {
-    return (
-      <div className="p-8 text-center text-gray-500">
-        Planificación no encontrada
-      </div>
-    )
-  }
+  if (!planificacion) notFound()
 
-  return <PlanificacionView planificacion={planificacion} soloEstudiante />
+  return <EstudianteView planificacion={planificacion} />
 }

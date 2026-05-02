@@ -17,10 +17,10 @@ export default function SidebarTema({ href, tema, onClose }: Props) {
     <Link
       href={href}
       onClick={onClose}
-      className={`block px-3 py-1.5 rounded text-sm transition-colors ${
+      className={`block px-3 py-2 rounded-lg text-sm transition-colors ${
         isActive
-          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium'
-          : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-50 dark:hover:bg-slate-800'
+          ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 font-medium border border-blue-200 dark:border-blue-800'
+          : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800 hover:text-gray-900 dark:hover:text-white'
       }`}
     >
       {tema}

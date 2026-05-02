@@ -37,9 +37,7 @@ export default function PlanificacionView({
   const { data: session } = useSession()
   const lang = getLang(planificacion.materia)
   
-  const rol: Rol = soloEstudiante
-  ? 'estudiante'
-  : session ? 'profesor' : 'estudiante'
+  const rol: Rol = soloEstudiante ? 'estudiante' : (session ? 'profesor' : 'estudiante')
   
   function formatear(texto: string): string {
   if (!texto) return ''
@@ -184,7 +182,9 @@ export default function PlanificacionView({
       </header>
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-2xl font-bold">{planificacion.tema}</h1>
-        <BotonPDF slug={planificacion.slug} grado={planificacion.grado} />
+        {!soloEstudiante && (
+          <BotonPDF slug={planificacion.slug} grado={planificacion.grado} />
+        )}
       </div>
 
       {/* Momentos */}

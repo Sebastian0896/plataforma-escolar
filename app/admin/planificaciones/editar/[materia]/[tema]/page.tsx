@@ -6,6 +6,7 @@ import { useSession } from 'next-auth/react'
 import FormDatosGenerales from '@/components/planificacion/FormDatosGenerales'
 import FormMomento from '@/components/planificacion/FormMomento'
 import type { DatosGenerales, Momento } from '@/components/planificacion/formTypes'
+import BotonVolver from '@/components/BotonVolver'
 
 const MOMENTOS_VACIOS: Momento[] = [
   { tipo: 'inicio', descripcion: '', estudiante: '', actividades: [] },
@@ -106,6 +107,7 @@ export default function EditarPlanificacionPage() {
 
   return (
     <div>
+      <BotonVolver label="Volver a planificaciones" />
       <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Editar Planificación</h1>
       <form onSubmit={handleSubmit} className="space-y-6">
         <FormDatosGenerales datos={datos} onChange={setDatos} />
