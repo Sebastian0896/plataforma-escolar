@@ -6,16 +6,27 @@ import Usuario from '@/lib/models/Usuario'
 
 export const runtime = "nodejs"
 
-// Verificar permiso
-async function verificarAdmin() {
-  const session = await auth()
-  if (!session || (session.user?.role !== 'admin' && session.user?.role !== 'admin_centro')) {
-    return null
-  }
-  return session
+// Jerarquía de creación
+const JERARQUIA: Record<string, string[]> = {
+  superadmin: ['admin', 'admin_centro', 'docente', 'estudiante'],
+  admin: ['admin_centro', 'docente', 'estudiante'],
+  admin_centro: ['docente', 'estudiante'],
 }
 
-// GET
+function puedeGestionar(rolCreador: string, rolObjetivo: string): boolean {
+  return JERARQUIA[rolCreador]?.includes(rolObjetivo) || false
+}
+
+function verificarPermiso(rolRequerido?: string) {
+  return async () => {
+    const session = await auth()
+    if (!session) return null
+    if (rolRequerido && !puedeGestionar(session.user?.role || '', rolRequerido)) return null
+    return session
+  }
+}
+
+// GET — Listar usuarios
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const id = searchParams.get('id')
@@ -27,36 +38,58 @@ export async function GET(request: Request) {
     return NextResponse.json(usuario)
   }
 
-  const session = await verificarAdmin()
+  const session = await auth()
   if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
   const mostrarInactivos = searchParams.get('inactivos') === 'true'
+  const filter: any = { activo: mostrarInactivos ? false : true }
+
+  // admin_centro solo ve su centro
+  if (session.user?.role === 'admin_centro') {
+    filter.centroId = session.user.centroId
+  }
+  // superadmin y admin ven todo
 
   await connectDB()
-  const usuarios = await Usuario.find({
-    centroId: session.user.centroId,
-    activo: mostrarInactivos ? false : true,
-  }).sort({ createdAt: -1 }).lean()
-
+  const usuarios = await Usuario.find(filter).sort({ createdAt: -1 }).lean()
   return NextResponse.json(usuarios)
 }
 
-// POST
+// POST — Crear usuario
 export async function POST(request: Request) {
-  const session = await verificarAdmin()
-  if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  const body = await request.json()
+  const { nombre, email, password, rol, genero, nivel, ciclo, grado, rne, categoriaDocente, materias, niveles, ciclos, grados, centroId } = body
+
+
+  // Permitir crear el primer superadmin sin sesión
+if (rol === 'superadmin') {
+  await connectDB()
+  const count = await Usuario.countDocuments({ rol: 'superadmin' })
+  if (count > 0) {
+    const session = await auth()
+    if (!session || session.user?.role !== 'superadmin') {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
+  }
+} else {
+  const session = await auth()
+  if (!session || !puedeGestionar(session.user?.role || '', rol)) {
+    return NextResponse.json({ error: 'No autorizado para crear este rol' }, { status: 401 })
+  }
+}
+  // Verificar permisos
+  const session = await auth()
+  if (!session || !puedeGestionar(session.user?.role || '', rol)) {
+    return NextResponse.json({ error: 'No autorizado para crear este rol' }, { status: 401 })
+  }
+
+  if (!nombre || !email || !password || !rol) {
+    return NextResponse.json({ error: 'Campos requeridos' }, { status: 400 })
+  }
+
+  console.log('📦 POST /api/usuarios - Body:', body)
 
   try {
-    const body = await request.json()
-    const { nombre, email, password, rol, genero, nivel, ciclo, grado, rne, categoriaDocente, materias, niveles, ciclos, grados } = body
-
-
-    if (!nombre || !email || !password || !rol) {
-      return NextResponse.json({ error: 'Campos requeridos' }, { status: 400 })
-    }
-
-    // Normalizar ciclos: acepta array u objeto
-    const ciclosArray = Array.isArray(ciclos) ? ciclos : Object.values(ciclos || {}).filter(Boolean)
     await connectDB()
 
     const existe = await Usuario.findOne({ email })
@@ -64,10 +97,18 @@ export async function POST(request: Request) {
 
     const passwordHash = await bcrypt.hash(password, 10)
 
+    // Determinar centroId
+    let centroAsignado = centroId
+    if (session.user?.role === 'admin_centro') {
+      centroAsignado = session.user.centroId // fuerza su centro
+    }
+
+    const ciclosArray = Array.isArray(ciclos) ? ciclos : Object.values(ciclos || {}).filter(Boolean)
+
     const usuario: any = {
       nombre, email, password: passwordHash, rol,
       genero: genero || '',
-      centroId: session.user.centroId,
+      centroId: centroAsignado || session.user?.centroId,
     }
 
     if (rol === 'estudiante') {
@@ -79,45 +120,45 @@ export async function POST(request: Request) {
 
     if (rol === 'docente') {
       usuario.niveles = niveles || []
-      usuario.ciclos = ciclosArray || []
+      usuario.ciclos = [...new Set(ciclosArray)]
       usuario.grados = grados || []
       usuario.categoriaDocente = categoriaDocente
       usuario.materias = materias || []
     }
 
-    console.log('📦 usuario a crear:', JSON.stringify(usuario))
     await Usuario.create(usuario)
     return NextResponse.json({ success: true }, { status: 201 })
   } catch (error: any) {
     if (error.code === 11000) return NextResponse.json({ error: 'Email o RNE ya registrado' }, { status: 409 })
-    return NextResponse.json({ error: 'Error del servidor' }, { status: 500 })
+      console.error('❌ Error POST /api/usuarios:', error)
+    return NextResponse.json({ error: 'Error del servidor: ' + error.message }, { status: 500 })
+    //return NextResponse.json({ error: error.message || 'Error del servidor' }, { status: 500 })
   }
 }
 
-// PUT
+// PUT — Actualizar usuario
 export async function PUT(request: Request) {
-  const session = await verificarAdmin()
-  if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  const body = await request.json()
+  const { id, password, rol, ciclos, ...updateData } = body
+
+  // Verificar permisos
+  const session = await auth()
+  if (!session || !puedeGestionar(session.user?.role || '', rol || '')) {
+    return NextResponse.json({ error: 'No autorizado para modificar este rol' }, { status: 401 })
+  }
 
   try {
-    const body = await request.json()
-    const { id, password, ciclos, genero, ...updateData } = body
-    
-    if (ciclos) {
-      updateData.ciclos = Array.isArray(ciclos) ? ciclos : Object.values(ciclos).filter(Boolean)
-    }
-
     if (password) {
       updateData.password = await bcrypt.hash(password, 10)
     }
 
-    if(genero !== undefined){
-      updateData.genero = genero
+    if (ciclos) {
+      updateData.ciclos = [...new Set(Array.isArray(ciclos) ? ciclos : Object.values(ciclos).filter(Boolean))]
     }
 
     const unset: any = {}
 
-    if (updateData.rol === 'estudiante') {
+    if (rol === 'estudiante') {
       unset.categoriaDocente = 1
       unset.materias = 1
       unset.niveles = 1
@@ -125,14 +166,14 @@ export async function PUT(request: Request) {
       unset.grados = 1
     }
 
-    if (updateData.rol === 'docente') {
+    if (rol === 'docente') {
       unset.nivel = 1
       unset.ciclo = 1
       unset.grado = 1
       unset.rne = 1
     }
 
-    if (updateData.rol === 'admin' || updateData.rol === 'admin_centro') {
+    if (rol === 'admin' || rol === 'admin_centro') {
       unset.nivel = 1
       unset.ciclo = 1
       unset.grado = 1
@@ -150,8 +191,6 @@ export async function PUT(request: Request) {
       await Usuario.findByIdAndUpdate(id, { $unset: unset })
     }
 
-     console.log('📦 usuario a actualizar:', JSON.stringify(updateData))
-
     await Usuario.findByIdAndUpdate(id, updateData)
 
     return NextResponse.json({ success: true })
@@ -162,7 +201,7 @@ export async function PUT(request: Request) {
 
 // DELETE
 export async function DELETE(request: Request) {
-  const session = await verificarAdmin()
+  const session = await auth()
   if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
   const { searchParams } = new URL(request.url)

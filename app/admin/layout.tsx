@@ -14,7 +14,12 @@ export default async function AdminLayout({
   const session = await auth()
 
   if (!session) return redirect("/login")
-  if (session.user?.role !== 'admin' && session.user?.role !== 'docente') return redirect("/dashboard")
+  if (
+    session.user?.role !== 'admin' && 
+    session.user?.role !== 'docente' && 
+    session.user?.role !== 'admin_centro' &&
+    session.user?.role !== 'superadmin'
+  ) {redirect('/dashboard')}
 
   return (
     <div className="min-h-screen">

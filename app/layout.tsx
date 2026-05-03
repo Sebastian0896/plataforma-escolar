@@ -10,8 +10,8 @@ export const viewport: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" suppressHydrationWarning>
-      <body className="bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-gray-100">
+    <html lang="es" >
+      <body className="bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-gray-100" suppressHydrationWarning>
         <SessionProvider>
           <ThemeProvider>
             {children}

@@ -37,8 +37,7 @@ export default function UsuariosPage() {
           >
             {mostrarInactivos ? 'Ver activos' : 'Ver inactivos'}
           </button>
-          <Link href="/admin/usuarios/nuevo-estudiante" className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700">+ Estudiante</Link>
-          <Link href="/admin/usuarios/nuevo-docente" className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700">+ Docente</Link>
+          <Link href="/admin/usuarios/nuevo" className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">+ Nuevo Usuario</Link>
         </div>
       </div>
 

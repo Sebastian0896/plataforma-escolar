@@ -11,9 +11,6 @@ export default function HomePage() {
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
           Plataforma Educativa
         </h1>
-        <p className="text-lg text-gray-600 dark:text-gray-400 mb-1">
-          Centro Educativo Salomé Ureña
-        </p>
         <p className="text-sm text-gray-400 dark:text-gray-500 mb-8">
           Sistema de Planificaciones Docentes
         </p>
@@ -26,7 +23,7 @@ export default function HomePage() {
         </Link>
 
         <p className="text-xs text-gray-400 dark:text-gray-500 text-center mt-6">
-          © {new Date().getFullYear()} Centro Educativo Salomé Ureña
+          © {new Date().getFullYear()} mieducacion
         </p>
       </div>
     </div>

@@ -1,22 +1,17 @@
+// components/NavLinks.tsx
 'use client'
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useSession } from 'next-auth/react'
 
 interface Props {
+  rol?: string
+  grado?: string
   onClick?: () => void
 }
 
-export default function NavLinks({ onClick }: Props) {
-  const { data: session, status } = useSession()
+export default function NavLinks({ rol, grado, onClick }: Props) {
   const pathname = usePathname()
-
-  // ⏳ Mientras carga sesión, no renderizamos nada
-  if (status === 'loading') return null
-
-  const rol = session?.user?.role
-  const grado = session?.user?.grado
 
   return (
     <>
@@ -34,7 +29,7 @@ export default function NavLinks({ onClick }: Props) {
         </Link>
       )}
 
-      {(rol === 'admin' || rol === 'docente') && (
+      {(rol === 'admin' || rol === 'docente' || rol === 'admin_centro') && (
         <Link
           href="/admin"
           onClick={onClick}
@@ -48,7 +43,7 @@ export default function NavLinks({ onClick }: Props) {
         </Link>
       )}
 
-      {(rol === 'admin' || rol === 'admin_centro') && (
+      {(rol === 'admin' || rol === 'admin_centro' || rol === 'superadmin') && (
         <Link
           href="/admin/usuarios"
           onClick={onClick}
@@ -62,7 +57,21 @@ export default function NavLinks({ onClick }: Props) {
         </Link>
       )}
 
-      {rol === 'estudiante' && grado && (
+      {rol === 'superadmin' && (
+        <Link
+          href="/admin/centros"
+          onClick={onClick}
+          className={`px-3 py-2 rounded-lg text-sm transition-colors ${
+            pathname.startsWith('/admin/centros')
+              ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400'
+              : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800'
+          }`}
+        >
+          🏫 Centros
+        </Link>
+      )}
+
+      {rol === 'estudiante' && (
         <Link
           href={`/estudiante/${grado}`}
           onClick={onClick}
