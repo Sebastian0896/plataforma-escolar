@@ -17,8 +17,29 @@ const MATERIAS_DISPONIBLES = [
   { slug: 'artistica', label: 'Artística' },
 ]
 
+const MATERIAS_POR_CATEGORIA: Record<string, string[]> = {
+  idiomas: ['frances', 'ingles'],
+  'materias-basicas': ['lengua-espanola', 'matematica', 'ciencias-sociales', 'ciencias-naturales'],
+  'otras-materias': ['educacion-fisica', 'artistica'],
+}
+
 const GRADOS_PRIMARIA = ['1ro-primaria', '2do-primaria', '3ro-primaria', '4to-primaria', '5to-primaria', '6to-primaria']
 const GRADOS_SECUNDARIA = ['1ro-secundaria', '2do-secundaria', '3ro-secundaria', '4to-secundaria', '5to-secundaria', '6to-secundaria']
+
+const GRADOS_PRIMER_CICLO_PRIMARIA = ['1ro-primaria', '2do-primaria', '3ro-primaria']
+const GRADOS_SEGUNDO_CICLO_PRIMARIA = ['4to-primaria', '5to-primaria', '6to-primaria']
+const GRADOS_PRIMER_CICLO_SECUNDARIA = ['1ro-secundaria', '2do-secundaria', '3ro-secundaria']
+const GRADOS_SEGUNDO_CICLO_SECUNDARIA = ['4to-secundaria', '5to-secundaria', '6to-secundaria']
+
+function getGradosPorCiclo(nivel: string, ciclo: string): string[] {
+  if (nivel === 'nivel-primario') {
+    return ciclo === 'primer-ciclo' ? GRADOS_PRIMER_CICLO_PRIMARIA : GRADOS_SEGUNDO_CICLO_PRIMARIA
+  }
+  if (nivel === 'nivel-secundario') {
+    return ciclo === 'primer-ciclo' ? GRADOS_PRIMER_CICLO_SECUNDARIA : GRADOS_SEGUNDO_CICLO_SECUNDARIA
+  }
+  return []
+}
 
 export default function EditarUsuarioPage() {
   const router = useRouter()
@@ -181,17 +202,12 @@ export default function EditarUsuarioPage() {
                 </div>
                 <div>
                   <label className={labelClass}>Grado</label>
-                  <select value={form.grado} 
-                  onChange={(e) => {
-                    const grado = e.target.value
-                    setForm({ ...form, grado, ciclo: getCicloByGrado(grado) })
-                  }} 
-                  className={inputClass} required disabled={!form.nivel}>
-                    <option value="">Seleccionar...</option>
-                    {(form.nivel === 'nivel-primario' ? GRADOS_PRIMARIA : GRADOS_SECUNDARIA).map((g) => (
-                      <option key={g} value={g}>{g.replace('-', ' ')}</option>
-                    ))}
-                  </select>
+                  <select value={form.grado} onChange={(e) => setForm({ ...form, grado: e.target.value })} className={inputClass} required disabled={!form.nivel || !form.ciclo}>
+                  <option value="">Seleccionar...</option>
+                  {getGradosPorCiclo(form.nivel, form.ciclo).map((g) => (
+                    <option key={g} value={g}>{g.replace('-', ' ')}</option>
+                  ))}
+                </select>
                 </div>
                 <div><label className={labelClass}>RNE</label><input type="text" value={form.rne} onChange={(e) => setForm({ ...form, rne: e.target.value })} className={inputClass} /></div>
               </>
@@ -222,54 +238,78 @@ export default function EditarUsuarioPage() {
                     ))}
                   </div>
                 </div>
-                <div>
-                  <label className={labelClass}>Ciclos</label>
-                  <div className="flex gap-2">
-                    {['primer-ciclo', 'segundo-ciclo'].map((c) => (
-                      <label key={c} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs border cursor-pointer ${
-                        form.ciclos.includes(c) ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 text-blue-700 dark:text-blue-400' : 'border-gray-200 dark:border-slate-600'
-                      }`}>
-                        <input type="checkbox" checked={form.ciclos.includes(c)} onChange={() => toggleArray('ciclos', c)} className="sr-only" />
-                        {c === 'primer-ciclo' ? 'Primer Ciclo' : 'Segundo Ciclo'}
-                      </label>
-                    ))}
-                  </div>
-                </div>
               </>
             )}
           </div>
 
           {/* Materias (docente) */}
-          {form.rol === 'docente' && (
+          {form.rol === 'docente' && form.categoriaDocente && (
             <div className="mt-4">
               <label className={labelClass}>Materias que imparte</label>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {MATERIAS_DISPONIBLES.map((m) => (
+
+                {
+                  MATERIAS_DISPONIBLES.filter((m) => MATERIAS_POR_CATEGORIA[form.categoriaDocente]?.includes(m.slug)).map((m) => (
+                    <label key={m.slug} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs border cursor-pointer ${
+                    form.materias.includes(m.slug) ? 'bg-green-50 dark:bg-green-900/20 border-green-300 text-green-700 dark:text-green-400' : 'border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-400'
+                  }`}>
+                    <input type="checkbox" checked={form.materias.includes(m.slug)} onChange={() => toggleArray('materias', m.slug)} className="sr-only" />
+                    {m.label}
+                  </label>
+                  ))
+                }
+                {/* {MATERIAS_DISPONIBLES.map((m) => (
                   <label key={m.slug} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs border cursor-pointer ${
                     form.materias.includes(m.slug) ? 'bg-green-50 dark:bg-green-900/20 border-green-300 text-green-700 dark:text-green-400' : 'border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-400'
                   }`}>
                     <input type="checkbox" checked={form.materias.includes(m.slug)} onChange={() => toggleArray('materias', m.slug)} className="sr-only" />
                     {m.label}
                   </label>
-                ))}
+                ))} */}
               </div>
             </div>
           )}
 
           {/* Grados (docente) */}
-          {form.rol === 'docente' && form.niveles.length > 0 && (
-            <div className="mt-4">
+          {/* Ciclo y Grados por nivel */}
+          {form.niveles.length > 0 && (
+            <div className="mt-4 space-y-4">
               <label className={labelClass}>Grados que imparte</label>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                {gradosDisponibles.map((g) => (
-                  <label key={g} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs border cursor-pointer ${
-                    form.grados.includes(g) ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 text-blue-700 dark:text-blue-400' : 'border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-400'
-                  }`}>
-                    <input type="checkbox" checked={form.grados.includes(g)} onChange={() => toggleArray('grados', g)} className="sr-only" />
-                    {g.replace('-', ' ')}
-                  </label>
-                ))}
-              </div>
+              {form.niveles.map((nivel) => (
+                <div key={nivel} className="p-3 bg-gray-50 dark:bg-slate-700/30 rounded-lg">
+                  <div className="flex items-center gap-3 mb-2">
+                    <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                      {nivel === 'nivel-primario' ? 'Primaria' : 'Secundaria'}
+                    </p>
+                    <select
+                      value={form.ciclos[nivel] || ''}
+                      onChange={(e) => setForm({
+                        ...form,
+                        ciclos: { ...form.ciclos, [nivel]: e.target.value },
+                        grados: [] // limpiar grados al cambiar ciclo
+                      })}
+                      className="text-xs px-2 py-1.5 border rounded-lg dark:bg-slate-600 dark:text-white"
+                    >
+                      <option value="">Seleccionar ciclo...</option>
+                      <option value="primer-ciclo">Primer Ciclo</option>
+                      <option value="segundo-ciclo">Segundo Ciclo</option>
+                    </select>
+                  </div>
+
+                  {form.ciclos[nivel] && (
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                      {getGradosPorCiclo(nivel, form.ciclos[nivel]).map((g) => (
+                        <label key={g} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs border cursor-pointer ${
+                          form.grados.includes(g) ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 text-blue-700 dark:text-blue-400' : 'border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-400'
+                        }`}>
+                          <input type="checkbox" checked={form.grados.includes(g)} onChange={() => toggleArray('grados', g)} className="sr-only" />
+                          {g.replace('-', ' ')}
+                        </label>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           )}
         </div>

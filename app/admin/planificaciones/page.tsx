@@ -24,6 +24,7 @@ console.log('👤 Mi session.id:', miId)
 console.log('👤 Mi session.id:', session?.user?.id)
 console.log('🆔 creadoPorId:', creadoPorId?.toString())
   const estructura = await getEstructuraCompleta(
+  session?.user.centroId,
   esAdmin ? undefined : categoria,
   esAdmin ? undefined : (grados.length > 0 ? grados : undefined),
   esAdmin ? undefined : (materias.length > 0 ? materias : undefined),

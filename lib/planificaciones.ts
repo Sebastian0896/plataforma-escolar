@@ -1,3 +1,4 @@
+import mongoose from 'mongoose'
 import { connectDB } from './db'
 import Planificacion from './models/Planificacion'
 import type { Planificacion as IPlanificacion, NivelInfo } from './types'
@@ -12,6 +13,7 @@ function formatear(texto: string): string {
 }
 
 export async function getEstructuraCompleta(
+  centroId?: string,
   categoriaDocenteSlug?: string,
   gradosPermitidos?: string[],
   materiasPermitidas?: string[],
@@ -20,24 +22,23 @@ export async function getEstructuraCompleta(
   await connectDB()
 
     const filter: any = { publicado: true }
-
+    if (centroId) filter.centroId = new mongoose.Types.ObjectId(centroId)
     if (categoriaDocenteSlug) filter.categoriaDocente = categoriaDocenteSlug
     if (gradosPermitidos?.length) filter.grado = { $in: gradosPermitidos }
     if (materiasPermitidas?.length) filter.materia = { $in: materiasPermitidas }
     if (creadoPorId) filter.creadoPor = creadoPorId
   
-  console.log('🔍 Filter completo:', JSON.stringify(filter))
-
-  const planificaciones = await Planificacion.find(filter).lean()
-
-console.log('📊 Con filtro:', planificaciones.length)
-
-  if (!planificaciones?.length) return []
-
-  const nivelesMap = new Map<string, any>()
-
-  for (const p of planificaciones) {
+    const planificaciones = await Planificacion.find();
     
+    console.log('🔍 Parámetros recibidos:', { centroId, categoriaDocenteSlug, gradosPermitidos, materiasPermitidas, creadoPorId })
+    console.log('🔍 Filter final:', JSON.stringify(filter))
+    console.log('📊 Planificaciones encontradas:', planificaciones.length)
+    if (!planificaciones?.length) return []
+    
+    const nivelesMap = new Map<string, any>()
+    
+    for (const p of planificaciones) {
+      
     if (!nivelesMap.has(p.nivel)) {
       nivelesMap.set(p.nivel, { 
         nombre: formatear(p.nivel), // ← Aplicar formatear

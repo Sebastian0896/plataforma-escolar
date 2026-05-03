@@ -1,5 +1,6 @@
 import { getEstructuraCompleta } from '@/lib/planificaciones'
 import SidebarEstudiante from '@/components/estudiante/SidebarEstudiante'
+import { auth } from '@/auth'
 
 type Params = Promise<{ grado: string }>
 
@@ -11,7 +12,8 @@ export default async function EstudianteLayout({
   params: Params
 }) {
   const { grado } = await params
-  const estructura = await getEstructuraCompleta()
+  const session = await auth();
+  const estructura = await getEstructuraCompleta(session?.user.centroId)
 
   return (
     <div className="flex">

@@ -57,6 +57,7 @@ export async function POST(request: Request) {
       coordinadora: data.acf.coordinadora,
       centroEducativo: data.acf.centro_educativo,
       anoEscolar: data.acf.ano_escolar,
+      centroId: session.user?.centroId,
       creadoPor: session.user?.id, // ← NUEVO
       momentos: [
         {

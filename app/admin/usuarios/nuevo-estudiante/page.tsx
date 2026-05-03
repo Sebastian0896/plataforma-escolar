@@ -4,6 +4,21 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { getCicloByGrado } from '@/lib/utils'
 
+const GRADOS_PRIMER_CICLO_PRIMARIA = ['1ro-primaria', '2do-primaria', '3ro-primaria']
+const GRADOS_SEGUNDO_CICLO_PRIMARIA = ['4to-primaria', '5to-primaria', '6to-primaria']
+const GRADOS_PRIMER_CICLO_SECUNDARIA = ['1ro-secundaria', '2do-secundaria', '3ro-secundaria']
+const GRADOS_SEGUNDO_CICLO_SECUNDARIA = ['4to-secundaria', '5to-secundaria', '6to-secundaria']
+
+function getGradosPorCiclo(nivel: string, ciclo: string): string[] {
+  if (nivel === 'nivel-primario') {
+    return ciclo === 'primer-ciclo' ? GRADOS_PRIMER_CICLO_PRIMARIA : GRADOS_SEGUNDO_CICLO_PRIMARIA
+  }
+  if (nivel === 'nivel-secundario') {
+    return ciclo === 'primer-ciclo' ? GRADOS_PRIMER_CICLO_SECUNDARIA : GRADOS_SEGUNDO_CICLO_SECUNDARIA
+  }
+  return []
+}
+
 export default function NuevoEstudiantePage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -80,19 +95,15 @@ export default function NuevoEstudiantePage() {
               </select>
             </div>
             <div>
-              <label className={labelClass}>Grado</label>
-              <select value={form.grado} 
-              onChange={(e) => {
-                const grado = e.target.value
-                setForm({ ...form, grado, ciclo: getCicloByGrado(grado) })
-              }} 
-              className={inputClass} required disabled={!form.nivel}>
+                <label className={labelClass}>Grado</label>
+                <select value={form.grado} onChange={(e) => setForm({ ...form, grado: e.target.value })} className={inputClass} required disabled={!form.nivel || !form.ciclo}>
                 <option value="">Seleccionar...</option>
-                {gradosFiltrados.map((g) => (
+                {getGradosPorCiclo(form.nivel, form.ciclo).map((g) => (
                   <option key={g} value={g}>{g.replace('-', ' ')}</option>
                 ))}
               </select>
             </div>
+              
           </div>
         </div>
 

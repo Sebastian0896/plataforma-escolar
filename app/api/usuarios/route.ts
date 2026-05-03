@@ -50,10 +50,13 @@ export async function POST(request: Request) {
     const body = await request.json()
     const { nombre, email, password, rol, genero, nivel, ciclo, grado, rne, categoriaDocente, materias, niveles, ciclos, grados } = body
 
+
     if (!nombre || !email || !password || !rol) {
       return NextResponse.json({ error: 'Campos requeridos' }, { status: 400 })
     }
 
+    // Normalizar ciclos: acepta array u objeto
+    const ciclosArray = Array.isArray(ciclos) ? ciclos : Object.values(ciclos || {}).filter(Boolean)
     await connectDB()
 
     const existe = await Usuario.findOne({ email })
@@ -76,7 +79,7 @@ export async function POST(request: Request) {
 
     if (rol === 'docente') {
       usuario.niveles = niveles || []
-      usuario.ciclos = ciclos || []
+      usuario.ciclos = ciclosArray || []
       usuario.grados = grados || []
       usuario.categoriaDocente = categoriaDocente
       usuario.materias = materias || []
@@ -98,7 +101,11 @@ export async function PUT(request: Request) {
 
   try {
     const body = await request.json()
-    const { id, password, genero, ...updateData } = body
+    const { id, password, ciclos, genero, ...updateData } = body
+    
+    if (ciclos) {
+      updateData.ciclos = Array.isArray(ciclos) ? ciclos : Object.values(ciclos).filter(Boolean)
+    }
 
     if (password) {
       updateData.password = await bcrypt.hash(password, 10)
