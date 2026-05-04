@@ -41,9 +41,10 @@ export async function POST(request: Request) {
   try {
     const data = await request.json()
     await connectDB()
-
+    const slugBase = generarSlug(data.title)
+    const slug = `${slugBase}-${session.user?.centroId?.toString().slice(-6)}`
     const plan = await Planificacion.create({
-      slug: generarSlug(data.title),
+      slug,
       tema: data.title,
       materia: data.materia,
       nivel: data.nivel,

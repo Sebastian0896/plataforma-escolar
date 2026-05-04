@@ -47,6 +47,12 @@ export default function CentrosPage() {
                   <span className={`text-xs px-2 py-1 rounded ${c.activo ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                     {c.activo ? 'Activo' : 'Inactivo'}
                   </span>
+                  {
+                    c.activo && (
+                        <Link href={`/admin/centros/${c._id}/planificaciones`} className="text-xs text-blue-600 hover:underline">
+                        Ver planificaciones
+                        </Link>
+                    )}
                   {c.activo && (
                     <Link href={`/admin/centros/editar/${c._id}`} className="text-xs text-blue-600 hover:underline">Editar</Link>
                   )}

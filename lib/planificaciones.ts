@@ -26,13 +26,20 @@ export async function getEstructuraCompleta(
     if (categoriaDocenteSlug) filter.categoriaDocente = categoriaDocenteSlug
     if (gradosPermitidos?.length) filter.grado = { $in: gradosPermitidos }
     if (materiasPermitidas?.length) filter.materia = { $in: materiasPermitidas }
-    if (creadoPorId) filter.creadoPor = creadoPorId
-  
-    const planificaciones = await Planificacion.find();
-    
-    console.log('🔍 Parámetros recibidos:', { centroId, categoriaDocenteSlug, gradosPermitidos, materiasPermitidas, creadoPorId })
+    if (creadoPorId) {
+      filter.creadoPor = typeof creadoPorId === 'string' 
+        ? new mongoose.Types.ObjectId(creadoPorId) 
+        : creadoPorId
+    }
+
     console.log('🔍 Filter final:', JSON.stringify(filter))
-    console.log('📊 Planificaciones encontradas:', planificaciones.length)
+console.log('🔍 categoriaDocenteSlug recibido:', categoriaDocenteSlug)
+  
+    const planificaciones = await Planificacion.find(filter).lean();
+    
+    //console.log('🔍 Parámetros recibidos:', { centroId, categoriaDocenteSlug, gradosPermitidos, materiasPermitidas, creadoPorId })
+    //console.log('🔍 Filter final:', JSON.stringify(filter))
+    //console.log('📊 Planificaciones encontradas:', planificaciones.length)
     if (!planificaciones?.length) return []
     
     const nivelesMap = new Map<string, any>()

@@ -27,9 +27,9 @@ export default async function SidebarWrapper() {
     console.log('🆔 creadoPorId:', creadoPorId)
     console.log('👤 Session categoriaDocente:', session?.user?.categoriaDocente)
 
-//const centroId = session?.user?.centroId
+const centroId = session?.user?.centroId
 estructura = await getEstructuraCompleta(
-  session?.user?.centroId,
+  centroId,
   session?.user?.categoriaDocente,
   grados.length > 0 ? grados : undefined,
   materias.length > 0 ? materias : undefined,

@@ -13,7 +13,9 @@ export default async function EstudianteLayout({
 }) {
   const { grado } = await params
   const session = await auth();
-  const estructura = await getEstructuraCompleta(session?.user.centroId)
+  const centroId = session?.user?.centroId
+
+  const estructura = await getEstructuraCompleta(centroId)
 
   return (
     <div className="flex">
