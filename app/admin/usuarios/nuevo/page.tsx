@@ -57,6 +57,7 @@ export default function NuevoUsuarioPage() {
     nivel: '', ciclo: '', grado: '', rne: '',
     // Docente
     categoriaDocente: '', materias: [] as string[], niveles: [] as string[], ciclos: {} as Record<string, string>, grados: [] as string[],
+    codigoCentro: ''
   })
 
   const toggleArray = (campo: 'niveles' | 'materias' | 'grados', valor: string) => {
@@ -69,26 +70,56 @@ export default function NuevoUsuarioPage() {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError('')
+  e.preventDefault()
+  setLoading(true)
+  setError('')
 
-    if (!form.rol) { setError('Seleccioná un rol'); setLoading(false); return }
+  if (!form.rol) { setError('Seleccioná un rol'); setLoading(false); return }
+  if (form.rol === 'docente' && form.materias.length === 0) { setError('Seleccioná al menos una materia'); setLoading(false); return }
+  if (form.rol === 'docente' && form.grados.length === 0) { setError('Seleccioná al menos un grado'); setLoading(false); return }
 
+  let centroId = session?.user?.centroId
+
+  // Si es admin o superadmin y puso código de centro, validarlo
+  if ((session?.user?.role === 'admin' || session?.user?.role === 'superadmin') && form.codigoCentro) {
     try {
-      const res = await fetch('/api/usuarios', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      })
-      if (!res.ok) { const data = await res.json(); throw new Error(data.error) }
-      router.push('/admin/usuarios')
-      router.refresh()
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error')
+      const resCentro = await fetch(`/api/centros?codigo=${form.codigoCentro.toUpperCase()}`)
+      if (!resCentro.ok) {
+        setError('Código de centro no encontrado o inactivo')
+        setLoading(false)
+        return
+      }
+      const centroData = await resCentro.json()
+      centroId = centroData._id
+    } catch {
+      setError('Error al validar el centro')
       setLoading(false)
+      return
     }
   }
+
+  // Si es admin_centro, usa su propio centro
+  if (session?.user?.role === 'admin_centro') {
+    centroId = session.user.centroId
+  }
+
+  try {
+    const res = await fetch('/api/usuarios', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...form,
+        centroId,
+      }),
+    })
+    if (!res.ok) { const data = await res.json(); throw new Error(data.error) }
+    router.push('/admin/usuarios')
+    router.refresh()
+  } catch (err: unknown) {
+    setError(err instanceof Error ? err.message : 'Error')
+    setLoading(false)
+  }
+}
 
   const inputClass = "w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
   const labelClass = "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
@@ -112,6 +143,19 @@ export default function NuevoUsuarioPage() {
                 <option value="otro">Otro</option>
               </select>
             </div>
+            {(session?.user?.role === 'admin' || session?.user?.role === 'superadmin') && (
+              <div>
+                <label className={labelClass}>Código del Centro</label>
+                <input
+                  type="text"
+                  value={form.codigoCentro}
+                  onChange={(e) => setForm({ ...form, codigoCentro: e.target.value.toUpperCase() })}
+                  className={inputClass}
+                  placeholder="Ej: SLU2025"
+                  required
+                />
+              </div>
+            )}
             <div>
               <label className={labelClass}>Rol</label>
               <select value={form.rol} onChange={(e) => setForm({ ...form, rol: e.target.value, categoriaDocente: '', materias: [], niveles: [], ciclos: {}, grados: [], grado: '', rne: '' })} className={inputClass} required>

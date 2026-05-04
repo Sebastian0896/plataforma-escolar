@@ -9,20 +9,35 @@ export const runtime = "nodejs"
 
 // GET — Listar todos o uno
 export async function GET(request: Request) {
-  const session = await auth()
-  if (!session || session.user?.role !== 'superadmin') {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-  }
-
   const { searchParams } = new URL(request.url)
   const id = searchParams.get('id')
+  const codigo = searchParams.get('codigo')
 
   await connectDB()
 
+  // Buscar por código (público para validación)
+  if (codigo) {
+    const centro = await Centro.findOne({ codigo: codigo.toUpperCase(), activo: true }).lean()
+    if (!centro) return NextResponse.json({ error: 'No encontrado' }, { status: 404 })
+    return NextResponse.json(centro)
+  }
+
+  // Buscar por ID
   if (id) {
+    const session = await auth()
+    // Permitir si es superadmin O si está buscando su propio centro
+    if (session?.user?.role !== 'superadmin' && session?.user?.centroId !== id) {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
     const centro = await Centro.findById(id).lean()
     if (!centro) return NextResponse.json({ error: 'No encontrado' }, { status: 404 })
     return NextResponse.json(centro)
+  }
+
+  // Listar todos (solo superadmin)
+  const session = await auth()
+  if (session?.user?.role !== 'superadmin') {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
   }
 
   const centros = await Centro.find({}).sort({ createdAt: -1 }).lean()

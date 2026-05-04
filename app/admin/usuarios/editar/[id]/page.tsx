@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { getCicloByGrado } from '@/lib/utils'
 import BotonVolver from '@/components/BotonVolver'
+import { useSession } from 'next-auth/react'
 
 const MATERIAS_DISPONIBLES = [
   { slug: 'frances', label: 'Francés' },
@@ -48,38 +49,63 @@ export default function EditarUsuarioPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
+  const { data: session } = useSession()
+
   const [form, setForm] = useState({
-    nombre: '', email: '', password: '', rol: '', genero: '',
+    nombre: '', email: '', password: '', rol: '', codigoCentro: '', genero: '',
     nivel: '', ciclo: '', grado: '', rne: '',
     categoriaDocente: '',
     niveles: [] as string[],
     ciclos: [] as string[],
     materias: [] as string[],
     grados: [] as string[],
+    centroId: session?.user?.centroId,
   })
 
   useEffect(() => {
-    const cargar = async () => {
-      try {
-        const res = await fetch(`/api/usuarios?id=${params.id}`)
-        if (!res.ok) throw new Error('No encontrado')
-        const data = await res.json()
-        setForm({
-          nombre: data.nombre || '', email: data.email || '', password: '', rol: data.rol || '', genero: data.genero || '',
-          nivel: data.nivel || '', ciclo: data.ciclo || '', grado: data.grado || '', rne: data.rne || '',
-          categoriaDocente: data.categoriaDocente || '',
-          niveles: data.niveles || [],
-          ciclos: data.ciclos || [],
-          materias: data.materias || [],
-          grados: data.grados || [],
-        })
-      } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : 'Error al cargar')
+  const cargar = async () => {
+    try {
+      const res = await fetch(`/api/usuarios?id=${params.id}`)
+      if (!res.ok) throw new Error('No encontrado')
+      const data = await res.json()
+
+      let codigoCentro = ''
+      if (data.centroId) {
+        try {
+          const resCentro = await fetch(`/api/centros?id=${data.centroId}`)
+          if (resCentro.ok) {
+            const centro = await resCentro.json()
+            codigoCentro = centro.codigo || ''
+          }
+        } catch {}
       }
-      setLoading(false)
+
+      setForm({
+        nombre: data.nombre || '',
+        email: data.email || '',
+        password: '',
+        genero: data.genero || '',
+        rol: data.rol || '',
+        codigoCentro,
+        // Estudiante
+        nivel: data.nivel || '',
+        ciclo: data.ciclo || '',
+        grado: data.grado || '',
+        rne: data.rne || '',
+        // Docente
+        categoriaDocente: data.categoriaDocente || '',
+        materias: data.materias || [],
+        niveles: data.niveles || [],
+        ciclos: data.ciclos || {},
+        grados: data.grados || [],
+      })
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Error al cargar')
     }
-    cargar()
-  }, [params.id])
+    setLoading(false)
+  }
+  cargar()
+}, [params.id])
 
   const toggleArray = (campo: 'niveles' | 'ciclos' | 'materias' | 'grados', valor: string) => {
     setForm((prev) => ({
@@ -95,48 +121,70 @@ export default function EditarUsuarioPage() {
   )
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setSaving(true)
-    setError('')
+  e.preventDefault()
+  setSaving(true)
+  setError('')
 
-    const body: any = {
-      id: params.id,
-      nombre: form.nombre,
-      email: form.email,
-      rol: form.rol,
-      genero: form.genero
-    }
-    if (form.password) body.password = form.password
+  let centroId = form.centroId || form?.centroId
 
-    if (form.rol === 'estudiante') {
-      body.nivel = form.nivel
-      body.ciclo = form.ciclo
-      body.grado = form.grado
-      body.rne = form.rne
-    }
-
-    if (form.rol === 'docente') {
-      body.niveles = form.niveles
-      body.ciclos = form.ciclos
-      body.grados = form.grados
-      body.categoriaDocente = form.categoriaDocente
-      body.materias = form.materias
-    }
-
+  // Validar código de centro si se cambió
+  if ((session?.user?.role === 'admin' || session?.user?.role === 'superadmin') && form.codigoCentro) {
     try {
-      const res = await fetch('/api/usuarios', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      })
-      if (!res.ok) { const data = await res.json(); throw new Error(data.error || 'Error') }
-      router.push('/admin/usuarios')
-      router.refresh()
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error al actualizar')
+      const resCentro = await fetch(`/api/centros?codigo=${form.codigoCentro.toUpperCase()}`)
+      if (!resCentro.ok) {
+        setError('Código de centro no encontrado o inactivo')
+        setSaving(false)
+        return
+      }
+      const centroData = await resCentro.json()
+      centroId = centroData._id
+    } catch {
+      setError('Error al validar el centro')
       setSaving(false)
+      return
     }
   }
+
+  const body: any = {
+    id: params.id,
+    nombre: form.nombre,
+    email: form.email,
+    rol: form.rol,
+    genero: form.genero,
+    centroId,
+  }
+
+  if (form.password) body.password = form.password
+
+  if (form.rol === 'estudiante') {
+    body.nivel = form.nivel
+    body.ciclo = form.ciclo
+    body.grado = form.grado
+    body.rne = form.rne
+  }
+
+  if (form.rol === 'docente') {
+    body.niveles = form.niveles
+    body.ciclos = form.ciclos
+    body.grados = form.grados
+    body.categoriaDocente = form.categoriaDocente
+    body.materias = form.materias
+  }
+
+  try {
+    const res = await fetch('/api/usuarios', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+    if (!res.ok) { const data = await res.json(); throw new Error(data.error || 'Error al actualizar') }
+    router.push('/admin/usuarios')
+    router.refresh()
+  } catch (err: unknown) {
+    setError(err instanceof Error ? err.message : 'Error al actualizar')
+    setSaving(false)
+  }
+}
 
   const inputClass = "w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
   const labelClass = "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
@@ -180,6 +228,27 @@ export default function EditarUsuarioPage() {
                 <option value="admin">Admin</option>
               </select>
             </div>
+            {(session?.user?.role === 'admin' || session?.user?.role === 'superadmin') && (
+              <div>
+                <label className={labelClass}>Código del Centro</label>
+                <input
+                    type="text"
+                    value={form.codigoCentro}
+                    onChange={(e) => setForm({ ...form, codigoCentro: e.target.value.toUpperCase() })}
+                    onBlur={async () => {
+                      if (form.codigoCentro) {
+                        const res = await fetch(`/api/centros?codigo=${form.codigoCentro}`)
+                        if (res.ok) {
+                          const centro = await res.json()
+                          setForm(prev => ({ ...prev, centroId: centro._id }))
+                        }
+                      }
+                    }}
+                    className={inputClass}
+                    placeholder="Ej: SALE2025"
+                  />
+              </div>
+            )}
 
             {/* Campos de ESTUDIANTE */}
             {form.rol === 'estudiante' && (

@@ -17,20 +17,36 @@ function generarSlug(title: string): string {
 // GET
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
-  const tema = searchParams.get('tema')
+  const id = searchParams.get('id')
 
-  if (!tema) {
-    return NextResponse.json({ error: 'Falta parámetro tema' }, { status: 400 })
+  if (id) {
+    await connectDB()
+    const plan = await Planificacion.findById(id).lean()
+    if (!plan) return NextResponse.json({ error: 'No encontrado' }, { status: 404 })
+    return NextResponse.json(plan)
+  }
+
+  const session = await auth()
+  if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+
+  const mostrarInactivos = searchParams.get('inactivos') === 'true'
+  const page = parseInt(searchParams.get('page') || '1')
+  const limit = parseInt(searchParams.get('limit') || '9')
+  const skip = (page - 1) * limit
+
+  const filter: any = { activo: mostrarInactivos ? false : true }
+  if (session.user?.role === 'admin_centro') {
+    filter.centroId = session.user.centroId
   }
 
   await connectDB()
-  const plan = await Planificacion.findOne({ slug: tema })
 
-  if (!plan) {
-    return NextResponse.json({ error: 'No encontrada' }, { status: 404 })
-  }
+  const [usuarios, total] = await Promise.all([
+    Planificacion.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+    Planificacion.countDocuments(filter),
+  ])
 
-  return NextResponse.json(plan)
+  return NextResponse.json({ usuarios, total, page, totalPages: Math.ceil(total / limit) })
 }
 
 // POST
@@ -82,7 +98,7 @@ export async function POST(request: Request) {
       ],
     })
 
-    console.log("Imprimiendo plan creada: ", plan)
+    //console.log("Imprimiendo plan creada: ", plan)
 
     return NextResponse.json(plan, { status: 201 })
   } catch (error: unknown) {

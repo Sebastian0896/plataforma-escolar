@@ -4,8 +4,9 @@ import Credentials from "next-auth/providers/credentials"
 import bcrypt from "bcryptjs"
 import { connectDB } from "@/lib/db"
 import Usuario from "@/lib/models/Usuario"
-
+import Centro from "./lib/models/Centro"
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  
   trustHost: true,
   cookies: {
     sessionToken: {
@@ -30,6 +31,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       },
       async authorize(credentials) {
         console.log("Credenciales:", credentials)
+        //const centro = await Centro.findById(usuario.centroId).lean()
 
         if (!credentials?.email || !credentials?.password) {
           console.log("Faltan credenciales")
@@ -41,6 +43,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           const usuario = await Usuario.findOne({ email: credentials.email, activo: true })
           console.log("Usuario:", usuario)
+          const centro = await Centro.findById(usuario.centroId).lean()
 
           if (!usuario) {
             console.log("Usuario no encontrado")
@@ -52,6 +55,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           if (!ok) return null
 
+
           return {
             id: usuario._id.toString(),
             name: usuario.nombre,
@@ -62,6 +66,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             grados: JSON.stringify(usuario.grados || []),
             materias: JSON.stringify(usuario.materias || []),
             centroId: usuario.centroId?.toString() || "",
+            centroNombre: centro?.nombre || '',
           }
         } catch (error) {
           console.error("ERROR REAL:", error)

@@ -42,17 +42,23 @@ export async function GET(request: Request) {
   if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
   const mostrarInactivos = searchParams.get('inactivos') === 'true'
-  const filter: any = { activo: mostrarInactivos ? false : true }
+  const page = parseInt(searchParams.get('page') || '1')
+  const limit = parseInt(searchParams.get('limit') || '9')
+  const skip = (page - 1) * limit
 
-  // admin_centro solo ve su centro
+  const filter: any = { activo: mostrarInactivos ? false : true }
   if (session.user?.role === 'admin_centro') {
     filter.centroId = session.user.centroId
   }
-  // superadmin y admin ven todo
 
   await connectDB()
-  const usuarios = await Usuario.find(filter).sort({ createdAt: -1 }).lean()
-  return NextResponse.json(usuarios)
+
+  const [usuarios, total] = await Promise.all([
+    Usuario.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+    Usuario.countDocuments(filter),
+  ])
+
+  return NextResponse.json({ usuarios, total, page, totalPages: Math.ceil(total / limit) })
 }
 
 // POST — Crear usuario
@@ -87,7 +93,7 @@ if (rol === 'superadmin') {
     return NextResponse.json({ error: 'Campos requeridos' }, { status: 400 })
   }
 
-  console.log('📦 POST /api/usuarios - Body:', body)
+  //console.log('📦 POST /api/usuarios - Body:', body)
 
   try {
     await connectDB()

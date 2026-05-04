@@ -29,12 +29,11 @@ export default async function SidebarWrapper() {
 
 const centroId = session?.user?.centroId
 estructura = await getEstructuraCompleta(
-  centroId,
-  session?.user?.categoriaDocente,
-  grados.length > 0 ? grados : undefined,
-  materias.length > 0 ? materias : undefined,
-  creadoPorId
-)
+  (rol === 'admin_centro' || rol === 'docente') ? centroId : undefined,
+  rol === 'docente' ? session?.user?.categoriaDocente : undefined,
+  rol === 'docente' && grados.length > 0 ? grados : undefined,
+  rol === 'docente' && materias.length > 0 ? materias : undefined,
+  rol === 'docente' ? creadoPorId : undefined)
 } else {
   estructura = []
 }

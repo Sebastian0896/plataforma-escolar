@@ -1,53 +1,131 @@
-import { auth } from '@/auth'
+import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { cookies } from 'next/headers'
+import { auth } from '@/auth'
+
+
+async function getStats() {
+  try {
+    const cookieStore = await cookies()
+    const allCookies = cookieStore.getAll()
+    const cookieHeader = allCookies.map(c => `${c.name}=${c.value}`).join('; ')
+
+    const res = await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/admin/stats`, {
+      headers: { Cookie: cookieHeader },
+      cache: 'no-store',
+    })
+    return res.json()
+  } catch {
+    return null
+  }
+}
 
 export default async function AdminDashboard() {
   const session = await auth()
+  if (!session) redirect('/login')
+
+  const stats = session.user?.role === 'superadmin' ? await getStats() : null
 
   return (
     <div>
       <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
-        Bienvenido, {session?.user?.name}
+        Bienvenido, {session.user?.name}
       </h1>
-      <p className="text-gray-500 dark:text-gray-400 mb-8">
-        Panel de gestión de planificaciones docentes
-      </p>
+      <p className="text-gray-500 dark:text-gray-400 mb-8">Panel de gestión</p>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5 hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-blue-600 dark:text-blue-400">
-                <path d="M11.25 4.533A9.707 9.707 0 006 3a9.735 9.735 0 00-3.25.555.75.75 0 00-.5.707v14.25a.75.75 0 001 .707A8.237 8.237 0 016 18.75c1.995 0 3.823.707 5.25 1.886V4.533zM12.75 20.636A8.214 8.214 0 0118 18.75c.966 0 1.89.166 2.75.47a.75.75 0 001-.708V4.262a.75.75 0 00-.5-.707A9.735 9.735 0 0018 3a9.707 9.707 0 00-5.25 1.533v16.103z" />
-              </svg>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-900 dark:text-white">Planificaciones</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Gestionar contenido</p>
-            </div>
+      {/* Stats generales - Superadmin */}
+      {stats && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5">
+            <p className="text-3xl font-bold text-blue-600">{stats.totalCentros}</p>
+            <p className="text-sm text-gray-500">Centros</p>
           </div>
-          <Link href="/admin/planificaciones" className="text-sm text-blue-600 dark:text-blue-400 hover:underline font-medium">
-            Ver todas →
-          </Link>
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5">
+            <p className="text-3xl font-bold text-green-600">{stats.totalUsuarios}</p>
+            <p className="text-sm text-gray-500">Usuarios</p>
+          </div>
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5">
+            <p className="text-3xl font-bold text-purple-600">{stats.totalPlanificaciones}</p>
+            <p className="text-sm text-gray-500">Planificaciones</p>
+          </div>
         </div>
+      )}
 
-        <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5 hover:shadow-md transition-shadow">
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-green-600 dark:text-green-400">
-                <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 9a.75.75 0 00-1.5 0v2.25H9a.75.75 0 000 1.5h2.25V15a.75.75 0 001.5 0v-2.25H15a.75.75 0 000-1.5h-2.25V9z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-900 dark:text-white">Nueva</p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Crear planificación</p>
-            </div>
+      {/* Centros - Superadmin */}
+      {stats && (
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Centros Educativos</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {stats.stats?.map((c: any) => (
+              <Link
+                key={c._id}
+                href={`/admin/centros/${c._id}`}
+                className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5 hover:shadow-md transition-shadow block"
+              >
+                <h3 className="font-semibold text-gray-900 dark:text-white">{c.nombre}</h3>
+                <p className="text-xs text-gray-400 mb-3">Código: {c.codigo}</p>
+                <div className="flex gap-4 text-sm">
+                  <span className="text-blue-600">👥 {c.usuarios} usuarios</span>
+                  <span className="text-green-600">📖 {c.planificaciones} planificaciones</span>
+                </div>
+              </Link>
+            ))}
           </div>
-          <Link href="/admin/planificaciones/nueva" className="text-sm text-blue-600 dark:text-blue-400 hover:underline font-medium">
-            Crear ahora →
-          </Link>
         </div>
-      </div>
+      )}
+
+      {/* Roles */}
+      {stats && (
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Usuarios por rol</h2>
+          <div className="flex gap-4 flex-wrap">
+            {stats.porRol?.map((r: any) => (
+              <div key={r._id} className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 px-4 py-3">
+                <p className="text-lg font-bold text-gray-900 dark:text-white">{r.total}</p>
+                <p className="text-xs text-gray-500 capitalize">{r._id?.replace('_', ' ') || 'Sin rol'}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Género */}
+      {stats && (
+        <div>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Usuarios por género</h2>
+          <div className="flex gap-4 flex-wrap">
+            {stats.porGenero?.map((g: any) => (
+              <div key={g._id} className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 px-4 py-3">
+                <p className="text-lg font-bold text-gray-900 dark:text-white">{g.total}</p>
+                <p className="text-xs text-gray-500 capitalize">{g._id || 'Sin especificar'}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Admin normal / Admin centro */}
+      {!stats && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Link href="/admin/planificaciones" className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5 hover:shadow-md">
+            <div className="text-3xl mb-2">📖</div>
+            <h3 className="font-semibold text-gray-900 dark:text-white">Planificaciones</h3>
+            <p className="text-sm text-gray-500">Gestionar contenido</p>
+          </Link>
+          <Link href="/admin/planificaciones/nueva" className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5 hover:shadow-md">
+            <div className="text-3xl mb-2">➕</div>
+            <h3 className="font-semibold text-gray-900 dark:text-white">Nueva</h3>
+            <p className="text-sm text-gray-500">Crear planificación</p>
+          </Link>
+          {(session.user?.role === 'admin' || session.user?.role === 'admin_centro' || session.user?.role === 'superadmin') && (
+            <Link href="/admin/usuarios" className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5 hover:shadow-md">
+              <div className="text-3xl mb-2">👥</div>
+              <h3 className="font-semibold text-gray-900 dark:text-white">Usuarios</h3>
+              <p className="text-sm text-gray-500">Gestionar usuarios</p>
+            </Link>
+          )}
+        </div>
+      )}
     </div>
   )
 }

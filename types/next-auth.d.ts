@@ -10,6 +10,7 @@ declare module "next-auth" {
       grados?: string[]
       materias?: string[]
       centroId?: string
+      centroNombre?: string
     } & DefaultSession["user"]
   }
   interface User {
@@ -19,6 +20,8 @@ declare module "next-auth" {
     grados?: string[]
     materias?: string[]
     centroId?: string
+    centroNombre?: string
+    
   }
 }
 
@@ -30,5 +33,6 @@ declare module "next-auth/jwt" {
     grados?: string[]
     materias?: string[]
     centroId?: string
+    centroNombre?: string
   }
 }

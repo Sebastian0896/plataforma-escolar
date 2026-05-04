@@ -1,4 +1,3 @@
-// app/login/page.tsx
 'use client'
 
 import { signIn } from 'next-auth/react'
@@ -32,7 +31,7 @@ function LoginForm() {
           <span className="text-2xl">📚</span>
         </div>
         <h1 className="text-xl font-bold text-gray-900 dark:text-white">Iniciar Sesión</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Centro Educativo Salomé Ureña</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Plataforma Educativa</p>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6">

@@ -15,7 +15,7 @@ export default function NavLinks({ rol, grado, onClick }: Props) {
 
   return (
     <>
-      {rol !== 'estudiante' && (
+      {rol !== 'estudiante' && rol !== 'superadmin' && (
         <Link
           href="/dashboard"
           onClick={onClick}
@@ -28,6 +28,7 @@ export default function NavLinks({ rol, grado, onClick }: Props) {
           📖 Planificaciones
         </Link>
       )}
+
 
       {(rol === 'admin' || rol === 'docente' || rol === 'admin_centro') && (
         <Link
