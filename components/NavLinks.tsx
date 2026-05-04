@@ -46,7 +46,7 @@ export default function NavLinks({ rol, grado, onClick }: Props) {
 
       {(rol === 'admin' || rol === 'admin_centro' || rol === 'superadmin') && (
         <Link
-          href="/admin/usuarios"
+          href={rol === 'admin_centro' ? '/admin/usuarios/centros' : '/admin/usuarios'}
           onClick={onClick}
           className={`px-3 py-2 rounded-lg text-sm transition-colors ${
             pathname.startsWith('/admin/usuarios')

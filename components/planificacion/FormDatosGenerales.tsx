@@ -2,7 +2,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
+import { useSession, getSession } from 'next-auth/react'
 import { DatosGenerales } from './formTypes'
 
 const MATERIAS_POR_CATEGORIA: Record<string, string[]> = {
@@ -55,6 +55,14 @@ export default function FormDatosGenerales({ datos, onChange }: Props) {
   }, [session?.user?.centroId])
 
   useEffect(() => {
+    getSession().then(session => {
+      if (session?.user) {
+        console.log('👤 Session cargada:', session.user)
+      }
+    })
+  }, [])
+
+  useEffect(() => {
     if (esDocente && session?.user?.categoriaDocente && !datos.categoriaDocente) {
       onChange({ ...datos, categoriaDocente: session.user.categoriaDocente })
     }
@@ -62,6 +70,7 @@ export default function FormDatosGenerales({ datos, onChange }: Props) {
       onChange({ ...datos, maestro: (session.user.name || '').toUpperCase() })
     }
   }, [session])
+  console.log('👤 Session:', session?.user)
 
   const materiasFiltradas = datos.categoriaDocente
     ? materias.filter((m) => MATERIAS_POR_CATEGORIA[datos.categoriaDocente]?.includes(m.slug))

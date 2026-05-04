@@ -31,13 +31,15 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const id = searchParams.get('id')
 
+  // Buscar uno solo por ID
   if (id) {
     await connectDB()
-    const usuario = await Usuario.findById(id).lean()
+    const usuario = await Usuario.findById(id).populate('centroId', 'nombre codigo').lean()
     if (!usuario) return NextResponse.json({ error: 'No encontrado' }, { status: 404 })
     return NextResponse.json(usuario)
   }
 
+  // Listar con paginación
   const session = await auth()
   if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
@@ -54,13 +56,28 @@ export async function GET(request: Request) {
   await connectDB()
 
   const [usuarios, total] = await Promise.all([
-    Usuario.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+    Usuario.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate('centroId', 'nombre codigo')
+      .lean(),
     Usuario.countDocuments(filter),
   ])
 
-  return NextResponse.json({ usuarios, total, page, totalPages: Math.ceil(total / limit) })
-}
+  const usuariosConCentro = usuarios.map((u: any) => ({
+    ...u,
+    centroNombre: u.centroId?.nombre || 'Sin centro',
+    centroCodigo: u.centroId?.codigo || '',
+  }))
 
+  return NextResponse.json({
+    usuarios: usuariosConCentro,
+    total,
+    page,
+    totalPages: Math.ceil(total / limit),
+  })
+}
 // POST — Crear usuario
 export async function POST(request: Request) {
   const body = await request.json()

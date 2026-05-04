@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 
-// Constantes
 const MATERIAS_DISPONIBLES = [
   { slug: 'frances', label: 'Francés' },
   { slug: 'ingles', label: 'Inglés' },
@@ -27,13 +26,8 @@ const GRADOS_SEGUNDO_CICLO_PRIMARIA = ['4to-primaria', '5to-primaria', '6to-prim
 const GRADOS_PRIMER_CICLO_SECUNDARIA = ['1ro-secundaria', '2do-secundaria', '3ro-secundaria']
 const GRADOS_SEGUNDO_CICLO_SECUNDARIA = ['4to-secundaria', '5to-secundaria', '6to-secundaria']
 
-const ROLES_DISPONIBLES: Record<string, string[]> = {
-  superadmin: ['admin', 'admin_centro', 'docente', 'estudiante'],
-  admin: ['admin_centro', 'docente', 'estudiante'],
-  admin_centro: ['docente', 'estudiante'],
-}
-
 function getGradosPorCiclo(nivel: string, ciclo: string): string[] {
+  if (!nivel || !ciclo) return []
   if (nivel === 'nivel-primario') {
     return ciclo === 'primer-ciclo' ? GRADOS_PRIMER_CICLO_PRIMARIA : GRADOS_SEGUNDO_CICLO_PRIMARIA
   }
@@ -41,6 +35,12 @@ function getGradosPorCiclo(nivel: string, ciclo: string): string[] {
     return ciclo === 'primer-ciclo' ? GRADOS_PRIMER_CICLO_SECUNDARIA : GRADOS_SEGUNDO_CICLO_SECUNDARIA
   }
   return []
+}
+
+const ROLES_DISPONIBLES: Record<string, string[]> = {
+  superadmin: ['admin', 'admin_centro', 'docente', 'estudiante'],
+  admin: ['admin_centro', 'docente', 'estudiante'],
+  admin_centro: ['docente', 'estudiante'],
 }
 
 export default function NuevoUsuarioPage() {
@@ -53,11 +53,13 @@ export default function NuevoUsuarioPage() {
 
   const [form, setForm] = useState({
     nombre: '', email: '', password: '', genero: '', rol: '',
-    // Estudiante
+    codigoCentro: '',
     nivel: '', ciclo: '', grado: '', rne: '',
-    // Docente
-    categoriaDocente: '', materias: [] as string[], niveles: [] as string[], ciclos: {} as Record<string, string>, grados: [] as string[],
-    codigoCentro: ''
+    categoriaDocente: '',
+    materias: [] as string[],
+    niveles: [] as string[],
+    ciclos: {} as Record<string, string>,
+    grados: [] as string[],
   })
 
   const toggleArray = (campo: 'niveles' | 'materias' | 'grados', valor: string) => {
@@ -70,56 +72,41 @@ export default function NuevoUsuarioPage() {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault()
-  setLoading(true)
-  setError('')
+    e.preventDefault()
+    setLoading(true)
+    setError('')
 
-  if (!form.rol) { setError('Seleccioná un rol'); setLoading(false); return }
-  if (form.rol === 'docente' && form.materias.length === 0) { setError('Seleccioná al menos una materia'); setLoading(false); return }
-  if (form.rol === 'docente' && form.grados.length === 0) { setError('Seleccioná al menos un grado'); setLoading(false); return }
+    if (!form.rol) { setError('Seleccioná un rol'); setLoading(false); return }
+    if (form.rol === 'docente' && form.materias.length === 0) { setError('Seleccioná al menos una materia'); setLoading(false); return }
+    if (form.rol === 'docente' && form.grados.length === 0) { setError('Seleccioná al menos un grado'); setLoading(false); return }
 
-  let centroId = session?.user?.centroId
+    let centroId = session?.user?.centroId
 
-  // Si es admin o superadmin y puso código de centro, validarlo
-  if ((session?.user?.role === 'admin' || session?.user?.role === 'superadmin') && form.codigoCentro) {
+    if ((session?.user?.role === 'admin' || session?.user?.role === 'superadmin') && form.codigoCentro) {
+      try {
+        const resCentro = await fetch(`/api/centros?codigo=${form.codigoCentro.toUpperCase()}`)
+        if (!resCentro.ok) { setError('Código de centro no encontrado o inactivo'); setLoading(false); return }
+        const centroData = await resCentro.json()
+        centroId = centroData._id
+      } catch { setError('Error al validar el centro'); setLoading(false); return }
+    }
+
+    if (session?.user?.role === 'admin_centro') centroId = session.user.centroId
+
     try {
-      const resCentro = await fetch(`/api/centros?codigo=${form.codigoCentro.toUpperCase()}`)
-      if (!resCentro.ok) {
-        setError('Código de centro no encontrado o inactivo')
-        setLoading(false)
-        return
-      }
-      const centroData = await resCentro.json()
-      centroId = centroData._id
-    } catch {
-      setError('Error al validar el centro')
+      const res = await fetch('/api/usuarios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...form, centroId }),
+      })
+      if (!res.ok) { const data = await res.json(); throw new Error(data.error) }
+      router.push('/admin/usuarios/centros')
+      router.refresh()
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Error')
       setLoading(false)
-      return
     }
   }
-
-  // Si es admin_centro, usa su propio centro
-  if (session?.user?.role === 'admin_centro') {
-    centroId = session.user.centroId
-  }
-
-  try {
-    const res = await fetch('/api/usuarios', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...form,
-        centroId,
-      }),
-    })
-    if (!res.ok) { const data = await res.json(); throw new Error(data.error) }
-    router.push('/admin/usuarios')
-    router.refresh()
-  } catch (err: unknown) {
-    setError(err instanceof Error ? err.message : 'Error')
-    setLoading(false)
-  }
-}
 
   const inputClass = "w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
   const labelClass = "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
@@ -143,28 +130,20 @@ export default function NuevoUsuarioPage() {
                 <option value="otro">Otro</option>
               </select>
             </div>
-            {(session?.user?.role === 'admin' || session?.user?.role === 'superadmin') && (
-              <div>
-                <label className={labelClass}>Código del Centro</label>
-                <input
-                  type="text"
-                  value={form.codigoCentro}
-                  onChange={(e) => setForm({ ...form, codigoCentro: e.target.value.toUpperCase() })}
-                  className={inputClass}
-                  placeholder="Ej: SLU2025"
-                  required
-                />
-              </div>
-            )}
             <div>
               <label className={labelClass}>Rol</label>
               <select value={form.rol} onChange={(e) => setForm({ ...form, rol: e.target.value, categoriaDocente: '', materias: [], niveles: [], ciclos: {}, grados: [], grado: '', rne: '' })} className={inputClass} required>
                 <option value="">Seleccionar...</option>
-                {rolesPermitidos.map(r => (
-                  <option key={r} value={r}>{r.replace('_', ' ')}</option>
-                ))}
+                {rolesPermitidos.map(r => <option key={r} value={r}>{r.replace('_', ' ')}</option>)}
               </select>
             </div>
+
+            {(session?.user?.role === 'admin' || session?.user?.role === 'superadmin') && (
+              <div>
+                <label className={labelClass}>Código del Centro</label>
+                <input type="text" value={form.codigoCentro} onChange={(e) => setForm({ ...form, codigoCentro: e.target.value.toUpperCase() })} className={inputClass} placeholder="Ej: SALE2025" />
+              </div>
+            )}
 
             {/* Estudiante */}
             {form.rol === 'estudiante' && (
@@ -189,9 +168,7 @@ export default function NuevoUsuarioPage() {
                   <label className={labelClass}>Grado</label>
                   <select value={form.grado} onChange={(e) => setForm({ ...form, grado: e.target.value })} className={inputClass} required disabled={!form.ciclo}>
                     <option value="">Seleccionar...</option>
-                    {getGradosPorCiclo(form.nivel, form.ciclo).map(g => (
-                      <option key={g} value={g}>{g.replace('-', ' ')}</option>
-                    ))}
+                    {getGradosPorCiclo(form.nivel, form.ciclo).map(g => <option key={g} value={g}>{g.replace('-', ' ')}</option>)}
                   </select>
                 </div>
                 <div><label className={labelClass}>RNE</label><input type="text" value={form.rne} onChange={(e) => setForm({ ...form, rne: e.target.value })} className={inputClass} /></div>
@@ -214,7 +191,7 @@ export default function NuevoUsuarioPage() {
                   <label className={labelClass}>Niveles</label>
                   <div className="flex gap-2">
                     {['nivel-primario', 'nivel-secundario'].map(n => (
-                      <label key={n} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs border cursor-pointer ${form.niveles.includes(n) ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 text-blue-700 dark:text-blue-400' : 'border-gray-200 dark:border-slate-600'}`}>
+                      <label key={n} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs border cursor-pointer ${form.niveles.includes(n) ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 text-blue-700 dark:text-blue-400' : 'border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-400'}`}>
                         <input type="checkbox" checked={form.niveles.includes(n)} onChange={() => toggleArray('niveles', n)} className="sr-only" />
                         {n === 'nivel-primario' ? 'Primario' : 'Secundario'}
                       </label>
@@ -225,13 +202,13 @@ export default function NuevoUsuarioPage() {
             )}
           </div>
 
-          {/* Materias (docente) */}
+          {/* Materias */}
           {form.rol === 'docente' && form.categoriaDocente && (
             <div className="mt-4">
               <label className={labelClass}>Materias que imparte</label>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
                 {MATERIAS_DISPONIBLES.filter(m => MATERIAS_POR_CATEGORIA[form.categoriaDocente]?.includes(m.slug)).map(m => (
-                  <label key={m.slug} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs border cursor-pointer ${form.materias.includes(m.slug) ? 'bg-green-50 dark:bg-green-900/20 border-green-300 text-green-700 dark:text-green-400' : 'border-gray-200 dark:border-slate-600'}`}>
+                  <label key={m.slug} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs border cursor-pointer ${form.materias.includes(m.slug) ? 'bg-green-50 dark:bg-green-900/20 border-green-300 text-green-700 dark:text-green-400' : 'border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-400'}`}>
                     <input type="checkbox" checked={form.materias.includes(m.slug)} onChange={() => toggleArray('materias', m.slug)} className="sr-only" />
                     {m.label}
                   </label>
@@ -240,17 +217,19 @@ export default function NuevoUsuarioPage() {
             </div>
           )}
 
-          {/* Ciclos y Grados (docente) */}
+          {/* Grados por nivel */}
           {form.rol === 'docente' && form.niveles.length > 0 && (
             <div className="mt-4 space-y-4">
               <label className={labelClass}>Grados que imparte</label>
               {form.niveles.map(nivel => (
                 <div key={nivel} className="p-3 bg-gray-50 dark:bg-slate-700/30 rounded-lg">
                   <div className="flex items-center gap-3 mb-2">
-                    <p className="text-sm font-semibold">{nivel === 'nivel-primario' ? 'Primaria' : 'Secundaria'}</p>
+                    <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                      {nivel === 'nivel-primario' ? 'Primaria' : 'Secundaria'}
+                    </p>
                     <select
                       value={form.ciclos[nivel] || ''}
-                      onChange={(e) => setForm({ ...form, ciclos: { ...form.ciclos, [nivel]: e.target.value }, grados: [] })}
+                      onChange={(e) => setForm({ ...form, ciclos: { ...form.ciclos, [nivel]: e.target.value } })}
                       className="text-xs px-2 py-1.5 border rounded-lg dark:bg-slate-600 dark:text-white"
                     >
                       <option value="">Seleccionar ciclo...</option>
@@ -258,18 +237,71 @@ export default function NuevoUsuarioPage() {
                       <option value="segundo-ciclo">Segundo Ciclo</option>
                     </select>
                   </div>
+
                   {form.ciclos[nivel] && (
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                      {getGradosPorCiclo(nivel, form.ciclos[nivel]).map(g => (
-                        <label key={g} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs border cursor-pointer ${form.grados.includes(g) ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 text-blue-700 dark:text-blue-400' : 'border-gray-200 dark:border-slate-600'}`}>
-                          <input type="checkbox" checked={form.grados.includes(g)} onChange={() => toggleArray('grados', g)} className="sr-only" />
-                          {g.replace('-', ' ')}
-                        </label>
-                      ))}
-                    </div>
+                    <>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                        {getGradosPorCiclo(nivel, form.ciclos[nivel]).map(g => (
+                          <label key={g} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs border cursor-pointer ${form.grados.includes(g) ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 text-blue-700 dark:text-blue-400' : 'border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-400'}`}>
+                            <input type="checkbox" checked={form.grados.includes(g)} onChange={() => toggleArray('grados', g)} className="sr-only" />
+                            {g.replace('-', ' ')}
+                          </label>
+                        ))}
+                      </div>
+
+                      {/* Ciclo completo */}
+                      <label className="flex items-center gap-2 text-xs mt-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={getGradosPorCiclo(nivel, form.ciclos[nivel]).every(g => form.grados.includes(g))}
+                          onChange={(e) => {
+                            const gradosCiclo = getGradosPorCiclo(nivel, form.ciclos[nivel])
+                            if (e.target.checked) {
+                              setForm({ ...form, grados: [...new Set([...form.grados, ...gradosCiclo])] })
+                            } else {
+                              setForm({ ...form, grados: form.grados.filter(g => !gradosCiclo.includes(g)) })
+                            }
+                          }}
+                          className="rounded"
+                        />
+                        <span className="text-gray-600 dark:text-gray-400">Seleccionar ciclo completo</span>
+                      </label>
+                    </>
                   )}
                 </div>
               ))}
+            </div>
+          )}
+
+          {/* Nivel completo */}
+          {form.niveles.length > 0 && (
+            <div className="mt-4 pt-3 border-t border-gray-200 dark:border-slate-600">
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Selección rápida</p>
+              {form.niveles.map(nivel => {
+                const todosLosGrados = nivel === 'nivel-primario'
+                  ? [...GRADOS_PRIMER_CICLO_PRIMARIA, ...GRADOS_SEGUNDO_CICLO_PRIMARIA]
+                  : [...GRADOS_PRIMER_CICLO_SECUNDARIA, ...GRADOS_SEGUNDO_CICLO_SECUNDARIA]
+
+                return (
+                  <label key={nivel} className="flex items-center gap-2 text-xs cursor-pointer mb-1">
+                    <input
+                      type="checkbox"
+                      checked={todosLosGrados.every(g => form.grados.includes(g))}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setForm({ ...form, grados: [...new Set([...form.grados, ...todosLosGrados])] })
+                        } else {
+                          setForm({ ...form, grados: form.grados.filter(g => !todosLosGrados.includes(g)) })
+                        }
+                      }}
+                      className="rounded"
+                    />
+                    <span className="text-gray-600 dark:text-gray-400 font-medium">
+                      Nivel {nivel === 'nivel-primario' ? 'Primario' : 'Secundario'} completo
+                    </span>
+                  </label>
+                )
+              })}
             </div>
           )}
         </div>
