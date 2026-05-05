@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 
 function formatear(texto: string): string {
   if (!texto) return ''
@@ -10,13 +11,21 @@ function formatear(texto: string): string {
 
 export default function Breadcrumbs() {
   const pathname = usePathname()
+  const { data: session } = useSession()
   const segments = pathname.split('/').filter(Boolean)
 
   if (segments.length === 0) return null
 
+  const rol = session?.user?.role
+  const inicioHref = rol === 'docente' ? '/admin/docente' 
+    : rol === 'estudiante' ? `/estudiante/${session?.user?.grado}`
+    : '/dashboard'
+
   return (
     <nav className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-      <Link href="/" className="hover:text-blue-600 dark:hover:text-blue-400">Inicio</Link>
+      <Link href={inicioHref} className="hover:text-blue-600 dark:hover:text-blue-400">
+        Inicio
+      </Link>
       {segments.map((seg, idx) => {
         const href = '/' + segments.slice(0, idx + 1).join('/')
         const isLast = idx === segments.length - 1
