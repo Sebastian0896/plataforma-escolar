@@ -1,15 +1,5 @@
 // lib/types.ts
 
-/* export interface Actividad {
-  titulo: string
-  descripcion: string
-  contenidoEstudiante?: string
-  audioTexto?: string
-  audioTraduccion?: string
-  recursos?: string
-  duracion?: string
-} */
-
 export interface Recurso {
   tipo: 'audio' | 'imagen' | 'pdf' | 'video' | 'enlace'
   url?: string

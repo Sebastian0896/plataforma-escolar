@@ -7,6 +7,7 @@ import Link from 'next/link'
 import NavLinks from './NavLinks'
 import UserMenu from './UserMenu'
 import MobileMenu from './MobileMenu'
+import BuscadorGlobal from './BuscadorGlobal'
 
 export default function Navbar() {
   const { data: session } = useSession()
@@ -37,6 +38,8 @@ export default function Navbar() {
           <div className="hidden md:flex items-center gap-1">
             <NavLinks rol={rol} grado={session?.user?.grado} />
           </div>
+
+          <BuscadorGlobal />
 
           <div className="flex items-center gap-3">
             <UserMenu name={session?.user?.name} rol={rol} />

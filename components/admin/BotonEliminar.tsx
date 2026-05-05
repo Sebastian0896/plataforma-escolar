@@ -9,8 +9,8 @@ interface BotonEliminarProps {
 
 export default function BotonEliminar({ id }: BotonEliminarProps) {
   const router = useRouter()
-
   const handleDelete = async () => {
+    
     if (!confirm('¿Estás seguro de eliminar esta planificación?')) return
 
     try {

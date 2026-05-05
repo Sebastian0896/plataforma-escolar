@@ -192,6 +192,18 @@ export default function FormDatosGenerales({ datos, onChange }: Props) {
           <input type="text" value={datos.anoEscolar} onChange={(e) => set('anoEscolar', e.target.value)} className={inputClass} />
         </div>
 
+        {/* Fecha Programada */}
+        
+        <div>
+          <label className={labelClass}>Fecha programada</label>
+          <input
+            type="date"
+            value={datos.fechaProgramada?.split('T')[0] || ''}
+            onChange={(e) => set('fechaProgramada', e.target.value)}
+            className={inputClass}
+          />
+        </div>
+
         {/* Competencia */}
         <div className="md:col-span-2">
           <label className={labelClass}>Competencia</label>

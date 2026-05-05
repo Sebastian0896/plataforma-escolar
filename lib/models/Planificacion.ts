@@ -39,6 +39,7 @@ export interface IPlanificacion extends Document {
   centroEducativo: string
   anoEscolar: string
   publicado: boolean
+  fechaProgramada: { type: Date, default: null },
   momentos: IMomento[]
   creadoPor?: mongoose.Types.ObjectId
   centroId?: mongoose.Types.ObjectId
@@ -83,6 +84,7 @@ const PlanificacionSchema = new Schema<IPlanificacion>({
   centroEducativo: { type: String, default: '' },
   anoEscolar: { type: String, default: '2025-2026' },
   publicado: { type: Boolean, default: true },
+  fechaProgramada: {type: Date},
   momentos: [MomentoSchema],
   creadoPor: { type: Schema.Types.ObjectId, ref: 'Usuario' },
   centroId: { type: Schema.Types.ObjectId, ref: 'Centro' },

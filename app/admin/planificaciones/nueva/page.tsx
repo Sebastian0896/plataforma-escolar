@@ -20,6 +20,7 @@ const DATOS_INICIALES: DatosGenerales = {
   tema: '', competencia: '', indicadorLogro: '', estudianteGeneral: '',
   maestro: '', coordinadora: 'Susana',
   centroEducativo: 'Salomé Ureña', anoEscolar: '2025-2026',
+  fechaProgramada: '',
 }
 
 export default function NuevaPlanificacionPage() {
@@ -64,6 +65,7 @@ export default function NuevaPlanificacionPage() {
             m3_estudiante: momentos[2].estudiante,
             m3_actividades: JSON.stringify(momentos[2].actividades),
           },
+          fechaProgramada: datos.fechaProgramada,
         }),
       })
 

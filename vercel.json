@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/recordatorios?token=TU_SECRET",
+      "schedule": "0 6 * * *"
+    }
+  ]
+}

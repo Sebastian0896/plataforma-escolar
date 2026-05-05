@@ -27,6 +27,7 @@ export default function EditarPlanificacionPage() {
   const { data: session } = useSession()
   
   useEffect(() => {
+    console.log('🔄 useEffect ejecutado, tema:', params.tema)
     const cargar = async () => {
       try {
         const res = await fetch(`/api/planificaciones?tema=${params.tema}`)
@@ -40,11 +41,16 @@ export default function EditarPlanificacionPage() {
           competencia: data.competencia || data.acf?.competencia || '',
           indicadorLogro: data.indicadorLogro || data.acf?.indicador_logro || '',
           estudianteGeneral: data.contenidoEstudiante || data.acf?.contenido_estudiante_general || '',
-          maestro: session?.user.name?.toUpperCase() || data.maestro || data.acf?.maestro || '',
+          //maestro: session?.user.name?.toUpperCase() || data.maestro || data.acf?.maestro || '',
+          maestro: data.maestro || data.acf?.maestro || '',
           coordinadora: data.coordinadora || data.acf?.coordinadora || '',
           centroEducativo: data.centroEducativo || data.acf?.centro_educativo || '',
           anoEscolar: data.anoEscolar || data.acf?.ano_escolar || '',
+          fechaProgramada: data.fechaProgramada || '',
         })
+
+        console.log('📦 Datos cargados:', data)
+        console.log('📦 fechaProgramada:', data.fechaProgramada)
 
         const parseActividades = (jsonStr: string) => {
           if (!jsonStr || jsonStr === '[]') return []
@@ -65,7 +71,7 @@ export default function EditarPlanificacionPage() {
       setLoading(false)
     }
     cargar()
-  }, [params.tema])
+  }, [params.tema, session])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -80,6 +86,7 @@ export default function EditarPlanificacionPage() {
           id: postId, title: datos.tema,
           materia: datos.materia, nivel: datos.nivel, ciclo: datos.ciclo,
           grado: datos.grado, categoriaDocente: datos.categoriaDocente,
+          fechaProgramada: datos.fechaProgramada || undefined,
           acf: {
             competencia: datos.competencia, indicador_logro: datos.indicadorLogro,
             contenido_estudiante_general: datos.estudianteGeneral,
@@ -93,6 +100,7 @@ export default function EditarPlanificacionPage() {
             m3_actividades: JSON.stringify(momentos[2].actividades),
           },
         }),
+        
       })
       if (!res.ok) { const data = await res.json(); throw new Error(data.error || 'Error') }
       router.push('/admin/planificaciones')

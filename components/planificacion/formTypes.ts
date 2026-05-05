@@ -35,4 +35,5 @@ export interface DatosGenerales {
   coordinadora: string
   centroEducativo: string
   anoEscolar: string
+  fechaProgramada: string
 }

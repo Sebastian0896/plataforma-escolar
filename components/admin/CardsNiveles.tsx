@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import type { NivelInfo } from '@/lib/types'
+import BotonEliminar from './BotonEliminar'
 
 interface Props {
   estructura: NivelInfo[]
@@ -33,14 +34,18 @@ export default function CardsNiveles({ estructura }: Props) {
   return (
     <div>
       {/* Breadcrumbs */}
+      
       <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-6">
         <button onClick={() => { setVista('niveles'); setNivelSel(null) }} className="hover:text-blue-600">📚 Planificaciones</button>
+        
         {nivelSel && (
           <>
             <span>›</span>
             <button onClick={() => { setVista('ciclos'); setCicloSel(null) }} className="hover:text-blue-600">{nivelSel.nombre}</button>
           </>
+          
         )}
+        
         {cicloSel && (
           <>
             <span>›</span>
@@ -60,6 +65,19 @@ export default function CardsNiveles({ estructura }: Props) {
           </>
         )}
       </div>
+
+        
+      <div className='flex justify-end'>
+        {/* Breadcrumbs */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+            <Link href="/admin/planificaciones/nueva" className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
+              + Nueva
+            </Link>
+          </div>
+        </div>
+      </div>
+
 
       {/* Niveles */}
       {vista === 'niveles' && (
@@ -134,7 +152,7 @@ export default function CardsNiveles({ estructura }: Props) {
         <div className="space-y-2">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-bold text-gray-900 dark:text-white">{materiaSel.nombre}</h2>
-            <Link href="/admin/planificaciones/nueva" className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">+ Nueva</Link>
+            {/* <Link href="/admin/planificaciones/nueva" className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">+ Nueva</Link> */}
           </div>
           {materiaSel.temas.map((tema: any) => (
             <div key={tema.slug} className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 px-5 py-3 flex items-center justify-between">
@@ -144,7 +162,8 @@ export default function CardsNiveles({ estructura }: Props) {
               </div>
               <div className="flex items-center gap-3">
                 <Link href={`/admin/planificaciones/editar/${materiaSel.slug}/${tema.slug}`} className="text-sm text-blue-600 hover:underline">Editar</Link>
-                <button className="text-sm text-red-500 hover:text-red-700">Eliminar</button>
+                {/* <button id={tema.id} className="text-sm text-red-500 hover:text-red-700">Eliminar</button> */}
+                <BotonEliminar id={tema.id} />
               </div>
             </div>
           ))}

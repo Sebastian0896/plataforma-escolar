@@ -19,7 +19,9 @@ function generarSlug(title: string): string {
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const id = searchParams.get('id')
+  const tema = searchParams.get('tema')
 
+  // Buscar por ID
   if (id) {
     await connectDB()
     const plan = await Planificacion.findById(id).lean()
@@ -27,27 +29,32 @@ export async function GET(request: Request) {
     return NextResponse.json(plan)
   }
 
+  // Buscar por tema (slug)
+  if (tema) {
+    await connectDB()
+    const plan = await Planificacion.findOne({ slug: tema, publicado: true }).lean()
+    if (!plan) return NextResponse.json({ error: 'No encontrado' }, { status: 404 })
+    return NextResponse.json(plan)
+  }
+
+  // Listado paginado
   const session = await auth()
   if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
-  const mostrarInactivos = searchParams.get('inactivos') === 'true'
   const page = parseInt(searchParams.get('page') || '1')
   const limit = parseInt(searchParams.get('limit') || '9')
   const skip = (page - 1) * limit
 
-  const filter: any = { activo: mostrarInactivos ? false : true }
-  if (session.user?.role === 'admin_centro') {
-    filter.centroId = session.user.centroId
-  }
-
   await connectDB()
+  const filter: any = { publicado: true }
+  if (session.user?.role === 'admin_centro') filter.centroId = session.user.centroId
 
-  const [usuarios, total] = await Promise.all([
+  const [planificaciones, total] = await Promise.all([
     Planificacion.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
     Planificacion.countDocuments(filter),
   ])
 
-  return NextResponse.json({ usuarios, total, page, totalPages: Math.ceil(total / limit) })
+  return NextResponse.json({ planificaciones, total, page, totalPages: Math.ceil(total / limit) })
 }
 
 // POST
@@ -60,6 +67,10 @@ export async function POST(request: Request) {
     await connectDB()
     const slugBase = generarSlug(data.title)
     const slug = `${slugBase}-${session.user?.centroId?.toString().slice(-6)}`
+
+    console.log('📦 fechaProgramada recibida:', data.fechaProgramada)
+    console.log('📦 Objeto create:', { ...data, fechaProgramada: data.fechaProgramada })
+    console.log('📦 Schema paths:', Object.keys(Planificacion.schema.paths))
     const plan = await Planificacion.create({
       slug,
       tema: data.title,
@@ -77,6 +88,7 @@ export async function POST(request: Request) {
       anoEscolar: data.acf.ano_escolar,
       centroId: session.user?.centroId,
       creadoPor: session.user?.id, // ← NUEVO
+      fechaProgramada: data.fechaProgramada ? new Date(data.fechaProgramada) : null,
       momentos: [
         {
           tipo: 'inicio',
@@ -97,6 +109,7 @@ export async function POST(request: Request) {
           actividades: JSON.parse(data.acf.m3_actividades || '[]'),
         },
       ],
+      
     })
 
     //console.log("Imprimiendo plan creada: ", plan)
@@ -143,6 +156,7 @@ export async function PUT(request: Request) {
         coordinadora: data.acf.coordinadora,
         centroEducativo: data.acf.centro_educativo,
         anoEscolar: data.acf.ano_escolar,
+        fechaProgramada: data.fechaProgramada ? new Date(data.fechaProgramada) : null,
         momentos: [
           {
             tipo: 'inicio',
@@ -163,8 +177,9 @@ export async function PUT(request: Request) {
             actividades: JSON.parse(data.acf.m3_actividades || '[]'),
           },
         ],
+        
       },
-      { new: true }
+      {returnDocument: "after"}
     )
 
     if (!plan) {
@@ -189,6 +204,11 @@ export async function DELETE(request: Request) {
   if (!id) return NextResponse.json({ error: 'ID requerido' }, { status: 400 })
 
   await connectDB()
+
+  // Eliminar notificaciones asociadas
+  await Notificacion.deleteMany({ planificacionId: id })
+
+  // Eliminar planificación
   await Planificacion.findByIdAndDelete(id)
 
   return NextResponse.json({ success: true })
