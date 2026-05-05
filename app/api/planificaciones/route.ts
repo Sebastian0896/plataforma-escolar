@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { connectDB } from '@/lib/db'
 import Planificacion from '@/lib/models/Planificacion'
+import Notificacion from '@/lib/models/Notificacion'
 
 export const runtime = "nodejs"
 
@@ -99,6 +100,16 @@ export async function POST(request: Request) {
     })
 
     //console.log("Imprimiendo plan creada: ", plan)
+
+    // Notificar a estudiantes del grado
+    await Notificacion.create({
+      tipo: 'nueva_plan',
+      titulo: 'Nueva planificación',
+      mensaje: `${data.title} - ${data.grado}`,
+      grado: data.grado,
+      planificacionId: plan._id,
+      centroId: session.user?.centroId,
+    })
 
     return NextResponse.json(plan, { status: 201 })
   } catch (error: unknown) {

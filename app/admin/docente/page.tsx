@@ -45,6 +45,15 @@ export default function DocenteDashboard() {
         </div>
       </div>
 
+      {stats?.pendientes?.length > 0 && (
+        <div className="mb-8 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
+            <h3 className="font-semibold text-amber-800 dark:text-amber-300 mb-2">📋 Pendientes esta semana</h3>
+            <p className="text-sm text-amber-700 dark:text-amber-400">
+            No tenés planificación para: {stats.pendientes.map((g: string) => g?.replace('-', ' ')).join(', ')}
+            </p>
+        </div>
+        )}
+
       {/* Accesos rápidos */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <Link href="/admin/planificaciones/nueva" className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-md transition-all group">

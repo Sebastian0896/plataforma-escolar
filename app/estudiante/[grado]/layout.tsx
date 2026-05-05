@@ -1,6 +1,7 @@
 import { getEstructuraCompleta } from '@/lib/planificaciones'
 import SidebarEstudiante from '@/components/estudiante/SidebarEstudiante'
 import { auth } from '@/auth'
+import Navbar from '@/components/Navbar'
 
 type Params = Promise<{ grado: string }>
 
@@ -18,11 +19,12 @@ export default async function EstudianteLayout({
   const estructura = await getEstructuraCompleta(centroId)
 
   return (
-    <div className="flex">
-      <SidebarEstudiante estructura={estructura} grado={grado} />
-      <main className="flex-1 p-6 max-w-6xl mx-auto w-full">
-        {children}
-      </main>
+    <div className="min-h-screen">
+      <Navbar />
+      <div className="flex">
+        <SidebarEstudiante estructura={estructura} grado={grado} />
+        <main className="flex-1 p-6 max-w-4xl mx-auto w-full">{children}</main>
+      </div>
     </div>
   )
 }

@@ -3,6 +3,7 @@
 import { signOut, useSession } from 'next-auth/react'
 import { useTheme } from 'next-themes'
 import ThemeToggle from './ThemeToggle'
+import NotificacionesBell from './NotificacionesBell'
 
 export default function UserMenu() {
   const { data: session, status } = useSession()
@@ -17,7 +18,7 @@ export default function UserMenu() {
   return (
     <div className="flex items-center gap-3">
       <ThemeToggle />
-
+        <NotificacionesBell />
       <div className="hidden sm:flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
         <div className="w-7 h-7 bg-gray-200 dark:bg-slate-600 rounded-full flex items-center justify-center text-xs font-bold">
           {name?.charAt(0)?.toUpperCase() || 'U'}
