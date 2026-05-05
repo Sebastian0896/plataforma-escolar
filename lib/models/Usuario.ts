@@ -29,7 +29,7 @@ const UsuarioSchema = new Schema<IUsuario>({
   materias: [{ type: String }], // ← Agregar
   rne: { type: String, unique: true, sparse: true },
   activo: { type: Boolean, default: true },
-  centroId: { type: Schema.Types.ObjectId, ref: 'Centro', required: true },
+  centroId: { type: Schema.Types.ObjectId, ref: 'Centro', required: false },
   niveles: [{ type: String }],  
   ciclos: [{ type: String }], 
 }, { timestamps: true })

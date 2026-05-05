@@ -7,6 +7,7 @@ export interface INotificacion extends Document {
   destinatarioId?: mongoose.Types.ObjectId
   grado?: string
   planificacionId?: mongoose.Types.ObjectId
+  planificacionSlug?: string
   centroId: mongoose.Types.ObjectId
   leida: boolean
   destacada: boolean
@@ -20,6 +21,7 @@ const NotificacionSchema = new Schema<INotificacion>({
   destinatarioId: { type: Schema.Types.ObjectId, ref: 'Usuario' },
   grado: { type: String },
   planificacionId: { type: Schema.Types.ObjectId, ref: 'Planificacion' },
+  planificacionSlug: { type: String },
   centroId: { type: Schema.Types.ObjectId, ref: 'Centro', required: true },
   leida: { type: Boolean, default: false },
   destacada: { type: Boolean, default: false },

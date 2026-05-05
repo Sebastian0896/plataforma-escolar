@@ -17,6 +17,7 @@ export default function BotonEliminar({ id }: BotonEliminarProps) {
         await fetch(`/api/planificaciones?id=${id}`, { method: 'DELETE' })
         console.log("Eliminando la planificacion: ", id)
         router.refresh()
+        window.location.reload();
     } catch {
       alert('Error al eliminar')
     }

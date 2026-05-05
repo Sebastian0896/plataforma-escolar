@@ -55,7 +55,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
           if (!ok) return null
 
+          let centroNombre
 
+          if (usuario.centroId) {
+            const centro = await Centro.findById(usuario.centroId).lean()
+            centroNombre = centro?.nombre || ''
+          }
           return {
             id: usuario._id.toString(),
             name: usuario.nombre,
@@ -66,7 +71,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             grados: JSON.stringify(usuario.grados || []),
             materias: JSON.stringify(usuario.materias || []),
             centroId: usuario.centroId?.toString() || "",
-            centroNombre: centro?.nombre || '',
+            centroNombre,
           }
         } catch (error) {
           console.error("ERROR REAL:", error)

@@ -22,10 +22,10 @@ export async function getEstructuraCompleta(
   await connectDB()
 
     const filter: any = { publicado: true }
-    if (centroId) filter.centroId = new mongoose.Types.ObjectId(centroId)
-    if (categoriaDocenteSlug) filter.categoriaDocente = categoriaDocenteSlug
-    if (gradosPermitidos?.length) filter.grado = { $in: gradosPermitidos }
-    if (materiasPermitidas?.length) filter.materia = { $in: materiasPermitidas }
+    //if (centroId) filter.centroId = new mongoose.Types.ObjectId(centroId)
+    //if (categoriaDocenteSlug) filter.categoriaDocente = categoriaDocenteSlug
+    //if (gradosPermitidos?.length) filter.grado = { $in: gradosPermitidos }
+    //if (materiasPermitidas?.length) filter.materia = { $in: materiasPermitidas }
     if (creadoPorId) {
       filter.creadoPor = typeof creadoPorId === 'string' 
         ? new mongoose.Types.ObjectId(creadoPorId) 
@@ -36,6 +36,7 @@ export async function getEstructuraCompleta(
     //console.log('🔍 categoriaDocenteSlug recibido:', categoriaDocenteSlug)
   
     const planificaciones = await Planificacion.find(filter).lean();
+    //const planificaciones = await Planificacion.find({publicado: true}).lean();
     
     //console.log('🔍 Parámetros recibidos:', { centroId, categoriaDocenteSlug, gradosPermitidos, materiasPermitidas, creadoPorId })
     //console.log('🔍 Filter final:', JSON.stringify(filter))

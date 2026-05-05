@@ -11,7 +11,8 @@ export default async function PlanificacionesPage() {
   const grados = session?.user?.grados || []
   const materias = session?.user?.materias || []
 
-  const centroId = session?.user?.centroId
+  //const centroId = session?.user?.centroId
+  const centroId = session?.user?.role === 'admin_centro' ? session.user.centroId : undefined
   const creadoPorId = session?.user?.id
   let estructura = await getEstructuraCompleta(
   (rol === 'admin_centro' || rol === 'docente') ? centroId : undefined,

@@ -1,5 +1,8 @@
 'use client'
 
+import { useSession } from 'next-auth/react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useState, useEffect, useRef } from 'react'
 /* import Link from 'next/link' */
 
@@ -8,6 +11,8 @@ export default function NotificacionesBell() {
   const [totalNoLeidas, setTotalNoLeidas] = useState(0)
   const [abierto, setAbierto] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
+  
+  const { data: session } = useSession()
 
   useEffect(() => {
     fetch('/api/notificaciones?noLeidas=true')
@@ -52,6 +57,30 @@ export default function NotificacionesBell() {
   setTotalNoLeidas(prev => leida ? prev + 1 : Math.max(0, prev - 1))
 }
 
+const router = useRouter()
+
+/* const marcarLeidaYRedirigir = async (n: any) => {
+  // Marcar como leída
+  if (!n.leida) {
+    await fetch('/api/notificaciones', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: n._id, leida: true }),
+    })
+    setNotificaciones(prev => prev.map(x => x._id === n._id ? { ...x, leida: true } : x))
+    setTotalNoLeidas(prev => Math.max(0, prev - 1))
+  }
+
+  // Cerrar dropdown
+  setAbierto(false)
+
+  // Redirigir según tipo
+  if (n.planificacionId) {
+    const nivel = n.grado?.includes('primaria') ? 'nivel-primario' : 'nivel-secundario'
+    router.push(`/estudiante/${n.grado}/${n.planificacionId}`)
+  }
+}
+ */
   return (
     <div ref={ref} className="relative">
       <button
@@ -80,10 +109,12 @@ export default function NotificacionesBell() {
           ) : (
             notificaciones.map(n => (
               <div key={n._id} className={`p-3 border-b border-gray-50 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 ${!n.leida ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}>
+                 
+                
                 <div className="flex items-start gap-2">
                   <span className="text-lg">{iconos[n.tipo] || '📢'}</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">{n.titulo}</p>
+                    {/* <p className="text-sm font-medium text-gray-900 dark:text-white">{n.titulo}</p>
                     <p className="text-xs text-gray-500 mt-0.5">{n.mensaje}</p>
                     <p className="text-[10px] text-gray-400 mt-1">{new Date(n.createdAt).toLocaleString('es-DO')}</p>
                     <button
@@ -92,7 +123,35 @@ export default function NotificacionesBell() {
                         title={n.leida ? 'Marcar no leída' : 'Marcar leída'}
                     >
                         {n.leida ? '👁️' : '✅'}
-                    </button>
+                    </button> */}
+                    {n.planificacionId ? (
+                      <Link
+                        href={
+                          session?.user?.role === 'docente'
+                            ? `/dashboard/${n.nivel || 'nivel-secundario'}/${n.grado}/${n.planificacionSlug}`
+                            : `/estudiante/${n.grado}/${n.planificacionSlug}`
+                        }
+                       onClick={async (e) => {
+                        e.preventDefault()
+                        // Forzar PUT
+                        await fetch('/api/notificaciones', {
+                          method: 'PUT',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ id: n._id, leida: true }),
+                        })
+                        setNotificaciones(prev => prev.map(x => x._id === n._id ? { ...x, leida: true } : x))
+                        setAbierto(false)
+                        const nivel = n.grado?.includes('primaria') ? 'nivel-primario' : 'nivel-secundario'
+                        router.push(`/estudiante/${n.grado}/${n.planificacionSlug || n.planificacionId}`)
+                      }}
+                        className="text-sm font-medium text-gray-900 dark:text-white hover:text-blue-600"
+                      >
+                        {n.titulo}
+                      </Link>
+                      ) : (
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">{n.titulo}</p>
+                      )}
+
                   </div>
                   {!n.leida && <span className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 flex-shrink-0" />}
                 </div>

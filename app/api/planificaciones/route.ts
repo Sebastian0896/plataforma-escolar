@@ -47,8 +47,10 @@ export async function GET(request: Request) {
 
   await connectDB()
   const filter: any = { publicado: true }
-  if (session.user?.role === 'admin_centro') filter.centroId = session.user.centroId
-
+  /* if (session.user?.role === 'admin_centro') filter.centroId = session.user.centroId */ // Funcionaba antes de sacar a superadmin de centro
+  if (session.user?.centroId && session.user?.role === 'admin_centro') {
+  filter.centroId = session.user.centroId
+}
   const [planificaciones, total] = await Promise.all([
     Planificacion.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
     Planificacion.countDocuments(filter),
@@ -121,6 +123,7 @@ export async function POST(request: Request) {
       mensaje: `${data.title} - ${data.grado}`,
       grado: data.grado,
       planificacionId: plan._id,
+      planificacionSlug: plan.slug,
       centroId: session.user?.centroId,
     })
 

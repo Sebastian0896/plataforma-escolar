@@ -37,6 +37,8 @@ export default function CardsNiveles({ estructura }: Props) {
       
       <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-6">
         <button onClick={() => { setVista('niveles'); setNivelSel(null) }} className="hover:text-blue-600">📚 Planificaciones</button>
+
+       
         
         {nivelSel && (
           <>
@@ -45,6 +47,7 @@ export default function CardsNiveles({ estructura }: Props) {
           </>
           
         )}
+
         
         {cicloSel && (
           <>
@@ -69,14 +72,19 @@ export default function CardsNiveles({ estructura }: Props) {
         
       <div className='flex justify-end'>
         {/* Breadcrumbs */}
+        
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
             <Link href="/admin/planificaciones/nueva" className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
               + Nueva
             </Link>
+            
           </div>
+          
         </div>
       </div>
+
+      
 
 
       {/* Niveles */}
@@ -162,6 +170,9 @@ export default function CardsNiveles({ estructura }: Props) {
               </div>
               <div className="flex items-center gap-3">
                 <Link href={`/admin/planificaciones/editar/${materiaSel.slug}/${tema.slug}`} className="text-sm text-blue-600 hover:underline">Editar</Link>
+                <Link href={`/admin/planificaciones/clonar/${tema.slug}`} className="text-xs text-green-600 hover:underline">
+                  📋 Clonar
+                </Link>
                 {/* <button id={tema.id} className="text-sm text-red-500 hover:text-red-700">Eliminar</button> */}
                 <BotonEliminar id={tema.id} />
               </div>

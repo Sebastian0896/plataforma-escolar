@@ -43,16 +43,20 @@ export async function GET(request: Request) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
+  
+
   const mostrarInactivos = searchParams.get('inactivos') === 'true'
   const page = parseInt(searchParams.get('page') || '1')
   const limit = parseInt(searchParams.get('limit') || '9')
   const skip = (page - 1) * limit
 
   const filter: any = { activo: mostrarInactivos ? false : true }
-  if (session.user?.role === 'admin_centro') {
+  /* if (session.user?.role === 'admin_centro') {
     filter.centroId = session.user.centroId
-  }
-
+  } */ // Funcionaba antes de sacar a superadmin de centro
+  if (session.user?.centroId && session.user?.role === 'admin_centro') {
+  filter.centroId = session.user.centroId
+}
   await connectDB()
 
   const [usuarios, total] = await Promise.all([
