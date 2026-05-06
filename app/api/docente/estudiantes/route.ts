@@ -1,3 +1,4 @@
+// app/api/docente/estudiantes/route.ts
 import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { connectDB } from '@/lib/db'
@@ -8,28 +9,52 @@ export const runtime = "nodejs"
 
 export async function GET() {
   const session = await auth()
-  if (!session || session.user?.role !== 'docente') {
+  if (!session || (session.user?.role !== 'docente' && session.user?.role !== 'admin_centro')) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
   }
 
   await connectDB()
 
-  // Obtener grados del docente desde sus planificaciones
-  const planificaciones = await Planificacion.find({
-    centroId: session.user.centroId,
-    categoriaDocente: session.user.categoriaDocente,
-    publicado: true,
-  }).select('grado').lean()
+  // Obtener grados del docente desde su perfil
+  let grados = session.user?.grados?.length
+    ? session.user.grados
+    : (session.user?.grado ? [session.user.grado] : [])
 
-  const grados = [...new Set(planificaciones.map((p: any) => p.grado))]
+  // Si no tiene grados, buscar en sus planificaciones
+  if (grados.length === 0) {
+    const planes = await Planificacion.find({
+      centroId: session.user.centroId,
+      categoriaDocente: session.user.categoriaDocente,
+      publicado: true,
+    }).select('grado').lean()
+    grados = [...new Set(planes.map((p: any) => p.grado).filter(Boolean))]
+  }
 
-  // Buscar estudiantes en esos grados
-  const estudiantes = await Usuario.find({
+  // Si no hay grados, buscar en usuarios del mismo centro
+  if (grados.length === 0) {
+    const usuarios = await Usuario.find({
+      centroId: session.user.centroId,
+      rol: 'estudiante',
+      activo: true,
+    }).select('grado').lean()
+    grados = [...new Set(usuarios.map((u: any) => u.grado).filter(Boolean))]
+  }
+
+  // Buscar estudiantes
+  const filter: any = {
     centroId: session.user.centroId,
     rol: 'estudiante',
-    grado: { $in: grados },
     activo: true,
-  }).select('nombre email grado genero createdAt').sort({ grado: 1, nombre: 1 }).lean()
+  }
+
+  if (grados.length > 0) {
+    filter.grado = { $in: grados }
+  }
+
+  const estudiantes = await Usuario.find(filter)
+    .select('nombre email grado genero createdAt')
+    .sort({ grado: 1, nombre: 1 })
+    .lean()
 
   // Agrupar por grado
   const porGrado: Record<string, any[]> = {}

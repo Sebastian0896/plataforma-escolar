@@ -1,6 +1,7 @@
 // components/NavLinks.tsx
 'use client'
 
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
@@ -12,6 +13,8 @@ interface Props {
 
 export default function NavLinks({ rol, grado, onClick }: Props) {
   const pathname = usePathname()
+
+  const { data: session } = useSession()
 
   const linkClass = (path: string) =>
     `px-3 py-2 rounded-lg text-sm transition-colors ${
@@ -42,7 +45,7 @@ export default function NavLinks({ rol, grado, onClick }: Props) {
         </>
       )}
       
-      {rol === 'docente' && (
+      {(rol === 'docente' || (rol === 'admin_centro' && session?.user?.categoriaDocente)) && (
         <Link href="/admin/docente" onClick={onClick} className={linkClass('/admin/docente')}>
           🏠 Mi Oficina
         </Link>

@@ -1,11 +1,13 @@
 'use client'
 
 import { useSession } from 'next-auth/react'
+import Link from 'next/link'
 import { useState, useEffect } from 'react'
 
 export default function MisEstudiantesPage() {
   const { data: session } = useSession()
   const [data, setData] = useState<any>(null)
+
 
   useEffect(() => {
     if (session?.user) {
@@ -17,7 +19,14 @@ export default function MisEstudiantesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Mis Estudiantes</h1>
+      <div className='flex justify-between'>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Mis Estudiantes</h1>
+        {session?.user?.role === 'admin_centro' && (
+          <Link href="/admin/docente/estudiantes/nuevo" className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
+            + Nuevo Estudiante
+          </Link>
+        )}
+      </div>
       <p className="text-gray-500 dark:text-gray-400 mb-6">{data?.total || 0} estudiantes</p>
 
       {data?.porGrado && Object.entries(data.porGrado).map(([grado, estudiantes]: [string, any]) => (
