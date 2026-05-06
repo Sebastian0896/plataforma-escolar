@@ -5,6 +5,7 @@ import bcrypt from "bcryptjs"
 import { connectDB } from "@/lib/db"
 import Usuario from "@/lib/models/Usuario"
 import Centro from "./lib/models/Centro"
+import { rateLimit } from "./lib/rate-limit"
 export const { handlers, signIn, signOut, auth } = NextAuth({
   
   trustHost: true,
@@ -30,9 +31,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: "Contraseña", type: "password" },
       },
       async authorize(credentials) {
-        console.log("Credenciales:", credentials)
+        //console.log("Credenciales:", credentials)
         //const centro = await Centro.findById(usuario.centroId).lean()
-
+        if (!rateLimit(`login-${credentials?.email}`, 5, 60000)) {
+          throw new Error('Demasiados intentos. Esperá un minuto.')
+        }
         if (!credentials?.email || !credentials?.password) {
           console.log("Faltan credenciales")
           return null

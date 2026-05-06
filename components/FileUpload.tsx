@@ -13,7 +13,7 @@ export default function FileUpload({ onUpload, accept = '*/*' }: FileUploadProps
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-
+    console.log('📤 URL subida:')
     setUploading(true)
     const formData = new FormData()
     formData.append('file', file)

@@ -5,6 +5,7 @@ import { connectDB } from '@/lib/db'
 import Usuario from '@/lib/models/Usuario'
 import { PLANES, ACTIVAR_PLANES } from '@/lib/planes'
 import Centro from '@/lib/models/Centro'
+import { usuarioSchema } from '@/lib/validations'
 
 
 export const runtime = "nodejs"
@@ -88,6 +89,14 @@ export async function GET(request: Request) {
 // POST — Crear usuario
 export async function POST(request: Request) {
   const body = await request.json()
+
+  // Validar con Zod
+  const validation = usuarioSchema.safeParse(body)
+  
+  if (!validation.success) {
+    return NextResponse.json({ error: validation.error.errors[0].message }, { status: 400 })
+  }
+
   const { nombre, email, password, rol, genero, nivel, ciclo, grado, rne, categoriaDocente, materias, niveles, ciclos, grados, centroId } = body
 
 
