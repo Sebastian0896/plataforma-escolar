@@ -10,7 +10,7 @@ export default async function CentrosPage() {
 
   await connectDB()
   const centros = await Centro.find({}).sort({ createdAt: -1 }).lean()
-
+console.log('👤 Rol en centro/[id]:', session?.user?.role)
   return (
     <div>
       <div className="flex items-center justify-between mb-6">

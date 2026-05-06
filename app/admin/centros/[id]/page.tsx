@@ -10,7 +10,12 @@ type Params = Promise<{ id: string }>
 
 export default async function CentroDetailPage({ params }: { params: Params }) {
   const session = await auth()
-  if (session?.user?.role !== 'superadmin') redirect('/dashboard')
+  //if (session?.user?.role !== 'superadmin') redirect('/dashboard')
+  if (session?.user?.role !== 'superadmin' && 
+      session?.user?.role !== 'admin' && 
+      session?.user?.role !== 'admin_centro') {
+    redirect('/dashboard')
+  }
 
   const { id } = await params
 
@@ -47,6 +52,7 @@ export default async function CentroDetailPage({ params }: { params: Params }) {
           <p className="text-sm text-gray-500 mt-1">Planificaciones</p>
           <p className="text-xs text-blue-600 hover:underline mt-3">Ver todas →</p>
         </Link>
+
       </div>
     </div>
   )

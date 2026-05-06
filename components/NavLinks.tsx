@@ -22,25 +22,39 @@ export default function NavLinks({ rol, grado, onClick }: Props) {
 
   return (
     <>
-      {rol !== 'estudiante' && rol !== 'superadmin' && (
+      {rol !== 'estudiante' && rol !== 'superadmin' && rol !== 'admin_centro' && (
         <Link href="/dashboard" onClick={onClick} className={linkClass('/dashboard')}>
           📖 Planificaciones
         </Link>
       )}
 
+      {rol === 'admin_centro' && (
+        <>
+          <Link href="/admin" onClick={onClick} className={linkClass('/admin')}>
+            ⚙️ Panel
+          </Link>
+          <Link href="/admin/usuarios/centros" onClick={onClick} className={linkClass('/admin/usuarios')}>
+            👥 Usuarios
+          </Link>
+          <Link href="/admin/centros/plan" onClick={onClick} className={linkClass('/admin/centros/plan')}>
+            💎 Planes
+          </Link>
+        </>
+      )}
+      
       {rol === 'docente' && (
         <Link href="/admin/docente" onClick={onClick} className={linkClass('/admin/docente')}>
           🏠 Mi Oficina
         </Link>
       )}
 
-      {(rol === 'admin' || rol === 'admin_centro') && (
+      {(rol === 'admin') && (
         <Link href="/admin" onClick={onClick} className={linkClass('/admin')}>
           ⚙️ Administrar
         </Link>
       )}
 
-      {(rol === 'admin' || rol === 'admin_centro' || rol === 'superadmin') && (
+      {(rol === 'admin' || rol === 'superadmin') && (
         <Link href="/admin/usuarios/centros" onClick={onClick} className={linkClass('/admin/usuarios')}>
           👥 Usuarios
         </Link>

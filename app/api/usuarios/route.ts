@@ -3,6 +3,9 @@ import bcrypt from 'bcryptjs'
 import { auth } from '@/auth'
 import { connectDB } from '@/lib/db'
 import Usuario from '@/lib/models/Usuario'
+import { PLANES, ACTIVAR_PLANES } from '@/lib/planes'
+import Centro from '@/lib/models/Centro'
+
 
 export const runtime = "nodejs"
 
@@ -89,8 +92,9 @@ export async function POST(request: Request) {
 
 
   // Permitir crear el primer superadmin sin sesión
-if (rol === 'superadmin') {
+  if (rol === 'superadmin') {
   await connectDB()
+
   const count = await Usuario.countDocuments({ rol: 'superadmin' })
   if (count > 0) {
     const session = await auth()
@@ -115,6 +119,24 @@ if (rol === 'superadmin') {
   }
 
   //console.log('📦 POST /api/usuarios - Body:', body)
+
+  // Después de verificar permisos, antes de crear:
+  if (ACTIVAR_PLANES) {
+    const centro = await Centro.findById(session.user?.centroId)
+    if (!centro) return NextResponse.json({ error: 'Centro no encontrado' }, { status: 400 })
+
+    const plan = PLANES[centro.plan || 'gratis']
+
+    if (rol === 'docente') {
+      const count = await Usuario.countDocuments({ centroId: centro._id, rol: 'docente', activo: true })
+      if (count >= plan.docentes) return NextResponse.json({ error: `Límite de docentes (${plan.docentes}) alcanzado` }, { status: 403 })
+    }
+
+    if (rol === 'estudiante') {
+      const count = await Usuario.countDocuments({ centroId: centro._id, rol: 'estudiante', activo: true })
+      if (count >= plan.estudiantes) return NextResponse.json({ error: `Límite de estudiantes (${plan.estudiantes}) alcanzado` }, { status: 403 })
+    }
+  }
 
   try {
     await connectDB()
