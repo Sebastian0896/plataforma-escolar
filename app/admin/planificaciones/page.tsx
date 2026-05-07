@@ -1,7 +1,10 @@
+// app/admin/planificaciones/page.tsx
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { getEstructuraCompleta } from '@/lib/planificaciones'
 import CardsNiveles from '@/components/admin/CardsNiveles'
+import mongoose from 'mongoose'
+import Centro from '@/lib/models/Centro'
 
 export default async function PlanificacionesPage() {
   const session = await auth()
@@ -10,17 +13,30 @@ export default async function PlanificacionesPage() {
   const rol = session?.user?.role
   const grados = session?.user?.grados || []
   const materias = session?.user?.materias || []
+  const esAdmin = rol === 'admin' || rol === 'superadmin' || (rol === 'admin_centro' && session?.user?.categoriaDocente)
 
-  //const centroId = session?.user?.centroId
-  const centroId = session?.user?.role === 'admin_centro' ? session.user.centroId : undefined
-  const creadoPorId = session?.user?.id
-  let estructura = await getEstructuraCompleta(
-  (rol === 'admin_centro' || rol === 'docente') ? centroId : undefined,
-  rol === 'docente' ? session?.user?.categoriaDocente : undefined,
-  rol === 'docente' && grados.length > 0 ? grados : undefined,
-  rol === 'docente' && materias.length > 0 ? materias : undefined,
-  rol === 'docente' ? creadoPorId : undefined
-)
+  let creadoPorId: any = undefined
+
+  if (rol === 'docente') {
+    creadoPorId = session?.user?.id ? new mongoose.Types.ObjectId(session.user.id) : undefined
+  }
+
+  if (rol === 'admin_centro') {
+    const centro = await Centro.findById(session.user.centroId).lean()
+    if (centro?.tipo === 'individual') {
+      creadoPorId = session?.user?.id ? new mongoose.Types.ObjectId(session.user.id) : undefined
+    }
+  }
+
+  const centroId = rol === 'admin_centro' ? session.user.centroId : undefined
+
+  const estructura = await getEstructuraCompleta(
+    centroId,
+    esAdmin ? undefined : session?.user?.categoriaDocente,
+    esAdmin ? undefined : (grados.length > 0 ? grados : undefined),
+    esAdmin ? undefined : (materias.length > 0 ? materias : undefined),
+    creadoPorId
+  )
 
   return (
     <div>

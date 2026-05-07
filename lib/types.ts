@@ -42,6 +42,7 @@ export interface Planificacion {
   ciclo: string
   grado: string
   categoriaDocente: string
+  centroId: string
 }
 
 export interface Materia {

@@ -34,7 +34,7 @@ export async function getEstructuraCompleta(
 
     //console.log('🔍 Filter final:', JSON.stringify(filter))
     //console.log('🔍 categoriaDocenteSlug recibido:', categoriaDocenteSlug)
-  
+  console.log('🔍 Filter:', JSON.stringify(filter))
     const planificaciones = await Planificacion.find(filter).lean();
     //const planificaciones = await Planificacion.find({publicado: true}).lean();
     

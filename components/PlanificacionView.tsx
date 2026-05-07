@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Planificacion, Rol } from '@/lib/types'
 import MomentoSection from './MomentoSection'
 
@@ -36,9 +36,20 @@ export default function PlanificacionView({
 }: PlanificacionViewProps) {
   const { data: session } = useSession()
   const lang = getLang(planificacion.materia)
+
+  const [centroNombre, setCentroNombre] = useState(planificacion.centroEducativo || '')
   
   const rol: Rol = soloEstudiante ? 'estudiante' : (session ? 'profesor' : 'estudiante')
   
+  useEffect(() => {
+  if (planificacion.centroId) {
+    fetch(`/api/centros?id=${planificacion.centroId}`)
+      .then(r => r.json())
+      .then(c => { if (c.nombre) setCentroNombre(c.nombre) })
+      .catch(() => {})
+  }
+}, [planificacion.centroId])
+
   function formatear(texto: string): string {
   if (!texto) return ''
   return texto
@@ -64,7 +75,7 @@ export default function PlanificacionView({
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden mb-4">
           <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-5 py-4 flex items-center gap-4">
                         
-            <div className="w-14 h-14 bg-white dark:bg-slate-800 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md overflow-hidden relative">
+            {/* <div className="w-14 h-14 bg-white dark:bg-slate-800 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md overflow-hidden relative">
               <Image
                 src="/logo-salome-urena.png"
                 alt="Logo Centro Educativo Salomé Ureña"
@@ -73,10 +84,10 @@ export default function PlanificacionView({
                 className="object-contain p-1"
                 priority
               />
-            </div>
+            </div> */}
             <div className="text-white">
               <h2 className="text-lg font-bold leading-tight">
-                Centro Educativo Salomé Ureña
+                {centroNombre || 'Centro Educativo'}
               </h2>
               <p className="text-blue-100 text-xs">Formando el futuro con excelencia</p>
             </div>

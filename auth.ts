@@ -33,20 +33,24 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       async authorize(credentials) {
         //console.log("Credenciales:", credentials)
         //const centro = await Centro.findById(usuario.centroId).lean()
-        if (!rateLimit(`login-${credentials?.email}`, 5, 60000)) {
-          throw new Error('Demasiados intentos. Esperá un minuto.')
-        }
         if (!credentials?.email || !credentials?.password) {
           console.log("Faltan credenciales")
           return null
         }
+        console.log('⏱️ Rate limit check para:', credentials.email)
+        const permitido = rateLimit(`login-${credentials?.email}`, 5, 60000)
+        console.log('⏱️ Permitido:', permitido)
+        if (!permitido) {
+          return null
+        }
 
+    
         try {
           await connectDB()
 
           const usuario = await Usuario.findOne({ email: credentials.email, activo: true })
           console.log("Usuario:", usuario)
-          const centro = await Centro.findById(usuario.centroId).lean()
+          //const centro = await Centro.findById(usuario.centroId).lean()
 
           if (!usuario) {
             console.log("Usuario no encontrado")
@@ -64,6 +68,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             const centro = await Centro.findById(usuario.centroId).lean()
             centroNombre = centro?.nombre || ''
           }
+
+          let centroTipo = ''
+          if (usuario.centroId) {
+            const centro = await Centro.findById(usuario.centroId).lean()
+            centroNombre = centro?.nombre || ''
+            centroTipo = centro?.tipo || '' // ← guardar el tipo
+          }
           return {
             id: usuario._id.toString(),
             name: usuario.nombre,
@@ -75,6 +86,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             materias: JSON.stringify(usuario.materias || []),
             centroId: usuario.centroId?.toString() || "",
             centroNombre,
+            centroTipo,
           }
         } catch (error) {
           console.error("ERROR REAL:", error)
@@ -99,6 +111,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.grados = user.grados
         token.materias = user.materias
         token.centroId = user.centroId
+        token.centroTipo = user.centroTipo
       }
       return token
     },
@@ -111,6 +124,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.grados = token.grados ? JSON.parse(token.grados as string) : []
         session.user.materias = token.materias ? JSON.parse(token.materias as string) : []
         session.user.centroId = token.centroId as string
+        session.user.centroTipo = token.centroTipo as string
       }
       return session
     },
