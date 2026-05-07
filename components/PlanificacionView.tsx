@@ -8,6 +8,7 @@ import { useSession } from 'next-auth/react'
 import Image from 'next/image'
 
 import BotonPDF from './BotonPDF'
+import InstrumentoModal from './InstrumentoModal'
 
 const getLang = (materia: string): string => {
   const langMap: Record<string, string> = {
@@ -38,7 +39,7 @@ export default function PlanificacionView({
   const lang = getLang(planificacion.materia)
 
   const [centroNombre, setCentroNombre] = useState(planificacion.centroEducativo || '')
-  
+  const [showInstrumento, setShowInstrumento] = useState(false)
   const rol: Rol = soloEstudiante ? 'estudiante' : (session ? 'profesor' : 'estudiante')
   
   useEffect(() => {
@@ -69,7 +70,17 @@ export default function PlanificacionView({
               👩‍🏫 Vista docente
             </span>
           )}
+            <button
+              onClick={() => setShowInstrumento(true)}
+              className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-purple-700"
+            >
+              📋 Instrumento de Evaluación
+            </button>
         </div>
+
+        {showInstrumento && (
+          <InstrumentoModal slug={planificacion.slug} onClose={() => setShowInstrumento(false)} />
+        )}
 
         {/* Cabecera institucional */}
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden mb-4">
