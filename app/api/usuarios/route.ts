@@ -12,9 +12,9 @@ export const runtime = "nodejs"
 
 // Jerarquía de creación
 const JERARQUIA: Record<string, string[]> = {
-  superadmin: ['admin', 'admin_centro', 'docente', 'estudiante'],
-  admin: ['admin_centro', 'docente', 'estudiante'],
-  admin_centro: ['docente', 'estudiante'],
+  superadmin: ['admin', 'admin_centro', 'docente', 'estudiante', 'registro'],
+  admin: ['admin_centro', 'docente', 'estudiante', 'registro'],
+  admin_centro: ['docente', 'estudiante', 'registro'],
 }
 
 function puedeGestionar(rolCreador: string, rolObjetivo: string): boolean {
@@ -117,6 +117,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'No autorizado para crear este rol' }, { status: 401 })
   }
 }
+
   // Verificar permisos
   const session = await auth()
   if (!session || !puedeGestionar(session.user?.role || '', rol)) {

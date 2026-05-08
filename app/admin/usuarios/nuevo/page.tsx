@@ -38,9 +38,9 @@ function getGradosPorCiclo(nivel: string, ciclo: string): string[] {
 }
 
 const ROLES_DISPONIBLES: Record<string, string[]> = {
-  superadmin: ['admin', 'admin_centro', 'docente', 'estudiante'],
-  admin: ['admin_centro', 'docente', 'estudiante'],
-  admin_centro: ['docente', 'estudiante'],
+  superadmin: ['admin', 'admin_centro', 'docente', 'estudiante', 'registro'],
+  admin: ['admin_centro', 'docente', 'estudiante', 'registro'],
+  admin_centro: ['docente', 'estudiante', 'registro'],
 }
 
 export default function NuevoUsuarioPage() {

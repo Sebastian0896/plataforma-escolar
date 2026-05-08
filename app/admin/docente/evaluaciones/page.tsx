@@ -126,6 +126,14 @@ export default function EvaluacionesPage() {
           <option value="P3">P3</option>
           <option value="P4">P4</option>
         </select>
+
+        <a
+          href={`/api/evaluaciones/pdf?grado=${grado}&materia=${materia}`}
+          target="_blank"
+          className="ml-4 bg-red-600 text-white px-4 py-2.5 rounded-lg text-sm hover:bg-red-700"
+        >
+          📄 PDF Completo
+        </a>
       </div>
 
       {mensaje && (

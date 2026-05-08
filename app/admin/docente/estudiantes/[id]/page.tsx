@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 
+
 export default function EstudianteFichaPage() {
   const { data: session } = useSession()
   const params = useParams()
@@ -75,8 +76,8 @@ export default function EstudianteFichaPage() {
           </div>
         </div>
       </div>
-
-      <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
+        
+      <div className="bg-white dark:bg-slate-800 rounded-xl mb-4 border border-gray-200 dark:border-slate-700 overflow-hidden">
         <div className="p-4 border-b border-gray-200 dark:border-slate-700">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white">📊 Notas por Período</h2>
         </div>
@@ -107,13 +108,21 @@ export default function EstudianteFichaPage() {
                     <tr key={materia}>
                       <td className="px-4 py-3 font-medium text-gray-900 dark:text-white capitalize">{materia}</td>
                       {['P1', 'P2', 'P3', 'P4'].map(p => (
-                        <td key={p} className={`px-4 py-3 text-center ${getColorNota(periodos[p])}`}>
-                          {periodos[p] ?? '-'}
+                        <td key={p} className={`px-4 py-3 text-center font-medium ${
+                            periodos[p] >= 80 ? 'text-green-600 dark:text-green-400' :
+                            periodos[p] >= 65 ? 'text-amber-600 dark:text-amber-400' :
+                            periodos[p] !== null ? 'text-red-600 dark:text-red-400' : 'text-gray-400'
+                        }`}>
+                            {periodos[p] ?? '-'}
                         </td>
-                      ))}
-                      <td className={`px-4 py-3 text-center font-bold ${getColorNota(promedio)}`}>
+                        ))}
+                      <td className={`px-4 py-3 text-center font-bold ${
+                        promedio >= 80 ? 'text-green-600 dark:text-green-400' :
+                        promedio >= 65 ? 'text-amber-600 dark:text-amber-400' :
+                        promedio !== null ? 'text-red-600 dark:text-red-400' : 'text-gray-400'
+                        }`}>
                         {promedio ?? '-'}
-                      </td>
+                        </td>
                     </tr>
                   )
                 })}
@@ -122,6 +131,13 @@ export default function EstudianteFichaPage() {
           </div>
         )}
       </div>
+        <a
+        href={`/api/comprobante/${estudiante._id}?periodo=P1`}
+        target="_blank"
+        className="bg-blue-600 text-white px-4 py-2 my-8 rounded-lg text-sm hover:bg-blue-700"
+        >
+        📄 Comprobante P1
+        </a>
     </div>
   )
 }

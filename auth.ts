@@ -81,6 +81,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             email: usuario.email,
             role: usuario.rol,
             categoriaDocente: usuario.categoriaDocente || "",
+            niveles: JSON.stringify(usuario.niveles || []),
+            ciclos: JSON.stringify(usuario.ciclos || []),
             grado: usuario.grado || "",
             grados: JSON.stringify(usuario.grados || []),
             materias: JSON.stringify(usuario.materias || []),
@@ -107,6 +109,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.id = user.id
         token.role = user.role
         token.categoriaDocente = user.categoriaDocente
+        token.niveles = user.niveles
+        token.ciclos = user.ciclos
         token.grado = user.grado
         token.grados = user.grados
         token.materias = user.materias
@@ -120,6 +124,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.id = token.id as string ||  token.sub as string
         session.user.role = token.role as string
         session.user.categoriaDocente = token.categoriaDocente as string
+        session.user.niveles = token.niveles ? JSON.parse(token.niveles as string) : []
+        session.user.ciclos = token.ciclos ? JSON.parse(token.niveles as string) : []
         session.user.grado = token.grado as string
         session.user.grados = token.grados ? JSON.parse(token.grados as string) : []
         session.user.materias = token.materias ? JSON.parse(token.materias as string) : []

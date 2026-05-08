@@ -5,48 +5,38 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
 import { useState } from 'react'
-
 import { useTheme } from 'next-themes'
 
 export default function AdminSidebar() {
   const { data: session } = useSession()
   const user = session?.user
+  const rol = user?.role
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
+  const { setTheme } = useTheme()
 
-  const { setTheme } = useTheme();
-
-//console.log('👤 Session:', session)
-  const links = [
-    {
-      href: '/admin',
-      label: 'Dashboard',
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-          <path d="M11.47 3.841a.75.75 0 011.06 0l8.69 8.69a.75.75 0 101.06-1.061l-8.689-8.69a2.25 2.25 0 00-3.182 0l-8.69 8.69a.75.75 0 101.061 1.06l8.69-8.689z" />
-          <path d="M12 5.432l8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 01-.75-.75v-4.5a.75.75 0 00-.75-.75h-3a.75.75 0 00-.75.75V21a.75.75 0 01-.75.75H5.625a1.875 1.875 0 01-1.875-1.875v-6.198a2.29 2.29 0 00.091-.086L12 5.432z" />
-        </svg>
-      ),
-    },
-
-    {
-      href: '/admin/planificaciones/nueva',
-      label: 'Nueva Planificación',
-      icon: (
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-          <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 9a.75.75 0 00-1.5 0v2.25H9a.75.75 0 000 1.5h2.25V15a.75.75 0 001.5 0v-2.25H15a.75.75 0 000-1.5h-2.25V9z" clipRule="evenodd" />
-        </svg>
-      ),
-    },
+  // Links según rol
+  const allLinks = [
+    { href: '/admin', label: 'Dashboard', icon: '📊', roles: ['admin', 'docente', 'admin_centro', 'superadmin'] },
+    { href: '/admin/docente', label: 'Mi Oficina', icon: '🏠', roles: ['docente', 'admin_centro'] },
+    { href: '/admin/planificaciones', label: 'Planificaciones', icon: '📖', roles: ['admin', 'docente'] },
+    { href: '/admin/planificaciones/nueva', label: 'Nueva Planificación', icon: '➕', roles: ['admin', 'docente'] },
+    { href: '/admin/usuarios/centros', label: 'Usuarios', icon: '👥', roles: ['admin', 'admin_centro', 'superadmin'] },
+    { href: '/admin/centros', label: 'Centros', icon: '🏫', roles: ['superadmin'] },
+    { href: '/admin/centros/plan', label: 'Planes', icon: '💎', roles: ['admin_centro', 'admin'] },
+    { href: '/admin/docente/evaluaciones', label: 'Evaluaciones', icon: '📊', roles: ['docente'] },
+    { href: '/admin/registro/comprobantes', label: 'Comprobantes', icon: '📄', roles: ['registro'] },
   ]
+
+  const links = allLinks.filter(l => l.roles.includes(rol || ''))
 
   return (
     <>
       {/* Mobile toggle */}
       {!isOpen && (
         <button
-          onClick={() => setIsOpen(!isOpen)}
-          className="fixed top-4 left-4 z-50 lg:hidden bg-gray-900 text-white p-2 rounded-lg shadow-md"
+          onClick={() => setIsOpen(true)}
+          className="fixed top-4 left-4 z-[60] lg:hidden bg-gray-900 text-white p-2 rounded-lg shadow-md"
         >
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
             <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
@@ -56,41 +46,33 @@ export default function AdminSidebar() {
 
       {/* Overlay */}
       {isOpen && (
-        <div
-          onClick={() => setIsOpen(false)}
-          className="fixed inset-0 bg-black/20 z-40 lg:hidden"
-        />
+        <div onClick={() => setIsOpen(false)} className="fixed inset-0 bg-black/20 z-40 lg:hidden" />
       )}
 
       {/* Sidebar */}
-      <aside
-        className={`
-          fixed top-0 left-0 z-40 h-screen w-64 bg-gray-900 text-white overflow-y-auto
-          transform transition-transform duration-200 ease-in-out
-          lg:translate-x-0 lg:static lg:z-auto
-          ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-        `}
-      >
-        {/* Header */}
+      <aside className={`
+        fixed top-0 left-0 z-40 h-screen w-64 bg-gray-900 text-white overflow-y-auto
+        transform transition-transform duration-200 ease-in-out
+        lg:translate-x-0 lg:static lg:z-auto
+        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+      `}>
         <div className="p-4 border-b border-gray-800">
           <h1 className="text-lg font-bold">📚 Admin</h1>
           <p className="text-xs text-gray-400 mt-0.5">Panel de gestión</p>
         </div>
 
-        {/* User info */}
         <div className="p-4 border-b border-gray-800 flex items-center gap-3">
           <div className="w-10 h-10 bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0">
-            <span className="text-sm font-semibold text-green-800 dark:text-green-300">
+            <span className="text-sm font-bold">
               {user?.name?.charAt(0)?.toUpperCase() || 'U'}
             </span>
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium truncate">{user?.name || 'Docente'}</p>
-            <p className="text-xs text-gray-400 capitalize">{user?.role || 'profesor'}</p>
+            <p className="text-xs text-gray-400 capitalize">{rol || 'profesor'}</p>
           </div>
         </div>
 
-        {/* Navigation */}
         <nav className="p-3">
           {links.map((link) => {
             const isActive = pathname === link.href
@@ -105,17 +87,16 @@ export default function AdminSidebar() {
                     : 'text-gray-400 hover:bg-gray-800 hover:text-white'
                 }`}
               >
-                {link.icon}
+                <span>{link.icon}</span>
                 {link.label}
               </Link>
             )
           })}
         </nav>
 
-        {/* Footer */}
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-800">
           <button
-           onClick={() => {
+            onClick={() => {
               setTheme('light')
               signOut({ callbackUrl: '/' })
             }}

@@ -25,7 +25,9 @@ export default async function AdminDashboard() {
   if (!session) redirect('/login')
 
   const stats = session.user?.role === 'superadmin' ? await getStats() : null
-
+  if (session.user?.role === 'registro') {
+    redirect('/admin/registro/comprobantes')
+  }
   return (
     <div>
       <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">

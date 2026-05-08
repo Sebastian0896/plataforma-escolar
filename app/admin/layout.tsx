@@ -17,8 +17,9 @@ export default async function AdminLayout({
   if (session.user?.role !== 'admin' && 
     session.user?.role !== 'docente' && 
     session.user?.role !== 'admin_centro' &&
-    session.user?.role !== 'superadmin') {
-  //redirect('/dashboard')
+    session.user?.role !== 'superadmin' &&
+    session.user?.role !== 'registro') {
+  redirect('/dashboard')
 }
 
 

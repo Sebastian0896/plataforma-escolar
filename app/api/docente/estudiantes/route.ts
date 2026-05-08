@@ -10,7 +10,7 @@ export const runtime = "nodejs"
 // app/api/docente/estudiantes/route.ts — GET completo
 export async function GET(request: Request) {
   const session = await auth()
-  if (!session || (session.user?.role !== 'docente' && session.user?.role !== 'admin_centro')) {
+  if (!session || (session.user?.role !== 'docente' && session.user?.role !== 'admin_centro' && session.user?.role !== 'registro')) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
   }
 

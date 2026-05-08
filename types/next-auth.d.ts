@@ -7,6 +7,8 @@ declare module "next-auth" {
       id?: string
       role?: string
       categoriaDocente?: string
+      niveles?: string[]
+      ciclos?: string[]
       grado?: string
       grados?: string[]
       materias?: string[]
@@ -19,6 +21,8 @@ declare module "next-auth" {
     id?: string
     role?: string
     categoriaDocente?: string
+    niveles?: string[]
+    ciclos?: string[]
     grado?: string
     grados?: string[]
     materias?: string[]
@@ -32,6 +36,8 @@ declare module "next-auth/jwt" {
   interface JWT {
     role?: string
     categoriaDocente?: string
+    niveles?: string[]
+    ciclos?: string[]
     grado?: string
     grados?: string[]
     materias?: string[]
