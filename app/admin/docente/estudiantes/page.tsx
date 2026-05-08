@@ -17,6 +17,8 @@ export default function MisEstudiantesPage() {
     }
   }, [session])
 
+  
+
   return (
     <div>
       <div className='flex justify-between'>
@@ -28,7 +30,7 @@ export default function MisEstudiantesPage() {
         )}
       </div>
       <p className="text-gray-500 dark:text-gray-400 mb-6">{data?.total || 0} estudiantes</p>
-
+        
       {data?.porGrado && Object.entries(data.porGrado).map(([grado, estudiantes]: [string, any]) => (
         <div key={grado} className="mb-8">
           <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
@@ -52,6 +54,9 @@ export default function MisEstudiantesPage() {
                   <span className="text-xs text-gray-400 capitalize">{e.genero || 'Sin especificar'}</span>
                   <span className="text-xs px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">🎒 Estudiante</span>
                 </div>
+                <Link href={`/admin/docente/estudiantes/${e._id}`} className="text-xs text-blue-600 hover:underline">
+                Ver expediente →
+              </Link>
               </div>
             ))}
           </div>

@@ -7,37 +7,47 @@ import Planificacion from '@/lib/models/Planificacion'
 
 export const runtime = "nodejs"
 
-export async function GET() {
+// app/api/docente/estudiantes/route.ts — GET completo
+export async function GET(request: Request) {
   const session = await auth()
   if (!session || (session.user?.role !== 'docente' && session.user?.role !== 'admin_centro')) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
   }
 
+  const { searchParams } = new URL(request.url)
+  const grado = searchParams.get('grado')
+
   await connectDB()
 
-  // Obtener grados del docente desde su perfil
-  let grados = session.user?.grados?.length
-    ? session.user.grados
-    : (session.user?.grado ? [session.user.grado] : [])
+  let grados: string[] = []
 
-  // Si no tiene grados, buscar en sus planificaciones
-  if (grados.length === 0) {
-    const planes = await Planificacion.find({
-      centroId: session.user.centroId,
-      categoriaDocente: session.user.categoriaDocente,
-      publicado: true,
-    }).select('grado').lean()
-    grados = [...new Set(planes.map((p: any) => p.grado).filter(Boolean))]
-  }
+  if (grado) {
+    grados = [grado]
+  } else {
+    // Obtener grados del docente desde su perfil
+    grados = session.user?.grados?.length
+      ? session.user.grados
+      : (session.user?.grado ? [session.user.grado] : [])
 
-  // Si no hay grados, buscar en usuarios del mismo centro
-  if (grados.length === 0) {
-    const usuarios = await Usuario.find({
-      centroId: session.user.centroId,
-      rol: 'estudiante',
-      activo: true,
-    }).select('grado').lean()
-    grados = [...new Set(usuarios.map((u: any) => u.grado).filter(Boolean))]
+    // Si no tiene grados, buscar en sus planificaciones
+    if (grados.length === 0) {
+      const planes = await Planificacion.find({
+        centroId: session.user.centroId,
+        categoriaDocente: session.user.categoriaDocente,
+        publicado: true,
+      }).select('grado').lean()
+      grados = [...new Set(planes.map((p: any) => p.grado).filter(Boolean))]
+    }
+
+    // Si no hay grados, buscar en usuarios del mismo centro
+    if (grados.length === 0) {
+      const usuarios = await Usuario.find({
+        centroId: session.user.centroId,
+        rol: 'estudiante',
+        activo: true,
+      }).select('grado').lean()
+      grados = [...new Set(usuarios.map((u: any) => u.grado).filter(Boolean))]
+    }
   }
 
   // Buscar estudiantes
@@ -52,7 +62,6 @@ export async function GET() {
   }
 
   const estudiantes = await Usuario.find(filter)
-    .select('nombre email grado genero createdAt')
     .sort({ grado: 1, nombre: 1 })
     .lean()
 

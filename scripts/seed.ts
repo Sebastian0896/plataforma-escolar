@@ -5,7 +5,7 @@ import Centro from '../lib/models/Centro'
 import Usuario from '../lib/models/Usuario'
 import bcrypt from 'bcryptjs'
 import 'dotenv/config'
-
+import Competencia from '../lib/models/Competencia'
 async function seed() {
   await connectDB()
 
@@ -49,7 +49,7 @@ async function seed() {
   console.log('   carlos@salome.edu.do / admin123 (técnico distrital)') */
 
 
-await Materia.deleteMany({})
+/* await Materia.deleteMany({})
 
 const materias = [
   { nombre: 'Francés', slug: 'frances', categoriaDocente: 'idiomas' },
@@ -68,6 +68,22 @@ for (const m of materias) {
 
 console.log('✅ Materias creadas')
   process.exit(0)
+} */
+
+  
+
+await Competencia.deleteMany({})
+const competencias = [
+  { nombre: 'Comunicativa', orden: 1 },
+  { nombre: 'Pensamiento Lógico, Crítico y Creativo', orden: 2 },
+  { nombre: 'Resolución de Problemas', orden: 3 },
+  { nombre: 'Científica y Tecnológica', orden: 4 },
+  { nombre: 'Ética y Ciudadana', orden: 5 },
+  { nombre: 'Ambiental y de la Salud', orden: 6 },
+  { nombre: 'Desarrollo Personal y Espiritual', orden: 7 },
+]
+await Competencia.insertMany(competencias)
+console.log('✅ Competencias creadas')
 }
 
 seed()

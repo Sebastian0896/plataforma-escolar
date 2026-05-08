@@ -134,6 +134,14 @@ export default function DocenteDashboard() {
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Ver lista</p>
         </Link>
 
+        <Link href="/admin/docente/evaluaciones" className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5 hover:border-rose-300 dark:hover:border-rose-700 hover:shadow-md transition-all group">
+          <div className="w-10 h-10 rounded-lg bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center mb-3 group-hover:bg-rose-100 dark:group-hover:bg-rose-900/30 transition-colors">
+            <span className="text-xl">📊</span>
+          </div>
+          <h3 className="font-semibold text-gray-900 dark:text-white">Evaluaciones</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Calificar estudiantes</p>
+        </Link>
+
         <Link href="/dashboard" className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5 hover:border-amber-300 dark:hover:border-amber-700 hover:shadow-md transition-all group">
           <div className="w-10 h-10 rounded-lg bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center mb-3 group-hover:bg-amber-100 dark:group-hover:bg-amber-900/30 transition-colors">
             <span className="text-xl">👁️</span>
