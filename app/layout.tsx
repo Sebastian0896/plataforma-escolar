@@ -3,8 +3,11 @@ import './globals.css'
 import SessionProvider from '@/components/SessionProvider'
 import ThemeProvider from '@/components/ThemeProvider'
 
-export const viewport: Metadata = {
-  title: 'Plataforma Educativa',
+export const metadata: Metadata = {
+  title: {
+    default: 'Plataforma Educativa',
+    template: '%s | Plataforma Educativa',
+  },
   description: 'Sistema de planificaciones docentes',
 }
 

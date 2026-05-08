@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { cookies } from 'next/headers'
 import { auth } from '@/auth'
 
+export const metadata = { title: 'Dashboard' }
 
 async function getStats() {
   try {

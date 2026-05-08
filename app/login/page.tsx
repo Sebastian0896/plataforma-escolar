@@ -5,6 +5,8 @@ import { signIn } from 'next-auth/react'
 import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 
+/* export const metadata = { title: 'Iniciar Sesión' } */
+
 function LoginForm() {
   const searchParams = useSearchParams()
   const error = searchParams.get('error')

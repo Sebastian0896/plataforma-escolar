@@ -6,6 +6,8 @@ import CardsNiveles from '@/components/admin/CardsNiveles'
 import mongoose from 'mongoose'
 import Centro from '@/lib/models/Centro'
 
+export const metadata = { title: 'Planificaciones' }
+
 export default async function PlanificacionesPage() {
   const session = await auth()
   if (!session) redirect('/login')

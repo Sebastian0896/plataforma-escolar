@@ -5,6 +5,8 @@ import Centro from '@/lib/models/Centro'
 import Usuario from '@/lib/models/Usuario'
 import Link from 'next/link'
 
+export const metadata = { title: 'Usuarios' }
+
 export default async function CentrosUsuariosPage() {
   const session = await auth()
   if (!session || (session.user?.role !== 'admin' && session.user?.role !== 'superadmin' && session.user?.role !== 'admin_centro')) redirect('/dashboard')

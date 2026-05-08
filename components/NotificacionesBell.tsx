@@ -72,57 +72,60 @@ export default function NotificacionesBell({ up = false }: Props) {
       </button>
 
       {abierto && (
-        <div className={`z-50 w-80 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 shadow-xl max-h-80 overflow-y-auto ${
-            up ? 'bottom-full mb-12 right-0' : 'top-full mt-2 right-0'
-          }`}>
-          <div className="flex items-center justify-between p-3 border-b border-gray-100 dark:border-slate-700">
-            <h3 className="font-semibold text-gray-900 dark:text-white text-sm">Notificaciones</h3>
-            {totalNoLeidas > 0 && (
-              <button onClick={marcarTodas} className="text-xs text-blue-600 hover:underline">Marcar todas leídas</button>
+        <>
+          {/* Overlay */}
+          <div className="fixed inset-0 z-40 bg-black/20" onClick={() => setAbierto(false)} />
+          
+          {/* Panel desde abajo */}
+          <div className="fixed bottom-16 left-0 right-0 z-50 bg-white dark:bg-slate-800 rounded-t-2xl border border-gray-200 dark:border-slate-700 shadow-xl max-h-[60vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-3 border-b border-gray-100 dark:border-slate-700 sticky top-0 bg-white dark:bg-slate-800">
+              <h3 className="font-semibold text-gray-900 dark:text-white text-sm">Notificaciones</h3>
+              {totalNoLeidas > 0 && (
+                <button onClick={marcarTodas} className="text-xs text-blue-600 hover:underline">Marcar todas leídas</button>
+              )}
+            </div>
+
+            {notificaciones.length === 0 ? (
+              <p className="p-4 text-sm text-gray-500 text-center">Sin notificaciones</p>
+            ) : (
+              notificaciones.map(n => (
+                <div key={n._id} className={`p-3 border-b border-gray-50 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 ${!n.leida ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}>
+                  <div className="flex items-start gap-2">
+                    <span className="text-lg">{iconos[n.tipo] || '📢'}</span>
+                    <div className="flex-1 min-w-0">
+                      {n.planificacionId ? (
+                        <span
+                          onClick={async (e) => {
+                            e.preventDefault()
+                            await marcarLeida(n._id)
+                            const nivel = n.grado?.includes('primaria') ? 'nivel-primario' : 'nivel-secundario'
+                            router.push(`/estudiante/${n.grado}/${n.planificacionSlug || n.planificacionId}`)
+                          }}
+                          className="text-sm font-medium text-gray-900 dark:text-white hover:text-blue-600 cursor-pointer"
+                        >
+                          {n.titulo}
+                        </span>
+                      ) : (
+                        <p className="text-sm font-medium text-gray-900 dark:text-white">{n.titulo}</p>
+                      )}
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{n.mensaje}</p>
+                      <div className="flex items-center justify-between mt-1">
+                        <p className="text-[10px] text-gray-400 dark:text-gray-500">{new Date(n.createdAt).toLocaleString('es-DO')}</p>
+                        <button
+                          onClick={async (e) => { e.stopPropagation(); await marcarLeida(n._id) }}
+                          className="text-xs hover:underline"
+                        >
+                          {n.leida ? '👁️' : '✅'}
+                        </button>
+                      </div>
+                    </div>
+                    {!n.leida && <span className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 flex-shrink-0" />}
+                  </div>
+                </div>
+              ))
             )}
           </div>
-
-          {notificaciones.length === 0 ? (
-            <p className="p-4 text-sm text-gray-500 text-center">Sin notificaciones</p>
-          ) : (
-            notificaciones.map(n => (
-              <div key={n._id} className={`p-3 border-b border-gray-50 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 ${!n.leida ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}>
-                <div className="flex items-start gap-2">
-                  <span className="text-lg">{iconos[n.tipo] || '📢'}</span>
-                  <div className="flex-1 min-w-0">
-                    {n.planificacionId ? (
-                      <span
-                        onClick={async (e) => {
-                          e.preventDefault()
-                          await marcarLeida(n._id)
-                          const nivel = n.grado?.includes('primaria') ? 'nivel-primario' : 'nivel-secundario'
-                          router.push(`/estudiante/${n.grado}/${n.planificacionSlug || n.planificacionId}`)
-                        }}
-                        className="text-sm font-medium text-gray-900 dark:text-white hover:text-blue-600 cursor-pointer"
-                      >
-                        {n.titulo}
-                      </span>
-                    ) : (
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">{n.titulo}</p>
-                    )}
-                    <p className="text-xs text-gray-500 mt-0.5">{n.mensaje}</p>
-                    <div className="flex items-center justify-between mt-1">
-                      <p className="text-[10px] text-gray-400">{new Date(n.createdAt).toLocaleString('es-DO')}</p>
-                      <button
-                        onClick={async (e) => { e.stopPropagation(); await marcarLeida(n._id) }}
-                        className="text-xs hover:underline"
-                        title={n.leida ? 'Marcar no leída' : 'Marcar leída'}
-                      >
-                        {n.leida ? '👁️' : '✅'}
-                      </button>
-                    </div>
-                  </div>
-                  {!n.leida && <span className="w-2 h-2 rounded-full bg-blue-500 mt-1.5 flex-shrink-0" />}
-                </div>
-              </div>
-            ))
-          )}
-        </div>
+        </>
       )}
     </div>
   )

@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react'
 
+/* export const metadata = { title: 'Comprobantes' } */
+
 const GRADOS = [
   '1ro-primaria','2do-primaria','3ro-primaria','4to-primaria','5to-primaria','6to-primaria',
   '1ro-secundaria','2do-secundaria','3ro-secundaria','4to-secundaria','5to-secundaria','6to-secundaria',

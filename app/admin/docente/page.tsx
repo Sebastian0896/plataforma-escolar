@@ -6,6 +6,9 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
+
+/* export const metadata = { title: 'Oficina Virtual' } */
+
 export default function DocenteDashboard() {
   const { data: session } = useSession()
   const [stats, setStats] = useState<any>(null)

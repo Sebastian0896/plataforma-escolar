@@ -4,7 +4,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { signOut, useSession } from 'next-auth/react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTheme } from 'next-themes'
 
 export default function AdminSidebar() {
@@ -29,6 +29,12 @@ export default function AdminSidebar() {
   ]
 
   const links = allLinks.filter(l => l.roles.includes(rol || ''))
+
+  useEffect(() => {
+  const handler = () => setIsOpen(prev => !prev)
+  document.addEventListener('toggle-sidebar', handler)
+  return () => document.removeEventListener('toggle-sidebar', handler)
+}, [])
 
   return (
     <>
