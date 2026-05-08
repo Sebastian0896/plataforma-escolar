@@ -9,6 +9,10 @@ export default async function DashboardPage() {
     redirect('/login')
   }
 
+  if (session.user?.role === 'registro') {
+  redirect('/admin/registro/comprobantes')
+}
+
   if (session.user.role === 'estudiante' && session.user.grado) {
     redirect(`/estudiante/${session.user.grado}`)
   }

@@ -4,7 +4,7 @@ import SessionProvider from '@/components/SessionProvider'
 import ThemeProvider from '@/components/ThemeProvider'
 
 export const viewport: Metadata = {
-  title: 'Plataforma Educativa — Salomé Ureña',
+  title: 'Plataforma Educativa',
   description: 'Sistema de planificaciones docentes',
 }
 

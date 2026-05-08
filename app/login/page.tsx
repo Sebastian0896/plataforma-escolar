@@ -1,3 +1,4 @@
+// app/login/page.tsx
 'use client'
 
 import { signIn } from 'next-auth/react'
@@ -11,18 +12,45 @@ function LoginForm() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  
+  const [loginError, setLoginError] = useState('')
+  const [intentos, setIntentos] = useState(0)
+  const [bloqueado, setBloqueado] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setLoading(true)
 
-    await signIn('credentials', {
+    if (bloqueado) {
+      setLoginError('Demasiados intentos. Esperá un minuto.')
+      return
+    }
+
+    setLoading(true)
+    setLoginError('')
+
+    const result = await signIn('credentials', {
       email,
       password,
-      redirect: true,
-      callbackUrl: '/dashboard',
+      redirect: false,
     })
+
+    if (result?.error) {
+      const nuevo = intentos + 1
+      setIntentos(nuevo)
+      if (nuevo >= 5) {
+        setBloqueado(true)
+        setLoginError('Demasiados intentos. Esperá un minuto.')
+        setTimeout(() => {
+          setBloqueado(false)
+          setIntentos(0)
+        }, 60000)
+      } else {
+        setLoginError('Email o contraseña incorrectos')
+      }
+      setLoading(false)
+      return
+    }
+
+    window.location.href = '/dashboard'
   }
 
   return (
@@ -36,28 +64,44 @@ function LoginForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6">
-        {error && (
+        {(error || loginError) && (
           <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-sm text-red-700 dark:text-red-400">
-            Email o contraseña incorrectos
+            {loginError || (error === 'CredentialsSignin' ? 'Email o contraseña incorrectos' : 'Error al iniciar sesión')}
           </div>
+        )}
+
+        {intentos >= 3 && intentos < 5 && (
+          <p className="text-xs text-amber-600 dark:text-amber-400 mb-3 text-center">
+            {5 - intentos} intentos restantes antes del bloqueo
+          </p>
         )}
 
         <div className="space-y-4">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
-            <input type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)}
+            <input
+              type="email" id="email" value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="admin@salome.edu.do" required autoFocus />
+              placeholder="admin@salome.edu.do" required autoFocus
+              disabled={bloqueado}
+            />
           </div>
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Contraseña</label>
-            <input type="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)}
+            <input
+              type="password" id="password" value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="••••••••" required />
+              placeholder="••••••••" required
+              disabled={bloqueado}
+            />
           </div>
-          <button type="submit" disabled={loading}
-            className="w-full bg-blue-600 text-white py-3 rounded-xl text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors">
-            {loading ? 'Ingresando...' : 'Ingresar'}
+          <button
+            type="submit" disabled={loading || bloqueado}
+            className="w-full bg-blue-600 text-white py-3 rounded-xl text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {bloqueado ? 'Bloqueado por 1 minuto' : loading ? 'Ingresando...' : 'Ingresar'}
           </button>
         </div>
       </form>

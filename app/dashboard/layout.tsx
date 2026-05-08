@@ -3,6 +3,7 @@ import Navbar from '@/components/Navbar'
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import Breadcrumbs from '@/components/Breadcrumbs'
+import MobileFooter from '@/components/MobileFooter'
 
 export default async function DashboardLayout({
   children,
@@ -23,6 +24,9 @@ export default async function DashboardLayout({
           {children}
         </main>
       </div>
+
+      <MobileFooter />
+
     </div>
   )
 }
