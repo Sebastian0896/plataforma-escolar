@@ -22,9 +22,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <div className="flex-1">
                 {children}
               </div>
-              <div className="md:hidden">
-                <MobileFooter />
-              </div>
             </div>
           </ThemeProvider>
         </SessionProvider>

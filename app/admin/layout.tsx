@@ -30,7 +30,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         <AdminSidebar />
         <main className="flex-1 p-6 lg:p-8 max-w-6xl mx-auto w-full bg-gray-50 dark:bg-slate-950">
           <Breadcrumbs />
-          {children}
+          <div className="flex flex-col min-h-screen">
+            <div className="flex-1">
+              {children}
+            </div>
+            <div className="md:hidden">
+              <MobileFooter />
+            </div>
+          </div>
         </main>
       </div>
 
