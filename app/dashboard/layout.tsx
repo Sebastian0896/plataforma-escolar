@@ -9,7 +9,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <Navbar />
       <div className="flex flex-1">
         <SidebarWrapper />
-        <main className="flex-1 p-4 lg:p-6 max-w-4xl mx-auto w-full">
+        <main className="flex-1 p-4 lg:p-6 max-w-6xl mx-auto w-full">
           <Breadcrumbs />
           {children}
         </main>

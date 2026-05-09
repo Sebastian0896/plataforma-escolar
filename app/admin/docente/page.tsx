@@ -168,6 +168,14 @@ export default function DocenteDashboard() {
           <h3 className="font-semibold text-gray-900 dark:text-white">Calendario</h3>
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Ver programación</p>
         </Link>
+
+        <Link href="/admin/docente/semana" className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5 hover:border-lime-300 dark:hover:border-lime-700 hover:shadow-md transition-all group">
+          <div className="w-10 h-10 rounded-lg bg-lime-50 dark:bg-lime-900/20 flex items-center justify-center mb-3">
+            <span className="text-xl">📅</span>
+          </div>
+          <h3 className="font-semibold text-gray-900 dark:text-white">Vista Semanal</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Planificaciones de la semana</p>
+        </Link>
       </div>
     
         <hr className="my-6 border-gray-200 dark:border-slate-700" />

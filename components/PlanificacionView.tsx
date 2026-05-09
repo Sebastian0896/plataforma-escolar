@@ -61,10 +61,12 @@ export default function PlanificacionView({
   return (
     <article className="animate-in">
       <header className="mb-6">
-        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-300 mb-4">
-          <span>{formatear(planificacion.materia)}</span>
-          <span>/</span>
-          <span>{planificacion.tema}</span>
+        <div className="flex justify-between items-center gap-2 text-sm text-gray-500 dark:text-gray-300 mb-4">
+          <div className=''>
+            <span className='mx-1'>{formatear(planificacion.materia)}</span>
+            <span className='mx-1'>/</span>
+            <span className='mx-1'>{planificacion.tema}</span>
+          </div>
           {/* {!soloEstudiante && session && (
             <span className="ml-auto text-xs bg-gray-50 dark:bg-slate-800/50 px-2 py-1 rounded">
               👩‍🏫 Vista docente
