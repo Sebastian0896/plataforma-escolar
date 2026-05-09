@@ -7,3 +7,7 @@
   --color-dark-card: #1e293b;
   --color-dark-border: #334155;
 }
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}

@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" >
-      <body className="bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-gray-100 pb-20 md:pb-0" suppressHydrationWarning>
+      <body className="bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-gray-100" suppressHydrationWarning>
         <SessionProvider>
           <ThemeProvider>
             <div className="flex flex-col min-h-screen">
