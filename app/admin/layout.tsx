@@ -9,11 +9,11 @@ export const runtime = "nodejs"
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await auth()
-  if (!session) redirect('/login')
-
-  
+  if (!session) return redirect("/login")
 
   const rol = session.user?.role
+
+  // Registro usa su propio layout
   if (rol === 'registro') {
     return <>{children}</>
   }
@@ -24,25 +24,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen flex flex-col">
       <Navbar />
-      <div className="flex">
+      <div className="flex flex-1">
         <AdminSidebar />
         <main className="flex-1 p-6 lg:p-8 max-w-6xl mx-auto w-full bg-gray-50 dark:bg-slate-950">
           <Breadcrumbs />
-          <div className="flex flex-col min-h-screen">
-            <div className="flex-1">
-              {children}
-            </div>
-            <div className="md:hidden">
-              <MobileFooter />
-            </div>
-          </div>
+          {children}
         </main>
       </div>
-
-      {/* <MobileFooter />
- */}
+      <MobileFooter />
     </div>
   )
 }
