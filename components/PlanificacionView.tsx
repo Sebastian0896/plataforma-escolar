@@ -65,11 +65,11 @@ export default function PlanificacionView({
           <span>{formatear(planificacion.materia)}</span>
           <span>/</span>
           <span>{planificacion.tema}</span>
-          {!soloEstudiante && session && (
+          {/* {!soloEstudiante && session && (
             <span className="ml-auto text-xs bg-gray-50 dark:bg-slate-800/50 px-2 py-1 rounded">
               👩‍🏫 Vista docente
             </span>
-          )}
+          )} */}
             <button
               onClick={() => setShowInstrumento(true)}
               className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-purple-700"
