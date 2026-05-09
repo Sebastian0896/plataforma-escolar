@@ -42,6 +42,10 @@ export default function MobileFooter() {
           </Link>
         ))}
 
+        <Link href="/cuenta" className="text-lg text-green-500 hover:text-blue-600">
+          👤
+        </Link>
+
         {/* Notificaciones */}
         <div className="flex flex-col items-center">
           <NotificacionesBell />
