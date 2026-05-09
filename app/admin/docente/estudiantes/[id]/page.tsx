@@ -12,6 +12,12 @@ export default function EstudianteFichaPage() {
   const [estudiante, setEstudiante] = useState<any>(null)
   const [evaluaciones, setEvaluaciones] = useState<any[]>([])
   const [cargando, setCargando] = useState(true)
+  const [diario, setDiario] = useState<Record<string, any[]>>({})
+  const [resumenDiario, setResumenDiario] = useState<Record<string, any>>({})
+  const [diarioAbierto, setDiarioAbierto] = useState<string | null>(null)
+  const [editando, setEditando] = useState<string | null>(null)
+  const [editValues, setEditValues] = useState({ participacion: 0, tarea: false, observacion: '', puntosExtra: 0 })
+
 
   useEffect(() => {
     if (params.id) {
@@ -30,6 +36,53 @@ export default function EstudianteFichaPage() {
         })
     }
   }, [params.id])
+
+  useEffect(() => {
+  fetch(`/api/diario/estudiante/${params.id}`)
+    .then(r => r.json())
+    .then(d => {
+      setDiario(d.registros || {})
+      setResumenDiario(d.resumen || {})
+    })
+}, [params.id])
+
+const iniciarEdicion = (r: any) => {
+  setEditando(r._id)
+  setEditValues({
+    participacion: r.participacion || 0,
+    tarea: r.tarea || false,
+    observacion: r.observacion || '',
+    puntosExtra: r.puntosExtra || 0,
+  })
+}
+
+const guardarEdicion = async () => {
+  await fetch('/api/diario', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: editando, ...editValues }),
+  })
+  setEditando(null)
+  window.location.reload()
+}
+
+  const editarRegistro = async (r: any) => {
+    const nuevaObs = prompt('Observación:', r.observacion)
+    if (nuevaObs === null) return
+    await fetch('/api/diario', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: r._id, observacion: nuevaObs }),
+    })
+    // Refrescar
+    window.location.reload()
+  }
+
+  const eliminarRegistro = async (id: string) => {
+    if (!confirm('¿Eliminar este registro?')) return
+    await fetch(`/api/diario?id=${id}`, { method: 'DELETE' })
+    window.location.reload()
+  }
 
   const getColorNota = (nota: number) => {
     if (nota === undefined || nota === null) return 'text-gray-400'
@@ -138,6 +191,127 @@ export default function EstudianteFichaPage() {
         >
         📄 Comprobante P1
         </a>
+
+        <hr className="my-6 border-gray-200 dark:border-slate-700" />
+
+        {Object.keys(diario).length > 0 && (
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden mt-6">
+            <div className="flex justify-between p-4 border-b border-gray-200 dark:border-slate-700">
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">📅 Diario del Docente</h2>
+              <a
+                href={`/api/diario/estudiante/${estudiante._id}/pdf`}
+                target="_blank"
+                className="text-xs bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700"
+              >
+                📄 PDF
+              </a>
+            </div>
+
+            {/* Resumen */}
+            <div className="p-4 grid grid-cols-4 gap-4 text-center">
+              {['P1', 'P2', 'P3', 'P4'].map(p => resumenDiario[p] && (
+                <div key={p} className="bg-gray-50 dark:bg-slate-700/30 rounded-lg p-3">
+                  <p className="text-sm font-bold text-gray-900 dark:text-white">{p}</p>
+                  <p className="text-xs text-gray-500">⭐{resumenDiario[p].estrellas} 📝{resumenDiario[p].tareas}/{resumenDiario[p].totalDias}</p>
+                  {resumenDiario[p].puntosExtra > 0 && <p className="text-xs text-amber-600">🎁+{resumenDiario[p].puntosExtra}</p>}
+                </div>
+              ))}
+            </div>
+
+            {/* Detalle por período (acordeón) */}
+            {['P1', 'P2', 'P3', 'P4'].map(p => diario[p]?.length > 0 && (
+              <div key={p} className="border-t border-gray-100 dark:border-slate-700">
+                <button
+                  onClick={() => setDiarioAbierto(diarioAbierto === p ? null : p)}
+                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-700"
+                >
+                  <span className="font-medium text-gray-900 dark:text-white text-sm">{p} — {diario[p].length} registros</span>
+                  <svg className={`w-4 h-4 transition-transform ${diarioAbierto === p ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {diarioAbierto === p && (
+                  <div className="px-4 pb-4 max-h-80 overflow-y-auto">
+                    <table className="w-full text-xs">
+                      <thead className="bg-gray-50 dark:bg-slate-700 sticky top-0">
+                        <tr>
+                          <th className="px-2 py-2 text-left">Fecha</th>
+                          <th className="px-2 py-2 text-center">⭐</th>
+                          <th className="px-2 py-2 text-center">📝</th>
+                          <th className="px-2 py-2 text-center">🎁</th>
+                          <th className="px-2 py-2 text-left">Obs</th>
+                          <th className="px-2 py-2"></th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
+                        {diario[p].map((r: any) => (
+                          editando === r._id ? (
+                            <tr key={r._id} className="bg-blue-50 dark:bg-blue-900/10">
+                              <td className="px-2 py-2 text-gray-600 dark:text-gray-400">{new Date(r.fecha).toLocaleDateString('es-DO')}</td>
+                              <td className="px-2 py-2 text-center">
+                                <input
+                                  type="number" min="0" max="5"
+                                  value={editValues.participacion}
+                                  onChange={e => setEditValues({...editValues, participacion: Number(e.target.value)})}
+                                  className="w-14 px-1 py-0.5 border rounded text-center text-xs dark:bg-slate-700 dark:text-white"
+                                />
+                              </td>
+                              <td className="px-2 py-2 text-center">
+                                <input
+                                  type="checkbox"
+                                  checked={editValues.tarea}
+                                  onChange={e => setEditValues({...editValues, tarea: e.target.checked})}
+                                  className="w-4 h-4"
+                                />
+                              </td>
+                              <td className="px-2 py-2 text-center">
+                                <input
+                                  type="number" min="0" max="10"
+                                  value={editValues.puntosExtra}
+                                  onChange={e => setEditValues({...editValues, puntosExtra: Number(e.target.value)})}
+                                  className="w-14 px-1 py-0.5 border rounded text-center text-xs dark:bg-slate-700 dark:text-white"
+                                />
+                              </td>
+                              <td className="px-2 py-2">
+                                <input
+                                  type="text"
+                                  value={editValues.observacion}
+                                  onChange={e => setEditValues({...editValues, observacion: e.target.value})}
+                                  className="w-full px-1 py-0.5 border rounded text-xs dark:bg-slate-700 dark:text-white"
+                                />
+                              </td>
+                              <td className="px-2 py-2">
+                                <div className="flex items-center gap-1">
+                                  <button onClick={guardarEdicion} className="text-green-600 hover:text-green-700 text-xs" title="Guardar">💾</button>
+                                  <button onClick={() => setEditando(null)} className="text-gray-400 hover:text-gray-600 text-xs" title="Cancelar">✖</button>
+                                </div>
+                              </td>
+                            </tr>
+                          ) : (
+                            <tr key={r._id} className="hover:bg-gray-50 dark:hover:bg-slate-700/50">
+                              <td className="px-2 py-2 text-gray-600 dark:text-gray-400">{new Date(r.fecha).toLocaleDateString('es-DO')}</td>
+                              <td className="px-2 py-2 text-center">{r.participacion || 0}</td>
+                              <td className="px-2 py-2 text-center">{r.tarea ? '✅' : '—'}</td>
+                              <td className="px-2 py-2 text-center">{r.puntosExtra || 0}</td>
+                              <td className="px-2 py-2 text-gray-500 max-w-[120px] truncate">{r.observacion || '—'}</td>
+                              <td className="px-2 py-2">
+                                <div className="flex items-center gap-1">
+                                  <button onClick={() => iniciarEdicion(r)} className="text-blue-600 hover:text-blue-700 text-xs" title="Editar">✏️</button>
+                                  <button onClick={() => eliminarRegistro(r._id)} className="text-red-500 hover:text-red-600 text-xs" title="Eliminar">🗑️</button>
+                                </div>
+                              </td>
+                            </tr>
+                          )
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+                              </div>
+            ))}
+          </div>
+        )}
     </div>
   )
 }

@@ -77,3 +77,36 @@ export async function POST(request: Request) {
 
   return NextResponse.json({ success: true })
 }
+
+// PUT — Actualizar un registro
+export async function PUT(request: Request) {
+  const session = await auth()
+  if (!session || (session.user?.role !== 'docente' && session.user?.role !== 'admin_centro')) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  }
+
+  const { id, ...data } = await request.json()
+
+  await connectDB()
+  await Diario.findByIdAndUpdate(id, data)
+
+  return NextResponse.json({ success: true })
+}
+
+// DELETE — Eliminar un registro
+export async function DELETE(request: Request) {
+  const session = await auth()
+  if (!session || (session.user?.role !== 'docente' && session.user?.role !== 'admin_centro')) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  }
+
+  const { searchParams } = new URL(request.url)
+  const id = searchParams.get('id')
+
+  if (!id) return NextResponse.json({ error: 'ID requerido' }, { status: 400 })
+
+  await connectDB()
+  await Diario.findByIdAndDelete(id)
+
+  return NextResponse.json({ success: true })
+}
