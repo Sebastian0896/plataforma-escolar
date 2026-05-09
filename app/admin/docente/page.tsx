@@ -137,6 +137,14 @@ export default function DocenteDashboard() {
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Ver lista</p>
         </Link>
 
+        <Link href="/admin/docente/diario" className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5 hover:border-cyan-300 dark:hover:border-cyan-700 hover:shadow-md transition-all group">
+          <div className="w-10 h-10 rounded-lg bg-cyan-50 dark:bg-cyan-900/20 flex items-center justify-center mb-3">
+            <span className="text-xl">📅</span>
+          </div>
+          <h3 className="font-semibold text-gray-900 dark:text-white">Diario</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Registro diario</p>
+        </Link>
+
         <Link href="/admin/docente/evaluaciones" className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5 hover:border-rose-300 dark:hover:border-rose-700 hover:shadow-md transition-all group">
           <div className="w-10 h-10 rounded-lg bg-rose-50 dark:bg-rose-900/20 flex items-center justify-center mb-3 group-hover:bg-rose-100 dark:group-hover:bg-rose-900/30 transition-colors">
             <span className="text-xl">📊</span>

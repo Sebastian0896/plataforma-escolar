@@ -63,6 +63,16 @@ export default function EvaluacionesPage() {
     }
   }, [grado, periodo, materia])
 
+  const [resumen, setResumen] = useState<Record<string, any>>({})
+
+useEffect(() => {
+  if (grado && materia && periodo) {
+    fetch(`/api/diario/resumen?grado=${grado}&materia=${materia}&periodo=${periodo}`)
+      .then(r => r.json())
+      .then(setResumen)
+  }
+}, [grado, materia, periodo])
+
   const setNota = (estudianteId: string, competenciaId: string, valor: number) => {
     setNotas(prev => ({
       ...prev,
@@ -99,6 +109,8 @@ export default function EvaluacionesPage() {
     if (nota >= 65) return 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300'
     return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
   }
+
+
 
   return (
     <div>
@@ -149,6 +161,7 @@ export default function EvaluacionesPage() {
       ) : (
         <>
           <div className="overflow-x-auto bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700">
+            
             <table className="w-full text-sm">
               <thead className="bg-gray-50 dark:bg-slate-700">
                 <tr>
@@ -163,7 +176,15 @@ export default function EvaluacionesPage() {
               <tbody className="divide-y divide-gray-100 dark:divide-slate-700">
                 {estudiantes.map((e: any) => (
                   <tr key={e._id}>
-                    <td className="px-4 py-2 text-gray-900 dark:text-white text-xs">{e.nombre}</td>
+                    <td className="px-4 py-2 text-gray-900 dark:text-white text-xs">
+                      {e.nombre} 
+                      {resumen[e._id] && (
+                        <span className="text-xs text-gray-400 ml-2">
+                          ⭐{resumen[e._id].estrellas} 📝{resumen[e._id].tareas}/{resumen[e._id].totalDias}
+                        </span>
+                      )}
+                    </td>
+                    
                     {competencias.map(c => {
                       const nota = notas[e._id]?.[c._id]
                       return (
