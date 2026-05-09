@@ -17,7 +17,9 @@ export default function EstudianteFichaPage() {
   const [diarioAbierto, setDiarioAbierto] = useState<string | null>(null)
   const [editando, setEditando] = useState<string | null>(null)
   const [editValues, setEditValues] = useState({ participacion: 0, tarea: false, observacion: '', puntosExtra: 0 })
-
+  const [asistencia, setAsistencia] = useState<Record<string, any[]>>({})
+  const [resumenAsistencia, setResumenAsistencia] = useState<Record<string, any>>({})
+  const [asistenciaAbierta, setAsistenciaAbierta] = useState(false)
 
   useEffect(() => {
     if (params.id) {
@@ -43,6 +45,15 @@ export default function EstudianteFichaPage() {
     .then(d => {
       setDiario(d.registros || {})
       setResumenDiario(d.resumen || {})
+    })
+}, [params.id])
+
+useEffect(() => {
+  fetch(`/api/asistencia/estudiante/${params.id}`)
+    .then(r => r.json())
+    .then(d => {
+      setAsistencia(d.porPeriodo || {})
+      setResumenAsistencia(d.resumen || {})
     })
 }, [params.id])
 
@@ -109,7 +120,7 @@ const guardarEdicion = async () => {
   if (!estudiante) return <p className="text-gray-500">Estudiante no encontrado</p>
 
   return (
-    <div>
+    <div className='pb-20'>
       <Link href="/admin/docente/estudiantes" className="text-sm text-blue-600 hover:underline mb-4 inline-block">
         ← Volver a estudiantes
       </Link>
@@ -310,6 +321,50 @@ const guardarEdicion = async () => {
                 )}
                               </div>
             ))}
+          </div>
+        )}
+
+        {Object.keys(resumenAsistencia).length > 0 && (
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden mt-6">
+            <button
+              onClick={() => setAsistenciaAbierta(!asistenciaAbierta)}
+              className="w-full flex items-center justify-between px-4 py-3 hover:bg-gray-50 dark:hover:bg-slate-700"
+            >
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">📋 Asistencia</h2>
+              <svg className={`w-4 h-4 transition-transform ${asistenciaAbierta ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            {asistenciaAbierta && (
+              <div className="p-4">
+                {/* Resumen */}
+                <div className="grid grid-cols-4 gap-3 mb-4">
+                  {['P1', 'P2', 'P3', 'P4'].map(p => resumenAsistencia[p] && (
+                    <div key={p} className="bg-gray-50 dark:bg-slate-700/30 rounded-lg p-3 text-center">
+                      <p className="text-sm font-bold text-gray-900 dark:text-white">{p}</p>
+                      <p className="text-xs text-green-600">✅ {resumenAsistencia[p].presentes}</p>
+                      <p className="text-xs text-red-500">❌ {resumenAsistencia[p].ausentes}</p>
+                      <p className="text-xs text-gray-400">de {resumenAsistencia[p].total}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Detalle */}
+                <div className="max-h-48 overflow-y-auto space-y-1">
+                  {Object.entries(asistencia).map(([p, regs]) =>
+                    regs.map((r: any) => (
+                      <div key={r._id} className="flex items-center justify-between text-xs py-1 px-2 rounded hover:bg-gray-50 dark:hover:bg-slate-700">
+                        <span className="text-gray-500">{new Date(r.fecha).toLocaleDateString('es-DO')}</span>
+                        <span className="text-gray-400">{r.materia}</span>
+                        <span>{r.presente ? '✅' : '❌'}</span>
+                        {r.observacion && <span className="text-gray-400 truncate max-w-[100px]">{r.observacion}</span>}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
     </div>

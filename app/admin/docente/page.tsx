@@ -137,6 +137,14 @@ export default function DocenteDashboard() {
           <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Ver lista</p>
         </Link>
 
+        <Link href="/admin/docente/asistencia" className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200  dark:border-slate-700 p-5 hover:border-sky-300 dark:hover:border-sky-700 hover:shadow-md transition-all group">
+          <div className="w-10 h-10 rounded-lg bg-sky-50 dark:bg-sky-900/20 flex items-center justify-center mb-3">
+            <span className="text-xl">📋</span>
+          </div>
+          <h3 className="font-semibold text-gray-900 dark:text-white">Asistencia</h3>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Registro diario</p>
+        </Link>
+
         <Link href="/admin/docente/diario" className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5 hover:border-cyan-300 dark:hover:border-cyan-700 hover:shadow-md transition-all group">
           <div className="w-10 h-10 rounded-lg bg-cyan-50 dark:bg-cyan-900/20 flex items-center justify-center mb-3">
             <span className="text-xl">📅</span>
