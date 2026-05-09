@@ -22,7 +22,7 @@ export default function Breadcrumbs() {
     : '/dashboard'
 
   return (
-    <nav className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+    <nav className="text-sm text-gray-500 dark:text-gray-400 mb-4 overflow-x-auto whitespace-nowrap">
       <Link href={inicioHref} className="hover:text-blue-600 dark:hover:text-blue-400">
         Inicio
       </Link>
