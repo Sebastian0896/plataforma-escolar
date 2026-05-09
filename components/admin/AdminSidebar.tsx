@@ -21,7 +21,7 @@ export default function AdminSidebar() {
   const allLinks = [
     { href: '/admin', label: 'Dashboard', icon: '📊', roles: ['admin', 'docente', 'admin_centro', 'superadmin'] },
     { href: '/admin/docente', label: 'Mi Oficina', icon: '🏠', roles: ['docente'] },
-    { href: '/admin/planificaciones', label: 'Planificaciones', icon: '📖', roles: ['docente'] },
+    { href: '/dashboard', label: 'Vista de planificaciones', icon: '📖', roles: ['docente'] },
     { href: '/admin/planificaciones/nueva', label: 'Nueva Planificación', icon: '➕', roles: ['docente'] },
     { href: '/admin/usuarios/centros', label: 'Usuarios', icon: '👥', roles: ['admin', 'admin_centro', 'superadmin'] },
     { href: '/admin/centros', label: 'Centros', icon: '🏫', roles: ['superadmin'] },
