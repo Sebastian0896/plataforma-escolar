@@ -25,7 +25,7 @@ export default function MobileFooter() {
   const visibles = links.filter(l => l.roles.includes(rol || ''))
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-700">
+    <nav className="md:hidden mt-8 bg-white dark:bg-slate-900 border-t border-gray-200 dark:border-slate-700">
       <div className="flex items-center justify-around h-14 px-2">
         {visibles.slice(0, 3).map(link => (
           <Link
