@@ -9,15 +9,16 @@ export default function MisRecursosPage() {
   const [recursos, setRecursos] = useState<any[]>([])
   const [filtro, setFiltro] = useState('todos')
 
-  useEffect(() => {
-    if (session?.user) {
-      fetch('/api/docente/recursos')
-        .then(r => r.json())
-        .then(data => setRecursos(data))
-    }
-  }, [session])
+useEffect(() => {
+  if (session?.user) {
+    fetch('/api/docente/recursos')
+      .then(r => r.json())
+      .then(data => setRecursos(Array.isArray(data) ? data : []))
+  }
+}, [session])
 
-  const filtrados = filtro === 'todos' ? recursos : recursos.filter(r => r.tipo === filtro)
+const filtrados = filtro === 'todos' ? recursos : recursos.filter(r => r.tipo === filtro)
+
 
   return (
     <div>

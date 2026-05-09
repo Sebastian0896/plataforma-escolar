@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import type { NivelInfo } from '@/lib/types'
 import SidebarNivel from './sidebar/SidebarNivel'
+import { useSession } from 'next-auth/react'
 
 function formatear(texto: string): string {
   if (!texto) return ''
@@ -18,39 +19,29 @@ interface SidebarProps {
 
 
 export default function Sidebar({ estructura }: SidebarProps) {
+  const { data: session } = useSession()
   const [isOpen, setIsOpen] = useState(false)
+  const [centroNombre, setCentroNombre] = useState('')
   
   useEffect(() => {
     const handler = () => setIsOpen(prev => !prev)
     document.addEventListener('toggle-sidebar', handler)
     return () => document.removeEventListener('toggle-sidebar', handler)
   }, [])
+
+
+useEffect(() => {
+  if (session?.user?.centroId) {
+    fetch(`/api/centros?id=${session.user.centroId}`)
+      .then(r => r.json())
+      .then(c => { if (c?.nombre) setCentroNombre(c.nombre) })
+      .catch(() => {})
+  }
+}, [session?.user?.centroId])
   
   return (
     <>
-      {/* {!isOpen && (
-        <button
-          onClick={() => setIsOpen(true)}
-          className="fixed top-4 left-4 z-50 lg:hidden bg-white dark:bg-slate-900 p-2 rounded-lg shadow-md border border-gray-200 dark:border-slate-700"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6 dark:text-white">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-          </svg>
-        </button>
-      )} */}
-
-
-       {/*  {!isOpen && (
-          <button
-              onClick={() => setIsOpen(true)}
-              className="fixed top-3 left-3 z-[40] lg:hidden bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 p-2.5 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
-            >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-            </svg>
-          </button>
-        )} */}
-
+      
       {isOpen && <div onClick={() => setIsOpen(false)} className="fixed inset-0 bg-black/20 z-40 lg:hidden" />}
 
       <aside className={`
@@ -73,7 +64,7 @@ export default function Sidebar({ estructura }: SidebarProps) {
 
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800">
           <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-            Centro Educativo Salomé Ureña
+            {centroNombre || 'Plataforma Educativa'}
           </p>
         </div>
       </aside>

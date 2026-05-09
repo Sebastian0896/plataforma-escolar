@@ -11,10 +11,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const session = await auth()
   if (!session) redirect('/login')
 
-  const rol = session.user?.role
+  
 
+  const rol = session.user?.role
   if (rol === 'registro') {
     return <>{children}</>
+  }
+
+  const rolesPermitidos = ['admin', 'admin_centro', 'superadmin', 'docente', 'registro']
+  if (!rolesPermitidos.includes(session.user?.role || '')) {
+    redirect('/dashboard')
   }
 
   return (

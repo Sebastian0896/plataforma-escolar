@@ -13,9 +13,9 @@ export default function DocenteDashboard() {
   const { data: session } = useSession()
   const [stats, setStats] = useState<any>(null)
 
-  if (!session || (session.user?.role !== 'docente' && session.user?.role !== 'admin_centro')) {
+  /* if (!session || (session.user?.role !== 'docente' && session.user?.role !== 'admin_centro')) {
     redirect('/dashboard')
-  }
+  } */
 
   useEffect(() => {
     if (session?.user) {

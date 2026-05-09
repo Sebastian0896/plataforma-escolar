@@ -3,28 +3,19 @@ import { redirect } from 'next/navigation'
 
 export default async function DashboardPage() {
   const session = await auth()
-  console.log("SESSION:", session)
+  if (!session) redirect('/login')
 
-  if (!session?.user) {
-    redirect('/login')
-  }
+  const rol = session.user?.role
 
-  if (session.user?.role === 'registro') {
-  redirect('/admin/registro/comprobantes')
-}
-
-  if (session.user.role === 'estudiante' && session.user.grado) {
-    redirect(`/estudiante/${session.user.grado}`)
-  }
+  if (rol === 'docente') redirect('/admin/docente')
+  if (rol === 'admin_centro') redirect('/admin')
+  if (rol === 'admin' || rol === 'superadmin') redirect('/admin')
+  if (rol === 'registro') redirect('/admin/registro/comprobantes')
+  if (rol === 'estudiante') redirect(`/estudiante/${session.user?.grado}`)
 
   return (
     <div className="text-center py-12">
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-        Bienvenido, {session.user.name}
-      </h1>
-      <p className="text-gray-500 dark:text-gray-400 mt-2">
-        Seleccioná una planificación del menú lateral para ver su contenido
-      </p>
+      <h1 className="text-2xl font-bold">Bienvenido</h1>
     </div>
   )
 }

@@ -15,20 +15,31 @@ export default function AdminSidebar() {
   const [isOpen, setIsOpen] = useState(false)
   const { setTheme } = useTheme()
 
+  console.log('👤 user en AdminSidebar:', user)
+
   // Links según rol
   const allLinks = [
     { href: '/admin', label: 'Dashboard', icon: '📊', roles: ['admin', 'docente', 'admin_centro', 'superadmin'] },
-    { href: '/admin/docente', label: 'Mi Oficina', icon: '🏠', roles: ['docente', 'admin_centro'] },
-    { href: '/admin/planificaciones', label: 'Planificaciones', icon: '📖', roles: ['admin', 'docente'] },
-    { href: '/admin/planificaciones/nueva', label: 'Nueva Planificación', icon: '➕', roles: ['admin', 'docente'] },
+    { href: '/admin/docente', label: 'Mi Oficina', icon: '🏠', roles: ['docente'] },
+    { href: '/admin/planificaciones', label: 'Planificaciones', icon: '📖', roles: ['docente'] },
+    { href: '/admin/planificaciones/nueva', label: 'Nueva Planificación', icon: '➕', roles: ['docente'] },
     { href: '/admin/usuarios/centros', label: 'Usuarios', icon: '👥', roles: ['admin', 'admin_centro', 'superadmin'] },
     { href: '/admin/centros', label: 'Centros', icon: '🏫', roles: ['superadmin'] },
     { href: '/admin/centros/plan', label: 'Planes', icon: '💎', roles: ['admin_centro', 'admin'] },
     { href: '/admin/docente/evaluaciones', label: 'Evaluaciones', icon: '📊', roles: ['docente'] },
     { href: '/admin/registro/comprobantes', label: 'Comprobantes', icon: '📄', roles: ['registro'] },
+    
   ]
 
-  const links = allLinks.filter(l => l.roles.includes(rol || ''))
+  const links = allLinks.filter(l => {
+  if (l.roles.includes(rol)) {
+    if (l.label === 'Mi Oficina' && rol === 'admin_centro') {
+      return !!(user?.categoriaDocente as string)
+    }
+    return true
+  }
+  return false
+})
 
   useEffect(() => {
   const handler = () => setIsOpen(prev => !prev)
@@ -41,16 +52,6 @@ export default function AdminSidebar() {
       {/* Mobile toggle */}
     
 
-      {/* {!isOpen && (
-          <button
-              onClick={() => setIsOpen(true)}
-              className="fixed top-3 left-3 z-[40] lg:hidden bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 p-2.5 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
-            >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-            </svg>
-          </button>
-        )} */}
 
       {/* Overlay */}
       {isOpen && (

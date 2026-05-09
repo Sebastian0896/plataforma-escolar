@@ -37,9 +37,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           console.log("Faltan credenciales")
           return null
         }
-        console.log('⏱️ Rate limit check para:', credentials.email)
+        //console.log('⏱️ Rate limit check para:', credentials.email)
         const permitido = rateLimit(`login-${credentials?.email}`, 5, 60000)
-        console.log('⏱️ Permitido:', permitido)
+        //console.log('⏱️ Permitido:', permitido)
         if (!permitido) {
           return null
         }
@@ -49,7 +49,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           await connectDB()
 
           const usuario = await Usuario.findOne({ email: credentials.email, activo: true })
-          console.log("Usuario:", usuario)
+          //console.log("Usuario:", usuario)
           //const centro = await Centro.findById(usuario.centroId).lean()
 
           if (!usuario) {
@@ -67,6 +67,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           if (usuario.centroId) {
             const centro = await Centro.findById(usuario.centroId).lean()
             centroNombre = centro?.nombre || ''
+            console.log("Imprimiendo centro nombre: ", centroNombre)
           }
 
           let centroTipo = ''
