@@ -41,7 +41,7 @@ export default function BuscadorGlobal() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Buscar planificaciones..."
-          className="w-full pl-8 h-9 text-sm"
+          className="w-full pl-8 h-9 max-w-md h-9 text-sm"
         />
       </div>
 
