@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
+import { getSession, useSession } from 'next-auth/react'
 import { Planificacion, Rol } from '@/lib/types'
 import MomentoSection from './MomentoSection'
 import BotonPDF from './BotonPDF'
@@ -26,7 +26,7 @@ interface PlanificacionViewProps {
 export default function PlanificacionView({ planificacion, soloEstudiante = false }: PlanificacionViewProps) {
   const { data: session } = useSession()
   const [showInstrumento, setShowInstrumento] = useState(false)
-  const [centroNombre, setCentroNombre] = useState(planificacion.centroEducativo || '')
+  const [centroNombre, setCentroNombre] = useState('')
   const lang = getLang(planificacion.materia)
 
   const rol: Rol = soloEstudiante ? 'estudiante' : session ? 'profesor' : 'estudiante'
@@ -40,6 +40,16 @@ export default function PlanificacionView({ planificacion, soloEstudiante = fals
     }
   }, [planificacion.centroId])
 
+
+
+  useEffect(() => {
+    getSession().then(session => {
+      console.log('👤 Session:', session?.user)
+      if (session?.user?.centroNombre) {
+        setCentroNombre(session.user.centroNombre)
+      }
+    })
+  }, [])
   return (
     <article className="animate-in pb-8">
       <header className="mb-6">
@@ -61,24 +71,24 @@ export default function PlanificacionView({ planificacion, soloEstudiante = fals
         </div>
 
         {/* Cabecera institucional */}
-        <Card className="overflow-hidden mb-4">
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-5 py-4 flex items-center gap-4">
-            <div className="text-white">
+        <Card className="overflow-hidden ">
+          <div className=" px-5 py-4 flex items-center gap-4">
+            <div className="text-foreground">
               <h2 className="text-lg font-bold leading-tight">{centroNombre}</h2>
-              <p className="text-blue-100 text-xs">Formando el futuro con excelencia</p>
+              <p className="text-muted-foreground text-xs">Formando el futuro con excelencia</p>
             </div>
           </div>
           <CardContent className="grid grid-cols-2 sm:grid-cols-2 gap-4 p-5">
             <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
               <div>
                 <h3 className="text-sm font-semibold">Maestro</h3>
-                <p className="text-sm">{planificacion.maestro || 'Sebastián González Rodríguez'}</p>
+                <p className="text-sm">{planificacion.maestro || 'Sin Docente'}</p>
               </div>
             </div>
             <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
               <div>
                 <h3 className="text-sm font-semibold">Coordinadora</h3>
-                <p className="text-sm">{planificacion.coordinadora || 'Susana'}</p>
+                <p className="text-sm">{planificacion.coordinadora || 'Sin Coordinador(a)'}</p>
               </div>
             </div>
             <div className="col-span-2 pt-4 border-t grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">

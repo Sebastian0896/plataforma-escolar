@@ -63,12 +63,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           if (!ok) return null
 
           let centroNombre
-
           if (usuario.centroId) {
             const centro = await Centro.findById(usuario.centroId).lean()
             centroNombre = centro?.nombre || ''
             console.log("Imprimiendo centro nombre: ", centroNombre)
           }
+
+          console.log('👤 usuario.centroId:', usuario.centroId)
 
           let centroTipo = ''
           if (usuario.centroId) {
@@ -76,6 +77,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             centroNombre = centro?.nombre || ''
             centroTipo = centro?.tipo || '' // ← guardar el tipo
           }
+
+          console.log('🏫 centroNombre obtenido:', centroNombre)
           return {
             id: usuario._id.toString(),
             name: usuario.nombre,
@@ -116,6 +119,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.grados = user.grados
         token.materias = user.materias
         token.centroId = user.centroId
+        token.centroNombre = user.centroNombre
         token.centroTipo = user.centroTipo
       }
       return token
@@ -131,6 +135,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.grados = token.grados ? JSON.parse(token.grados as string) : []
         session.user.materias = token.materias ? JSON.parse(token.materias as string) : []
         session.user.centroId = token.centroId as string
+        session.user.centroNombre = token.centroNombre as string
         session.user.centroTipo = token.centroTipo as string
       }
       return session

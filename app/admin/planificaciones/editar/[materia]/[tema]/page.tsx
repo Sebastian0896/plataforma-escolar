@@ -144,7 +144,7 @@ export default function EditarPlanificacionPage() {
 
       if (!res.ok) throw new Error('Error al guardar los cambios')
 
-      router.push('/admin/planificaciones')
+      router.push('/admin/docente/planificaciones')
       router.refresh()
         } catch (err: unknown) {
           setError(err instanceof Error ? err.message : 'Error inesperado')

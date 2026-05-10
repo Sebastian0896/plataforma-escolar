@@ -12,9 +12,9 @@ export const runtime = "nodejs"
 
 // Jerarquía de creación
 const JERARQUIA: Record<string, string[]> = {
-  superadmin: ['admin', 'admin_centro', 'docente', 'estudiante', 'registro'],
-  admin: ['admin_centro', 'docente', 'estudiante', 'registro'],
-  admin_centro: ['docente', 'estudiante', 'registro'],
+  superadmin: ['admin', 'admin_centro', 'docente', 'estudiante', 'coordinador', 'tecnico_distrital', 'registro'],
+  admin: ['admin_centro', 'docente', 'estudiante', 'coordinador', 'tecnico_distrital', 'registro'],
+  admin_centro: ['docente', 'estudiante', 'coordinador', 'tecnico_distrital', 'registro'],
 }
 
 function puedeGestionar(rolCreador: string, rolObjetivo: string): boolean {

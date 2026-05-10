@@ -86,7 +86,7 @@ export default function NuevaPlanificacionPage() {
         throw new Error(data.error || 'No se pudo crear la planificación') 
       }
       
-      router.push('/admin/planificaciones')
+      router.push('/admin/docente/planificaciones')
       router.refresh()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Ocurrió un error inesperado')

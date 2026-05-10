@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
+import { getSession, useSession } from 'next-auth/react'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
@@ -37,6 +37,23 @@ export default function FormDatosGenerales({ datos, onChange }: Props) {
   const [materias, setMaterias] = useState<any[]>([])
   const [centroNombre, setCentroNombre] = useState('')
   const esDocente = session?.user?.role === 'docente'
+
+
+    const [categoriaLista, setCategoriaLista] = useState(false)
+
+    useEffect(() => {
+      if (esDocente && !categoriaLista) {
+        getSession().then(session => {
+          if (session?.user?.categoriaDocente) {
+            onChange({ ...datos, categoriaDocente: session.user.categoriaDocente })
+            setCategoriaLista(true)
+          }
+          if (session?.user?.name) {
+            onChange(prev => ({ ...prev, maestro: (session.user?.name || '').toUpperCase() }))
+          }
+        })
+      }
+    }, [esDocente])
 
   useEffect(() => {
     fetch('/api/materias').then(r => r.json()).then(setMaterias)

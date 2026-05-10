@@ -1,4 +1,5 @@
 // app/api/docente/stats/route.ts
+import mongoose from 'mongoose'
 import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { connectDB } from '@/lib/db'
@@ -27,23 +28,26 @@ export async function GET() {
 
   const centroId = session.user.centroId
   const categoria = session.user.categoriaDocente
+  const docenteId = session.user?.id ? new mongoose.Types.ObjectId(session.user.id) : undefined
+
 
   // Total de planificaciones
   const totalPlanificaciones = await Planificacion.countDocuments({
     centroId,
     categoriaDocente: categoria,
+    creadoPor: docenteId,
     publicado: true,
   })
 
   // Por materia
   const porMateria = await Planificacion.aggregate([
-    { $match: { centroId, categoriaDocente: categoria, publicado: true } },
+    { $match: { centroId, categoriaDocente: categoria, creadoPor: docenteId, publicado: true } },
     { $group: { _id: '$materia', total: { $sum: 1 } } },
   ])
 
   // Por grado
   const porGrado = await Planificacion.aggregate([
-    { $match: { centroId, categoriaDocente: categoria, publicado: true } },
+    { $match: { centroId, categoriaDocente: categoria, creadoPor: docenteId, publicado: true } },
     { $group: { _id: '$grado', total: { $sum: 1 } } },
   ])
 
@@ -51,6 +55,7 @@ export async function GET() {
   const recientes = await Planificacion.find({
     centroId,
     categoriaDocente: categoria,
+    creadoPor: docenteId,
     publicado: true,
   })
     .sort({ fechaProgramada: -1, createdAt: -1 })
