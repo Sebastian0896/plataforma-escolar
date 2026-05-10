@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation'
 
 import Navbar from '@/components/Navbar'
 import Breadcrumbs from '@/components/Breadcrumbs'
-import MobileFooter from '@/components/MobileFooter'
 import AdminSidebar from '@/components/admin/AdminSidebar'
 
 export const runtime = 'nodejs'
@@ -68,9 +67,6 @@ export default async function AdminLayout({
           </div>
         </main>
       </div>
-
-      {/* Mobile Footer */}
-      <MobileFooter />
     </div>
   )
 }

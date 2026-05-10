@@ -1,7 +1,6 @@
 import SidebarWrapper from '@/components/SidebarWrapper'
 import Navbar from '@/components/Navbar'
 import Breadcrumbs from '@/components/Breadcrumbs'
-import MobileFooter from '@/components/MobileFooter'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -14,7 +13,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {children}
         </main>
       </div>
-      <MobileFooter />
     </div>
   )
 }

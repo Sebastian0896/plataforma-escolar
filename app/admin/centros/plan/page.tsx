@@ -5,6 +5,16 @@ import { connectDB } from '@/lib/db'
 import Centro from '@/lib/models/Centro'
 import PlanButtonClient from '@/components/PlanButtonClient'
 
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card'
+
+import { Badge } from '@/components/ui/badge'
+
 const PLANES_DISPONIBLES = [
   {
     slug: 'gratis',
@@ -13,7 +23,6 @@ const PLANES_DISPONIBLES = [
     docentes: 1,
     estudiantes: 20,
     activo: true,
-    color: 'bg-gray-100 dark:bg-slate-800',
     icono: '🆓',
     descripcion: 'Para empezar a usar la plataforma sin costo.',
     variantId: null,
@@ -25,9 +34,9 @@ const PLANES_DISPONIBLES = [
     docentes: 1,
     estudiantes: 100,
     activo: true,
-    color: 'bg-blue-50 dark:bg-blue-900/20',
     icono: '👩‍🏫',
-    descripcion: 'Para docentes independientes que quieren todas las funcionalidades.',
+    descripcion:
+      'Para docentes independientes que quieren todas las funcionalidades.',
     variantId: '1622245',
   },
   {
@@ -37,9 +46,9 @@ const PLANES_DISPONIBLES = [
     docentes: 'Ilimitado',
     estudiantes: 'Ilimitado',
     activo: true,
-    color: 'bg-green-50 dark:bg-green-900/20',
     icono: '🏫',
-    descripcion: 'Para instituciones educativas con múltiples docentes y estudiantes.',
+    descripcion:
+      'Para instituciones educativas con múltiples docentes y estudiantes.',
     variantId: '1622250',
   },
   {
@@ -49,9 +58,9 @@ const PLANES_DISPONIBLES = [
     docentes: 'Ilimitado',
     estudiantes: 'Ilimitado',
     activo: false,
-    color: 'bg-purple-50 dark:bg-purple-900/20',
     icono: '🏛️',
-    descripcion: 'Para distritos escolares con múltiples centros educativos.',
+    descripcion:
+      'Para distritos escolares con múltiples centros educativos.',
     variantId: null,
   },
   {
@@ -61,110 +70,157 @@ const PLANES_DISPONIBLES = [
     docentes: 'Ilimitado',
     estudiantes: 'Ilimitado',
     activo: false,
-    color: 'bg-amber-50 dark:bg-amber-900/20',
     icono: '🇩🇴',
-    descripcion: 'Para el Ministerio de Educación. Implementación nacional.',
+    descripcion:
+      'Para el Ministerio de Educación. Implementación nacional.',
     variantId: null,
   },
 ]
 
 export default async function PlanPage() {
   const session = await auth()
-  if (!session || (session.user?.role !== 'admin_centro' && session.user?.role !== 'admin')) {
+
+  if (
+    !session ||
+    (session.user?.role !== 'admin_centro' &&
+      session.user?.role !== 'admin')
+  ) {
     redirect('/dashboard')
   }
 
   await connectDB()
-  const centro = session.user?.centroId ? await Centro.findById(session.user.centroId).lean() : null
+
+  const centro = session.user?.centroId
+    ? await Centro.findById(session.user.centroId).lean()
+    : null
 
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Planes</h1>
-        <p className="text-gray-500 dark:text-gray-400">
-          {centro ? `Centro: ${centro.nombre}` : 'Seleccioná el plan que mejor se adapte'}
+    <div className="space-y-6 sm:space-y-8">
+      {/* Header */}
+      <div className="space-y-2">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 dark:text-white">
+          Planes
+        </h1>
+
+        <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400">
+          {centro
+            ? `Centro: ${centro.nombre}`
+            : 'Seleccioná el plan que mejor se adapte'}
         </p>
       </div>
 
+      {/* Plan actual */}
       {centro && (
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 mb-8">
-          <p className="text-sm text-blue-800 dark:text-blue-300">
-            📌 Plan actual: <strong className="capitalize">{centro.plan}</strong> — {centro.maxDocentes} docentes, {centro.maxEstudiantes} estudiantes
-          </p>
-        </div>
+        <Card className="border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-900/50">
+          <CardContent className="p-4 sm:p-5">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-slate-900 dark:text-white">
+                  📌 Plan actual
+                </p>
+
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                  <span className="capitalize font-semibold">
+                    {centro.plan}
+                  </span>{' '}
+                  — {centro.maxDocentes} docentes,{' '}
+                  {centro.maxEstudiantes} estudiantes
+                </p>
+              </div>
+
+              <Badge
+                variant="secondary"
+                className="w-fit rounded-full px-3 py-1 text-xs"
+              >
+                Activo
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
-        {PLANES_DISPONIBLES.map(plan => {
+      {/* Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-5 gap-4 lg:gap-5">
+        {PLANES_DISPONIBLES.map((plan) => {
           const esActual = centro?.plan === plan.slug
 
           return (
-            <div
+            <Card
               key={plan.slug}
-              className={`${plan.color} rounded-xl border border-gray-200 dark:border-slate-700 p-5 flex flex-col text-center relative ${!plan.activo ? 'opacity-60' : ''}`}
+              className={`relative flex flex-col border transition-all duration-200 hover:shadow-md ${
+                !plan.activo
+                  ? 'opacity-70'
+                  : 'hover:-translate-y-1'
+              }`}
             >
               {!plan.activo && (
-                <span className="absolute -top-2 left-1/2 -translate-x-1/2 bg-gray-600 text-white text-xs px-3 py-0.5 rounded-full">
+                <Badge className="absolute -top-2 left-1/2 -translate-x-1/2 rounded-full">
                   Próximamente
-                </span>
+                </Badge>
               )}
-              <div className="text-3xl mb-3">{plan.icono}</div>
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-1">{plan.nombre}</h3>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white mb-4">{plan.precio}</p>
-              <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1 mb-6 flex-1">
-                <li>👩‍🏫 {plan.docentes} docentes</li>
-                <li>🎒 {plan.estudiantes} estudiantes</li>
-              </ul>
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">{plan.descripcion}</p>
 
-              {plan.activo && (
-                <PlanButtonClient variantId={plan.variantId} esActual={esActual} planNombre={plan.nombre} />
-              )}
-            </div>
+              <CardHeader className="pb-4 text-center">
+                <div className="text-4xl mb-3">{plan.icono}</div>
+
+                <CardTitle className="text-lg">
+                  {plan.nombre}
+                </CardTitle>
+
+                <p className="text-3xl font-bold text-slate-900 dark:text-white">
+                  {plan.precio}
+                </p>
+
+                <CardDescription className="text-sm leading-relaxed pt-2">
+                  {plan.descripcion}
+                </CardDescription>
+              </CardHeader>
+
+              <CardContent className="flex flex-1 flex-col justify-between gap-6">
+                <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+                  <li className="flex items-center gap-2">
+                    <span>👩‍🏫</span>
+                    <span>{plan.docentes} docentes</span>
+                  </li>
+
+                  <li className="flex items-center gap-2">
+                    <span>🎒</span>
+                    <span>{plan.estudiantes} estudiantes</span>
+                  </li>
+                </ul>
+
+                {plan.activo && (
+                  <div className="pt-2">
+                    <PlanButtonClient
+                      variantId={plan.variantId}
+                      esActual={esActual}
+                      planNombre={plan.nombre}
+                    />
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           )
         })}
       </div>
 
-      <div className="text-center text-sm text-gray-500 dark:text-gray-400 bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6">
-        <p className="mb-2">💡 ¿Necesitás un plan personalizado?</p>
-        <p>Contactanos en <a href="mailto:info@mieducacion.es" className="text-blue-600 hover:underline">info@mieducacion.es</a></p>
-      </div>
+      {/* Footer */}
+      <Card className="border-slate-200 dark:border-slate-800">
+        <CardContent className="p-5 sm:p-6 text-center">
+          <p className="text-sm font-medium text-slate-900 dark:text-white mb-2">
+            💡 ¿Necesitás un plan personalizado?
+          </p>
+
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            Contactanos en{' '}
+            <a
+              href="mailto:info@mieducacion.es"
+              className="font-medium text-slate-700 dark:text-slate-200 underline underline-offset-4"
+            >
+              info@mieducacion.es
+            </a>
+          </p>
+        </CardContent>
+      </Card>
     </div>
   )
 }
-
-// Componente cliente para el botón
-/* function PlanButton({ variantId, esActual, planNombre }: { variantId: string | null; esActual: boolean; planNombre: string }) {
-  if (esActual) {
-    return (
-      <button disabled className="w-full py-2 rounded-lg text-sm font-medium bg-gray-300 dark:bg-slate-600 text-gray-500 cursor-not-allowed">
-        Plan actual
-      </button>
-    )
-  }
-
-  if (!variantId) {
-    return (
-      <button disabled className="w-full py-2 rounded-lg text-sm font-medium bg-gray-200 dark:bg-slate-700 text-gray-400 cursor-not-allowed">
-        Próximamente
-      </button>
-    )
-  }
-
-  return (
-    <button
-      onClick={async () => {
-        const res = await fetch('/api/checkout', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ variantId }),
-        })
-        const data = await res.json()
-        if (data.url) window.location.href = data.url
-      }}
-      className="w-full py-2 rounded-lg text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 transition-colors"
-    >
-      Seleccionar
-    </button>
-  )
-} */
