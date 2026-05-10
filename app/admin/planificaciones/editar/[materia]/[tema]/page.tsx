@@ -4,9 +4,18 @@ import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 
+// Shadcn UI Components
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Separator } from "@/components/ui/separator"
+import { Loader2, Save, ArrowLeft, AlertCircle } from "lucide-react"
+
+// Componentes Propios
 import FormDatosGenerales from '@/components/planificacion/FormDatosGenerales'
 import FormMomento from '@/components/planificacion/FormMomento'
-import BotonVolver from '@/components/BotonVolver'
+//import BotonVolver from '@/components/BotonVolver'
 
 import type { DatosGenerales, Momento } from '@/components/planificacion/formTypes'
 
@@ -23,25 +32,22 @@ export default function EditarPlanificacionPage() {
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState<string | null>(null)
   const [postId, setPostId] = useState<string | null>(null)
 
   const [datos, setDatos] = useState<DatosGenerales>({} as DatosGenerales)
   const [momentos, setMomentos] = useState<Momento[]>(MOMENTOS_VACIOS)
 
   useEffect(() => {
-    const cargar = async () => {
+    const cargarPlanificacion = async () => {
       try {
         const res = await fetch(`/api/planificaciones?tema=${params.tema}`)
-
-        if (!res.ok) {
-          throw new Error('No encontrada')
-        }
-
+        if (!res.ok) throw new Error('La planificación no fue encontrada o no tienes permisos.')
+        
         const data = await res.json()
-
         setPostId(data._id || data.id)
 
+        // Mapeo limpio de datos
         setDatos({
           materia: data.materia || '',
           nivel: data.nivel || '',
@@ -51,219 +57,183 @@ export default function EditarPlanificacionPage() {
           tema: data.tema || data.title?.rendered || '',
           competencia: data.competencia || data.acf?.competencia || '',
           indicadorLogro: data.indicadorLogro || data.acf?.indicador_logro || '',
-          estudianteGeneral:
-            data.contenidoEstudiante ||
-            data.acf?.contenido_estudiante_general ||
-            '',
+          estudianteGeneral: data.contenidoEstudiante || data.acf?.contenido_estudiante_general || '',
           maestro: data.maestro || data.acf?.maestro || '',
           coordinadora: data.coordinadora || data.acf?.coordinadora || '',
-          centroEducativo:
-            data.centroEducativo || data.acf?.centro_educativo || '',
+          centroEducativo: data.centroEducativo || data.acf?.centro_educativo || '',
           anoEscolar: data.anoEscolar || data.acf?.ano_escolar || '',
           fechaProgramada: data.fechaProgramada || '',
         })
 
         const parseActividades = (jsonStr: string) => {
-          if (!jsonStr || jsonStr === '[]') return []
-
-          return JSON.parse(jsonStr).map((a: any) => ({
-            titulo: a.titulo || '',
-            descripcion: a.descripcion || '',
-            estudiante: a.estudiante || '',
-            duracion: a.duracion || '',
-            recursos: a.recursos || [],
-          }))
+          try {
+            if (!jsonStr || jsonStr === '[]') return []
+            return JSON.parse(jsonStr)
+          } catch { return [] }
         }
 
         setMomentos([
           {
             tipo: 'inicio',
-            descripcion:
-              data.momentos?.[0]?.descripcion ||
-              data.acf?.m1_descripcion ||
-              '',
-            estudiante:
-              data.momentos?.[0]?.contenidoEstudiante ||
-              data.acf?.m1_estudiante ||
-              '',
-            actividades:
-              data.momentos?.[0]?.actividades ||
-              parseActividades(data.acf?.m1_actividades || '[]'),
+            descripcion: data.momentos?.[0]?.descripcion || data.acf?.m1_descripcion || '',
+            estudiante: data.momentos?.[0]?.contenidoEstudiante || data.acf?.m1_estudiante || '',
+            actividades: data.momentos?.[0]?.actividades || parseActividades(data.acf?.m1_actividades),
           },
           {
             tipo: 'desarrollo',
-            descripcion:
-              data.momentos?.[1]?.descripcion ||
-              data.acf?.m2_descripcion ||
-              '',
-            estudiante:
-              data.momentos?.[1]?.contenidoEstudiante ||
-              data.acf?.m2_estudiante ||
-              '',
-            actividades:
-              data.momentos?.[1]?.actividades ||
-              parseActividades(data.acf?.m2_actividades || '[]'),
+            descripcion: data.momentos?.[1]?.descripcion || data.acf?.m2_descripcion || '',
+            estudiante: data.momentos?.[1]?.contenidoEstudiante || data.acf?.m2_estudiante || '',
+            actividades: data.momentos?.[1]?.actividades || parseActividades(data.acf?.m2_actividades),
           },
           {
             tipo: 'cierre',
-            descripcion:
-              data.momentos?.[2]?.descripcion ||
-              data.acf?.m3_descripcion ||
-              '',
-            estudiante:
-              data.momentos?.[2]?.contenidoEstudiante ||
-              data.acf?.m3_estudiante ||
-              '',
-            actividades:
-              data.momentos?.[2]?.actividades ||
-              parseActividades(data.acf?.m3_actividades || '[]'),
+            descripcion: data.momentos?.[2]?.descripcion || data.acf?.m3_descripcion || '',
+            estudiante: data.momentos?.[2]?.contenidoEstudiante || data.acf?.m3_estudiante || '',
+            actividades: data.momentos?.[2]?.actividades || parseActividades(data.acf?.m3_actividades),
           },
         ])
-      } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : 'Error al cargar')
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Error de conexión')
+      } finally {
+        setLoading(false)
       }
-
-      setLoading(false)
     }
+    cargarPlanificacion()
+  }, [params.tema])
 
-    cargar()
-  }, [params.tema, session])
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault()
-
     setSaving(true)
-    setError('')
+    setError(null)
 
     try {
+      const payload = {
+        id: postId,
+        title: datos.tema,
+        materia: datos.materia,
+        nivel: datos.nivel,
+        ciclo: datos.ciclo,
+        grado: datos.grado,
+        categoriaDocente: datos.categoriaDocente,
+        fechaProgramada: datos.fechaProgramada || null,
+        acf: {
+          competencia: datos.competencia,
+          indicador_logro: datos.indicadorLogro,
+          contenido_estudiante_general: datos.estudianteGeneral,
+          maestro: datos.maestro,
+          coordinadora: datos.coordinadora,
+          centro_educativo: datos.centroEducativo,
+          ano_escolar: datos.anoEscolar,
+          m1_descripcion: momentos[0].descripcion,
+          m1_estudiante: momentos[0].estudiante,
+          m1_actividades: JSON.stringify(momentos[0].actividades),
+          m2_descripcion: momentos[1].descripcion,
+          m2_estudiante: momentos[1].estudiante,
+          m2_actividades: JSON.stringify(momentos[1].actividades),
+          m3_descripcion: momentos[2].descripcion,
+          m3_estudiante: momentos[2].estudiante,
+          m3_actividades: JSON.stringify(momentos[2].actividades),
+        },
+      }
+
       const res = await fetch('/api/planificaciones', {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          id: postId,
-          title: datos.tema,
-          materia: datos.materia,
-          nivel: datos.nivel,
-          ciclo: datos.ciclo,
-          grado: datos.grado,
-          categoriaDocente: datos.categoriaDocente,
-          fechaProgramada: datos.fechaProgramada || undefined,
-
-          acf: {
-            competencia: datos.competencia,
-            indicador_logro: datos.indicadorLogro,
-            contenido_estudiante_general: datos.estudianteGeneral,
-
-            maestro: datos.maestro,
-            coordinadora: datos.coordinadora,
-            centro_educativo: datos.centroEducativo,
-            ano_escolar: datos.anoEscolar,
-
-            m1_descripcion: momentos[0].descripcion,
-            m1_estudiante: momentos[0].estudiante,
-            m1_actividades: JSON.stringify(momentos[0].actividades),
-
-            m2_descripcion: momentos[1].descripcion,
-            m2_estudiante: momentos[1].estudiante,
-            m2_actividades: JSON.stringify(momentos[1].actividades),
-
-            m3_descripcion: momentos[2].descripcion,
-            m3_estudiante: momentos[2].estudiante,
-            m3_actividades: JSON.stringify(momentos[2].actividades),
-          },
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       })
 
-      if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.error || 'Error')
-      }
+      if (!res.ok) throw new Error('Error al guardar los cambios')
 
       router.push('/admin/planificaciones')
       router.refresh()
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error')
-      setSaving(false)
+        } catch (err: unknown) {
+          setError(err instanceof Error ? err.message : 'Error inesperado')
+          setSaving(false)
+        }
     }
-  }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[50vh]">
-        <p className="text-sm text-muted-foreground">
-          Cargando planificación...
-        </p>
+      <div className="max-w-6xl mx-auto p-8 space-y-6">
+        <Skeleton className="h-10 w-48" />
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-[400px] w-full" />
       </div>
     )
   }
 
   return (
-    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
-      <div className="space-y-4">
-        <BotonVolver label="Volver a planificaciones" />
-
+    <div className="max-w-6xl mx-auto px-4 py-8 space-y-8 animate-in fade-in duration-500">
+      {/* Header Section */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="space-y-1">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900 dark:text-white">
-            Editar planificación
-          </h1>
-
-          <p className="text-sm text-muted-foreground">
-            Actualiza los datos generales y los momentos pedagógicos.
-          </p>
+          <Button variant="ghost" onClick={() => router.back()} className="mb-2 -ml-2 text-muted-foreground">
+            <ArrowLeft className="mr-2 h-4 w-4" /> Volver
+          </Button>
+          <h1 className="text-3xl font-extrabold tracking-tight">Editar Planificación</h1>
+          <p className="text-muted-foreground italic">{datos.tema}</p>
+        </div>
+        
+        <div className="flex items-center gap-3">
+          <Button variant="outline" onClick={() => router.back()} disabled={saving}>
+            Cancelar
+          </Button>
+          <Button onClick={handleSubmit} disabled={saving} className="bg-primary">
+            {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+            {saving ? 'Guardando...' : 'Guardar Cambios'}
+          </Button>
         </div>
       </div>
 
+      <Separator />
+
       {error && (
-        <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-300">
-          {error}
-        </div>
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
-        <div className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-6 lg:p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <FormDatosGenerales
-            datos={datos}
-            onChange={setDatos}
-          />
-        </div>
+      <form onSubmit={handleSubmit} className="space-y-8">
+        {/* Sección Datos Generales */}
+        <Card className="shadow-md border-t-4 border-t-primary">
+          <CardHeader>
+            <CardTitle>Datos Generales</CardTitle>
+            <CardDescription>Información institucional y administrativa de la unidad.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <FormDatosGenerales datos={datos} onChange={setDatos} />
+          </CardContent>
+        </Card>
 
-        <div className="space-y-6">
+        {/* Sección Momentos */}
+        <div className="grid gap-8">
+          <h2 className="text-xl font-bold flex items-center gap-2">
+            Momentos Pedagógicos
+          </h2>
           {momentos.map((momento, idx) => (
-            <div
-              key={idx}
-              className="rounded-2xl border border-gray-200 bg-white p-4 sm:p-6 lg:p-8 shadow-sm dark:border-slate-800 dark:bg-slate-900"
-            >
-              <FormMomento
-                momento={momento}
-                index={idx}
-                onChange={(nuevo) => {
-                  const nuevos = [...momentos]
-                  nuevos[idx] = nuevo
-                  setMomentos(nuevos)
-                }}
-              />
-            </div>
+            <Card key={idx} className="overflow-hidden border-l-4 border-l-blue-500 shadow-sm hover:shadow-md transition-shadow">
+              <CardContent className="pt-6">
+                <FormMomento
+                  momento={momento}
+                  index={idx}
+                  onChange={(nuevo) => {
+                    const nuevos = [...momentos]
+                    nuevos[idx] = nuevo
+                    setMomentos(nuevos)
+                  }}
+                />
+              </CardContent>
+            </Card>
           ))}
         </div>
 
-        <div className="flex flex-col-reverse sm:flex-row sm:items-center gap-3 pt-2">
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="w-full sm:w-auto h-11 px-5 rounded-xl border border-gray-300 dark:border-slate-700 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
-          >
-            Cancelar
-          </button>
-
-          <button
-            type="submit"
-            disabled={saving}
-            className="w-full sm:w-auto h-11 px-6 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {saving ? 'Guardando...' : 'Actualizar planificación'}
-          </button>
+        {/* Floating Action Bar para móviles o final de página */}
+        <div className="flex justify-end gap-4 pb-10">
+          <Button size="lg" onClick={handleSubmit} disabled={saving} className="w-full sm:w-auto px-10">
+            {saving ? 'Procesando...' : 'Actualizar planificación'}
+          </Button>
         </div>
       </form>
     </div>

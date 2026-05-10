@@ -29,7 +29,7 @@ export default function UserMenu({ name, rol }: Props) {
   return (
     <div className="flex items-center gap-3">
       <ThemeToggle />
-      {rol !== 'registro' && <NotificacionesBell />}
+      {/* {rol !== 'registro' && <NotificacionesBell />} */}
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -50,7 +50,7 @@ export default function UserMenu({ name, rol }: Props) {
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuItem onClick={() => { setTheme('light'); signOut({ callbackUrl: '/' }) }} className="cursor-pointer">
+            <DropdownMenuItem onClick={() => { setTheme('light'); signOut({ redirect: false }).then(() => window.location.replace('/')) }}>
               🚪 Cerrar sesión
             </DropdownMenuItem>
           </DropdownMenuGroup>

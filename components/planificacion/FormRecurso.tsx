@@ -2,6 +2,17 @@
 
 import { Recurso } from './formTypes'
 import FileUpload from '@/components/FileUpload'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 interface Props {
   recurso: Recurso
@@ -9,67 +20,159 @@ interface Props {
   onDelete: () => void
 }
 
-export default function FormRecurso({ recurso, onChange, onDelete }: Props) {
+export default function FormRecurso({
+  recurso,
+  onChange,
+  onDelete,
+}: Props) {
+  const isArchivo =
+    recurso.tipo === 'imagen' ||
+    recurso.tipo === 'pdf' ||
+    recurso.tipo === 'video' ||
+    recurso.tipo === 'enlace'
+
   return (
-    <div className="p-2 bg-white dark:bg-slate-600 rounded border border-gray-200 dark:border-slate-500 space-y-2">
-      <div className="flex justify-between">
-        <select
-          value={recurso.tipo}
-          onChange={(e) => onChange({ ...recurso, tipo: e.target.value, url: '', texto: '', traduccion: '' })}
-          className="text-xs px-2 py-1 border rounded bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
-        >
-          <option value="audio">🎵 Audio</option>
-          <option value="imagen">🖼️ Imagen</option>
-          <option value="pdf">📄 PDF</option>
-          <option value="video">🎬 Video</option>
-          <option value="enlace">🔗 Enlace</option>
-        </select>
-        <button type="button" onClick={onDelete} className="text-xs text-red-500">Eliminar</button>
-      </div>
+    <Card className="border-border/60 bg-muted/30 shadow-sm">
+      <CardContent className="space-y-4 p-4">
+        {/* Header */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="w-full sm:w-52">
+            <Select
+              value={recurso.tipo}
+              onValueChange={(value) =>
+                onChange({
+                  ...recurso,
+                  tipo: value,
+                  url: '',
+                  texto: '',
+                  traduccion: '',
+                })
+              }
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Tipo de recurso" />
+              </SelectTrigger>
 
-      {recurso.tipo === 'audio' && (
-        <>
-          <textarea
-            placeholder="Texto para audio"
-            value={recurso.texto}
-            onChange={(e) => onChange({ ...recurso, texto: e.target.value })}
-            className="w-full px-2 py-1 border rounded text-xs bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
-            rows={2}
-          />
-          <textarea
-            placeholder="Traducción"
-            value={recurso.traduccion}
-            onChange={(e) => onChange({ ...recurso, traduccion: e.target.value })}
-            className="w-full px-2 py-1 border rounded text-xs bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
-            rows={2}
-          />
-        </>
-      )}
+              <SelectContent>
+                <SelectItem value="audio">🎵 Audio</SelectItem>
+                <SelectItem value="imagen">🖼️ Imagen</SelectItem>
+                <SelectItem value="pdf">📄 PDF</SelectItem>
+                <SelectItem value="video">🎬 Video</SelectItem>
+                <SelectItem value="enlace">🔗 Enlace</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
-      {(recurso.tipo === 'imagen' || recurso.tipo === 'pdf' || recurso.tipo === 'video' || recurso.tipo === 'enlace') && (
-        <>
-          <input
-            type="text" placeholder="URL"
-            value={recurso.url}
-            onChange={(e) => onChange({ ...recurso, url: e.target.value })}
-            className="w-full px-2 py-1 border rounded text-xs bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
-          />
-          <input
-            type="text" placeholder="Descripción"
-            value={recurso.descripcion}
-            onChange={(e) => onChange({ ...recurso, descripcion: e.target.value })}
-            className="w-full px-2 py-1 border rounded text-xs bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
-          />
-          <FileUpload
-            onUpload={(url) => onChange({ ...recurso, url })}
-            accept={
-              recurso.tipo === 'imagen' ? 'image/*' :
-              recurso.tipo === 'pdf' ? '.pdf,.doc,.docx' :
-              recurso.tipo === 'video' ? 'video/*' : '*/*'
-            }
-          />
-        </>
-      )}
-    </div>
+          <Button
+            type="button"
+            variant="destructive"
+            size="sm"
+            onClick={onDelete}
+            className="w-full sm:w-auto"
+          >
+            Eliminar
+          </Button>
+        </div>
+
+        {/* Audio */}
+        {recurso.tipo === 'audio' && (
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-foreground">
+                Texto para audio
+              </label>
+
+              <Textarea
+                placeholder="Escribí el contenido del audio..."
+                value={recurso.texto}
+                onChange={(e) =>
+                  onChange({
+                    ...recurso,
+                    texto: e.target.value,
+                  })
+                }
+                rows={3}
+                className="resize-none"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-foreground">
+                Traducción
+              </label>
+
+              <Textarea
+                placeholder="Escribí la traducción..."
+                value={recurso.traduccion}
+                onChange={(e) =>
+                  onChange({
+                    ...recurso,
+                    traduccion: e.target.value,
+                  })
+                }
+                rows={3}
+                className="resize-none"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Archivos / enlaces */}
+        {isArchivo && (
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-foreground">
+                URL
+              </label>
+
+              <Input
+                type="text"
+                placeholder="https://..."
+                value={recurso.url}
+                onChange={(e) =>
+                  onChange({
+                    ...recurso,
+                    url: e.target.value,
+                  })
+                }
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-foreground">
+                Descripción
+              </label>
+
+              <Input
+                type="text"
+                placeholder="Descripción del recurso"
+                value={recurso.descripcion}
+                onChange={(e) =>
+                  onChange({
+                    ...recurso,
+                    descripcion: e.target.value,
+                  })
+                }
+              />
+            </div>
+
+            <div className="rounded-xl border border-dashed border-border bg-background/70 p-4">
+              <FileUpload
+                onUpload={(url) => onChange({ ...recurso, url })}
+                accept={
+                  recurso.tipo === 'imagen'
+                    ? 'image/*'
+                    : recurso.tipo === 'pdf'
+                    ? '.pdf,.doc,.docx'
+                    : recurso.tipo === 'video'
+                    ? 'video/*'
+                    : '*/*'
+                }
+              />
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   )
 }

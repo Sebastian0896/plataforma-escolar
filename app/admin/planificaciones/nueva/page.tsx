@@ -3,10 +3,18 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+
+// Shadcn UI Components
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Separator } from "@/components/ui/separator"
+import { Loader2, Save, ArrowLeft, AlertCircle, PlusCircle } from "lucide-react"
+
+// Componentes del Proyecto
 import FormDatosGenerales from '@/components/planificacion/FormDatosGenerales'
 import FormMomento from '@/components/planificacion/FormMomento'
 import type { DatosGenerales, Momento } from '@/components/planificacion/formTypes'
-import BotonVolver from '@/components/BotonVolver'
 
 const MOMENTOS_INICIALES: Momento[] = [
   { tipo: 'inicio', descripcion: '', estudiante: '', actividades: [] },
@@ -15,26 +23,35 @@ const MOMENTOS_INICIALES: Momento[] = [
 ]
 
 const DATOS_INICIALES: DatosGenerales = {
-  materia: 'frances', nivel: 'nivel-secundario', ciclo: 'primer-ciclo',
-  grado: '1ro-secundaria', categoriaDocente: '',
-  tema: '', competencia: '', indicadorLogro: '', estudianteGeneral: '',
-  maestro: '', coordinadora: 'Susana',
-  centroEducativo: 'Salomé Ureña', anoEscolar: '2025-2026',
+  materia: 'frances', 
+  nivel: 'nivel-secundario', 
+  ciclo: 'primer-ciclo',
+  grado: '1ro-secundaria', 
+  categoriaDocente: '',
+  tema: '', 
+  competencia: '', 
+  indicadorLogro: '', 
+  estudianteGeneral: '',
+  maestro: '', 
+  coordinadora: 'Susana',
+  centroEducativo: 'Salomé Ureña', 
+  anoEscolar: '2025-2026',
   fechaProgramada: '',
 }
 
 export default function NuevaPlanificacionPage() {
   const router = useRouter()
+  const { data: session } = useSession()
+
   const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState<string | null>(null)
   const [datos, setDatos] = useState<DatosGenerales>(DATOS_INICIALES)
   const [momentos, setMomentos] = useState<Momento[]>(MOMENTOS_INICIALES)
-  const { data: session } = useSession()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setSaving(true)
-    setError('')
+    setError(null)
 
     try {
       const res = await fetch('/api/planificaciones', {
@@ -48,13 +65,8 @@ export default function NuevaPlanificacionPage() {
           grado: datos.grado,
           categoriaDocente: datos.categoriaDocente,
           acf: {
-            competencia: datos.competencia,
-            indicador_logro: datos.indicadorLogro,
-            contenido_estudiante_general: datos.estudianteGeneral,
-            maestro: session?.user.name?.toUpperCase(),
-            coordinadora: datos.coordinadora,
-            centro_educativo: datos.centroEducativo,
-            ano_escolar: datos.anoEscolar,
+            ...datos,
+            maestro: session?.user?.name?.toUpperCase() || datos.maestro,
             m1_descripcion: momentos[0].descripcion,
             m1_estudiante: momentos[0].estudiante,
             m1_actividades: JSON.stringify(momentos[0].actividades),
@@ -69,42 +81,111 @@ export default function NuevaPlanificacionPage() {
         }),
       })
 
-      if (!res.ok) { const data = await res.json(); throw new Error(data.error || 'Error') }
+      if (!res.ok) { 
+        const data = await res.json()
+        throw new Error(data.error || 'No se pudo crear la planificación') 
+      }
+      
       router.push('/admin/planificaciones')
       router.refresh()
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error al guardar')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ocurrió un error inesperado')
       setSaving(false)
     }
   }
 
   return (
-    <div>
-      <BotonVolver label="Volver a planificaciones" />
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Nueva Planificación</h1>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <FormDatosGenerales datos={datos} onChange={setDatos} />
-
-        {momentos.map((momento, idx) => (
-          <FormMomento
-            key={idx}
-            momento={momento}
-            index={idx}
-            onChange={(nuevo) => {
-              const nuevos = [...momentos]
-              nuevos[idx] = nuevo
-              setMomentos(nuevos)
-            }}
-          />
-        ))}
-
-        {error && <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-400">{error}</div>}
+    <div className="max-w-6xl mx-auto px-4 py-8 space-y-8 animate-in fade-in duration-500">
+      
+      {/* Header con acciones */}
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="space-y-1">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => router.back()} 
+            className="mb-2 -ml-2 text-muted-foreground hover:text-primary"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" /> Volver
+          </Button>
+          <h1 className="text-3xl font-extrabold tracking-tight flex items-center gap-2">
+            <PlusCircle className="h-8 w-8 text-primary" />
+            Nueva Planificación
+          </h1>
+          <p className="text-muted-foreground text-sm">
+            Complete los campos para generar una nueva planificación pedagógica.
+          </p>
+        </div>
 
         <div className="flex items-center gap-3">
-          <button type="submit" disabled={saving} className="bg-blue-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
-            {saving ? 'Guardando...' : 'Guardar Planificación'}
-          </button>
-          <button type="button" onClick={() => router.back()} className="text-sm text-gray-500 dark:text-gray-400">Cancelar</button>
+          <Button variant="outline" onClick={() => router.back()} disabled={saving}>
+            Cancelar
+          </Button>
+          <Button onClick={handleSubmit} disabled={saving} className="shadow-lg">
+            {saving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+            {saving ? 'Guardando...' : 'Crear Planificación'}
+          </Button>
+        </div>
+      </div>
+
+      <Separator />
+
+      {error && (
+        <Alert variant="destructive" className="animate-in slide-in-from-top-2">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error al guardar</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-8">
+        
+        {/* Card de Datos Generales */}
+        <Card className="border-t-4 border-t-primary shadow-md">
+          <CardHeader>
+            <CardTitle className="text-xl">Datos Generales</CardTitle>
+            <CardDescription>Información del centro, materia y grado.</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <FormDatosGenerales datos={datos} onChange={setDatos} />
+          </CardContent>
+        </Card>
+
+        {/* Sección de Momentos Pedagógicos */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-2 px-1">
+            <h2 className="text-xl font-bold tracking-tight">Momentos del Proceso Educativo</h2>
+          </div>
+          
+          <div className="grid gap-6">
+            {momentos.map((momento, idx) => (
+              <Card key={idx} className="border-l-4 border-l-primary/50 shadow-sm transition-all hover:shadow-md">
+                <CardContent className="pt-6">
+                  <FormMomento
+                    momento={momento}
+                    index={idx}
+                    onChange={(nuevo) => {
+                      const nuevos = [...momentos]
+                      nuevos[idx] = nuevo
+                      setMomentos(nuevos)
+                    }}
+                  />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+
+        {/* Action Bar Final */}
+        <div className="flex justify-end gap-4 pt-4 pb-12">
+          <Button 
+            type="submit" 
+            size="lg" 
+            disabled={saving} 
+            className="w-full sm:w-64 font-bold"
+          >
+            {saving ? 'Procesando...' : 'Finalizar y Guardar'}
+          </Button>
         </div>
       </form>
     </div>

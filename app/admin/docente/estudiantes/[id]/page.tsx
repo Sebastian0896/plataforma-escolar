@@ -4,10 +4,28 @@ import { useSession } from 'next-auth/react'
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { ChevronDown, ChevronUp, ArrowLeft } from 'lucide-react'
+import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
+import { 
+  ChevronDown, 
+  ChevronUp, 
+  ArrowLeft, 
+  FileText, 
+  Star, 
+  BookCheck, 
+  Calendar,
+  UserCircle,
+  GraduationCap,
+  Save,
+  X,
+  Trash2,
+  Edit3
+} from 'lucide-react'
+import { toast } from 'sonner'
+import { Badge } from '@/components/ui/badge'
 
 export default function EstudianteFichaPage() {
   const { data: session } = useSession()
@@ -24,51 +42,72 @@ export default function EstudianteFichaPage() {
   const [editando, setEditando] = useState<string | null>(null)
   const [editValues, setEditValues] = useState({ participacion: 0, tarea: false, observacion: '', puntosExtra: 0 })
 
-  useEffect(() => {
-    if (params.id) {
-      Promise.all([
+  const fetchData = async () => {
+    try {
+      const [est, ev, di, as] = await Promise.all([
         fetch(`/api/usuarios?id=${params.id}`).then(r => r.json()),
         fetch(`/api/evaluaciones/estudiante/${params.id}`).then(r => r.json()),
         fetch(`/api/diario/estudiante/${params.id}`).then(r => r.json()),
         fetch(`/api/asistencia/estudiante/${params.id}`).then(r => r.json()),
-      ]).then(([est, ev, di, as]) => {
-        setEstudiante(est)
-        setEvaluaciones(ev.evaluaciones || [])
-        setDiario(di.registros || {})
-        setResumenDiario(di.resumen || {})
-        setAsistencia(as.porPeriodo || {})
-        setResumenAsistencia(as.resumen || {})
-        setCargando(false)
-      })
+      ])
+      setEstudiante(est)
+      setEvaluaciones(ev.evaluaciones || [])
+      setDiario(di.registros || {})
+      setResumenDiario(di.resumen || {})
+      setAsistencia(as.porPeriodo || {})
+      setResumenAsistencia(as.resumen || {})
+    } catch (error) {
+      toast.error("Error al cargar los datos")
+    } finally {
+      setCargando(false)
     }
+  }
+
+  useEffect(() => {
+    if (params.id) fetchData()
   }, [params.id])
 
-  const getColorNota = (nota: number) => {
-    if (nota >= 80) return 'text-green-600 font-bold'
-    if (nota >= 65) return 'text-amber-600 font-bold'
-    if (nota !== null && nota !== undefined) return 'text-red-600 font-bold'
-    return 'text-muted-foreground'
+  const getColorNota = (nota: number | null) => {
+    if (nota === null) return 'text-slate-400'
+    if (nota >= 80) return 'text-emerald-600 dark:text-emerald-400 font-bold'
+    if (nota >= 65) return 'text-amber-600 dark:text-amber-400 font-bold'
+    return 'text-red-600 dark:text-red-400 font-bold'
   }
 
   const iniciarEdicion = (r: any) => {
     setEditando(r._id)
-    setEditValues({ participacion: r.participacion || 0, tarea: r.tarea || false, observacion: r.observacion || '', puntosExtra: r.puntosExtra || 0 })
+    setEditValues({ 
+      participacion: r.participacion || 0, 
+      tarea: r.tarea || false, 
+      observacion: r.observacion || '', 
+      puntosExtra: r.puntosExtra || 0 
+    })
   }
 
   const guardarEdicion = async () => {
-    await fetch('/api/diario', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: editando, ...editValues }) })
-    setEditando(null)
-    fetch(`/api/diario/estudiante/${params.id}`).then(r => r.json()).then(d => { setDiario(d.registros || {}); setResumenDiario(d.resumen || {}) })
+    try {
+      const res = await fetch('/api/diario', { 
+        method: 'PUT', 
+        headers: { 'Content-Type': 'application/json' }, 
+        body: JSON.stringify({ id: editando, ...editValues }) 
+      })
+      if (!res.ok) throw new Error()
+      toast.success("Registro actualizado")
+      setEditando(null)
+      fetchData()
+    } catch {
+      toast.error("Error al guardar cambios")
+    }
   }
 
   const eliminarRegistro = async (id: string) => {
     if (!confirm('¿Eliminar este registro?')) return
     await fetch(`/api/diario?id=${id}`, { method: 'DELETE' })
-    fetch(`/api/diario/estudiante/${params.id}`).then(r => r.json()).then(d => { setDiario(d.registros || {}); setResumenDiario(d.resumen || {}) })
+    fetchData()
   }
 
-  if (cargando) return <p className="text-muted-foreground">Cargando...</p>
-  if (!estudiante) return <p className="text-muted-foreground">Estudiante no encontrado</p>
+  if (cargando) return <div className="flex h-96 items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div></div>
+  if (!estudiante) return <p className="text-center py-20 text-slate-500">Estudiante no encontrado</p>
 
   const porMateria: Record<string, any> = {}
   evaluaciones.forEach((e: any) => {
@@ -79,143 +118,126 @@ export default function EstudianteFichaPage() {
   })
 
   return (
-    <div className="pb-20">
-      <Link href="/admin/docente/estudiantes" className="inline-flex items-center text-sm text-primary hover:underline mb-4">
-        <ArrowLeft className="w-4 h-4 mr-1" /> Volver a estudiantes
-      </Link>
+    <div className="max-w-6xl mx-auto pb-20 space-y-6">
+      <div className="flex justify-between items-center">
+        <Link className="group inline-flex items-center text-sm font-medium text-slate-500 hover:text-blue-600" href="/admin/docente/estudiantes">
+          <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform"/> Volver
+        </Link>
+        <Button asChild size="sm" variant="outline">
+          <a className='flex item-center' href={`/api/diario/estudiante/${estudiante._id}/pdf`} target="_blank"><FileText className="w-4 h-4 mr-2"/> Exportar PDF</a>
+        </Button>
+      </div>
 
-      <Card className="mb-6">
-        <CardContent className="p-6">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-2xl font-bold text-primary">
-              {estudiante.nombre?.charAt(0)?.toUpperCase()}
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold">{estudiante.nombre}</h1>
-              <p className="text-muted-foreground">{estudiante.email}</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                {estudiante.grado?.replace('-', ' ')} · {estudiante.genero || 'Sin género'}
-              </p>
+      <Card className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white border-none shadow-lg">
+        <CardContent className="p-8 flex items-center gap-6">
+          <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-3xl font-bold border border-white/30">
+            {estudiante.nombre?.charAt(0)?.toUpperCase()}
+          </div>
+          <div>
+            <h1 className="text-3xl font-bold">{estudiante.nombre}</h1>
+            <p className="text-blue-100">{estudiante.email}</p>
+            <div className="flex gap-2 mt-2">
+              <Badge className="bg-white/20 border-none text-white capitalize">{estudiante.grado?.replace('-', ' ')}</Badge>
+              <Badge className="bg-white/20 border-none text-white">{estudiante.genero || 'N/A'}</Badge>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      <Card className="mb-6">
-        <CardHeader><CardTitle>📊 Notas por Período</CardTitle></CardHeader>
-        <CardContent>
-          {Object.keys(porMateria).length === 0 ? (
-            <p className="text-sm text-muted-foreground">No hay evaluaciones registradas.</p>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Materia</TableHead>
-                  <TableHead className="text-center">P1</TableHead>
-                  <TableHead className="text-center">P2</TableHead>
-                  <TableHead className="text-center">P3</TableHead>
-                  <TableHead className="text-center">P4</TableHead>
-                  <TableHead className="text-center">Prom</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {Object.entries(porMateria).map(([materia, periodos]: any) => {
-                  const valores = [periodos.P1, periodos.P2, periodos.P3, periodos.P4].filter(v => v !== null)
-                  const promedio = valores.length > 0 ? Math.round(valores.reduce((a: number, b: number) => a + b, 0) / valores.length) : null
-                  return (
-                    <TableRow key={materia}>
-                      <TableCell className="font-medium capitalize">{materia}</TableCell>
-                      {['P1', 'P2', 'P3', 'P4'].map(p => (
-                        <TableCell key={p} className={`text-center font-medium ${getColorNota(periodos[p])}`}>{periodos[p] ?? '-'}</TableCell>
-                      ))}
-                      <TableCell className={`text-center font-bold ${getColorNota(promedio)}`}>{promedio ?? '-'}</TableCell>
-                    </TableRow>
-                  )
-                })}
-              </TableBody>
-            </Table>
-          )}
+      <Card className="shadow-sm overflow-hidden">
+        <CardHeader className="bg-slate-50/50 border-b">
+          <CardTitle className="text-lg flex items-center gap-2"><BookCheck className="w-5 h-5 text-blue-600"/> Calificaciones</CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="pl-6">Materia</TableHead>
+                {['P1', 'P2', 'P3', 'P4'].map(p => <TableHead key={p} className="text-center">{p}</TableHead>)}
+                <TableHead className="text-center bg-blue-50/50 font-bold">Promedio</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {Object.entries(porMateria).map(([materia, periodos]: any) => {
+                const valores = [periodos.P1, periodos.P2, periodos.P3, periodos.P4].filter(v => v !== null)
+                const promedio = valores.length > 0 ? Math.round(valores.reduce((a: number, b: number) => a + b, 0) / valores.length) : null
+                return (
+                  <TableRow key={materia}>
+                    <TableCell className="pl-6 font-semibold capitalize">{materia}</TableCell>
+                    {['P1', 'P2', 'P3', 'P4'].map(p => (
+                      <TableCell key={p} className={`text-center ${getColorNota(periodos[p])}`}>{periodos[p] ?? '-'}</TableCell>
+                    ))}
+                    <TableCell className={`text-center bg-blue-50/30 ${getColorNota(promedio)}`}>{promedio ?? '-'}</TableCell>
+                  </TableRow>
+                )
+              })}
+            </TableBody>
+          </Table>
         </CardContent>
       </Card>
 
-      {/* Diario */}
-      {Object.keys(resumenDiario).length > 0 && (
-        <Card className="mb-6">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>📅 Diario del Docente</CardTitle>
-            <a href={`/api/diario/estudiante/${estudiante._id}/pdf`} target="_blank">
-              <Button variant="destructive" size="sm">📄 PDF</Button>
-            </a>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-4 gap-3 mb-4">
-              {['P1', 'P2', 'P3', 'P4'].map(p => resumenDiario[p] && (
-                <div key={p} className="bg-muted rounded-lg p-3 text-center">
-                  <p className="text-sm font-bold">{p}</p>
-                  <p className="text-xs text-muted-foreground">⭐{resumenDiario[p].estrellas} 📝{resumenDiario[p].tareas}/{resumenDiario[p].totalDias}</p>
-                </div>
-              ))}
-            </div>
+      <Card className="shadow-sm">
+        <CardHeader className="border-b">
+          <CardTitle className="text-lg flex items-center gap-2"><Star className="w-5 h-5 text-amber-500"/> Seguimiento Diario</CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            {['P1', 'P2', 'P3', 'P4'].map(p => resumenDiario[p] && (
+              <div key={p} className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                <p className="text-xs font-bold text-slate-400 uppercase">{p}</p>
+                <p className="text-xl font-bold text-slate-800">{resumenDiario[p].estrellas} <span className="text-xs font-normal">pts</span></p>
+                <p className="text-[10px] text-slate-500 mt-1">{resumenDiario[p].tareas} tareas · {resumenDiario[p].totalDias} días</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="space-y-3">
             {['P1', 'P2', 'P3', 'P4'].map(p => diario[p]?.length > 0 && (
-              <div key={p} className="border-t">
-                <button onClick={() => setDiarioAbierto(diarioAbierto === p ? null : p)}
-                  className="w-full flex items-center justify-between px-4 py-3 hover:bg-muted">
-                  <span className="font-medium text-sm">{p} — {diario[p].length} registros</span>
-                  {diarioAbierto === p ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              <div key={p} className="border rounded-xl overflow-hidden">
+                <button onClick={() => setDiarioAbierto(diarioAbierto === p ? null : p)} className="w-full flex items-center justify-between px-5 py-3 bg-white hover:bg-slate-50 transition-colors text-sm font-semibold">
+                  <span className="flex items-center gap-2"><Calendar className="w-4 h-4 opacity-40"/> Registros de {p}</span>
+                  {diarioAbierto === p ? <ChevronUp className="w-4 h-4"/> : <ChevronDown className="w-4 h-4"/>}
                 </button>
                 {diarioAbierto === p && (
-                  <div className="max-h-80 overflow-y-auto">
+                  <div className="border-t max-h-80 overflow-y-auto">
                     <Table>
-                      <TableHeader>
+                      <TableHeader className="bg-slate-50">
                         <TableRow>
                           <TableHead>Fecha</TableHead>
                           <TableHead className="text-center">⭐</TableHead>
-                          <TableHead className="text-center">📝</TableHead>
-                          <TableHead className="text-center">🎁</TableHead>
-                          <TableHead>Obs</TableHead>
+                          <TableHead className="text-center">Tarea</TableHead>
+                          <TableHead className="text-center">Extra</TableHead>
+                          <TableHead>Obs.</TableHead>
                           <TableHead></TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {diario[p].map((r: any) => (
-                          <TableRow key={r._id}>
+                          <TableRow key={r._id} className="group">
                             {editando === r._id ? (
                               <>
-                                <TableCell>{new Date(r.fecha).toLocaleDateString('es-DO')}</TableCell>
-                                <TableCell className="text-center">
-                                  <input type="number" min="0" max="5" value={editValues.participacion}
-                                    onChange={e => setEditValues({...editValues, participacion: Number(e.target.value)})}
-                                    className="w-14 px-1 py-0.5 border rounded text-center text-xs" />
-                                </TableCell>
-                                <TableCell className="text-center">
-                                  <input type="checkbox" checked={editValues.tarea}
-                                    onChange={e => setEditValues({...editValues, tarea: e.target.checked})} />
-                                </TableCell>
-                                <TableCell className="text-center">
-                                  <input type="number" min="0" max="10" value={editValues.puntosExtra}
-                                    onChange={e => setEditValues({...editValues, puntosExtra: Number(e.target.value)})}
-                                    className="w-14 px-1 py-0.5 border rounded text-center text-xs" />
-                                </TableCell>
-                                <TableCell>
-                                  <input type="text" value={editValues.observacion}
-                                    onChange={e => setEditValues({...editValues, observacion: e.target.value})}
-                                    className="w-full px-1 py-0.5 border rounded text-xs" />
-                                </TableCell>
-                                <TableCell>
-                                  <Button variant="ghost" size="sm" onClick={guardarEdicion}>💾</Button>
-                                  <Button variant="ghost" size="sm" onClick={() => setEditando(null)}>✖</Button>
+                                <TableCell className="text-xs">{new Date(r.fecha).toLocaleDateString()}</TableCell>
+                                <TableCell><Input type="number" value={editValues.participacion} onChange={e => setEditValues({...editValues, participacion: Number(e.target.value)})} className="w-16 h-8 mx-auto text-center"/></TableCell>
+                                <TableCell className="text-center"><Checkbox checked={editValues.tarea} onCheckedChange={v => setEditValues({...editValues, tarea: !!v})}/></TableCell>
+                                <TableCell><Input type="number" value={editValues.puntosExtra} onChange={e => setEditValues({...editValues, puntosExtra: Number(e.target.value)})} className="w-16 h-8 mx-auto text-center"/></TableCell>
+                                <TableCell><Input value={editValues.observacion} onChange={e => setEditValues({...editValues, observacion: e.target.value})} className="h-8 text-xs"/></TableCell>
+                                <TableCell className="flex gap-1 justify-end py-4">
+                                  <Button size="icon" variant="ghost" className="h-8 w-8 text-green-600" onClick={guardarEdicion}><Save className="h-4 h-4"/></Button>
+                                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setEditando(null)}><X className="h-4 h-4"/></Button>
                                 </TableCell>
                               </>
                             ) : (
                               <>
-                                <TableCell>{new Date(r.fecha).toLocaleDateString('es-DO')}</TableCell>
-                                <TableCell className="text-center">{r.participacion || 0}</TableCell>
+                                <TableCell className="text-xs font-medium">{new Date(r.fecha).toLocaleDateString('es-DO', {day:'2-digit', month:'2-digit'})}</TableCell>
+                                <TableCell className="text-center font-bold text-blue-600">{r.participacion || 0}</TableCell>
                                 <TableCell className="text-center">{r.tarea ? '✅' : '—'}</TableCell>
-                                <TableCell className="text-center">{r.puntosExtra || 0}</TableCell>
-                                <TableCell className="text-muted-foreground">{r.observacion || '—'}</TableCell>
-                                <TableCell>
-                                  <Button variant="ghost" size="sm" onClick={() => iniciarEdicion(r)}>✏️</Button>
-                                  <Button variant="ghost" size="sm" onClick={() => eliminarRegistro(r._id)}>🗑️</Button>
+                                <TableCell className="text-center text-emerald-600 font-bold">+{r.puntosExtra || 0}</TableCell>
+                                <TableCell className="text-xs text-slate-500 italic">{r.observacion || '—'}</TableCell>
+                                <TableCell className="text-right">
+                                  <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => iniciarEdicion(r)}><Edit3 className="h-3.5 w-3.5"/></Button>
+                                    <Button size="icon" variant="ghost" className="h-8 w-8 text-red-400" onClick={() => eliminarRegistro(r._id)}><Trash2 className="h-3.5 w-3.5"/></Button>
+                                  </div>
                                 </TableCell>
                               </>
                             )}
@@ -227,45 +249,9 @@ export default function EstudianteFichaPage() {
                 )}
               </div>
             ))}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Asistencia */}
-      {Object.keys(resumenAsistencia).length > 0 && (
-        <Card>
-          <button onClick={() => setAsistenciaAbierta(!asistenciaAbierta)}
-            className="w-full flex items-center justify-between px-6 py-4 hover:bg-muted">
-            <CardTitle className="text-lg">📋 Asistencia</CardTitle>
-            {asistenciaAbierta ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </button>
-          {asistenciaAbierta && (
-            <CardContent>
-              <div className="grid grid-cols-4 gap-3 mb-4">
-                {['P1', 'P2', 'P3', 'P4'].map(p => resumenAsistencia[p] && (
-                  <div key={p} className="bg-muted rounded-lg p-3 text-center">
-                    <p className="text-sm font-bold">{p}</p>
-                    <p className="text-xs text-green-600">✅ {resumenAsistencia[p].presentes}</p>
-                    <p className="text-xs text-red-500">❌ {resumenAsistencia[p].ausentes}</p>
-                    <p className="text-xs text-muted-foreground">de {resumenAsistencia[p].total}</p>
-                  </div>
-                ))}
-              </div>
-              <div className="max-h-48 overflow-y-auto space-y-1">
-                {Object.entries(asistencia).map(([p, regs]) =>
-                  regs.map((r: any) => (
-                    <div key={r._id} className="flex items-center justify-between text-xs py-1 px-2 rounded hover:bg-muted">
-                      <span className="text-muted-foreground">{new Date(r.fecha).toLocaleDateString('es-DO')}</span>
-                      <span className="text-muted-foreground">{r.materia}</span>
-                      <span>{r.presente ? '✅' : '❌'}</span>
-                    </div>
-                  ))
-                )}
-              </div>
-            </CardContent>
-          )}
-        </Card>
-      )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }

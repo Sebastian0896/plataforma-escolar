@@ -5,106 +5,185 @@ import Usuario from '@/lib/models/Usuario'
 import Link from 'next/link'
 import PaginacionServer from '@/components/PaginacionServer'
 
-export default async function UsuariosPage({ searchParams }: { searchParams: Promise<{ page?: string; inactivos?: string }> }) {
+// Componentes Shadcn UI (Asumiendo que los tienes instalados)
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent } from "@/components/ui/card"
+import { 
+  Users, 
+  UserPlus, 
+  School, 
+  Filter, 
+  MoreHorizontal, 
+  Edit2, 
+  UserX, 
+  UserCheck 
+} from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
+export default async function UsuariosPage({ 
+  searchParams 
+}: { 
+  searchParams: Promise<{ page?: string; inactivos?: string }> 
+}) {
   const session = await auth()
-  if (!session || (session.user?.role !== 'admin' && session.user?.role !== 'admin_centro' && session.user?.role !== 'superadmin')) {
+  
+  // 1. Protección de Ruta
+  const rolesPermitidos = ['admin', 'admin_centro', 'superadmin']
+  if (!session || !rolesPermitidos.includes(session.user?.role || '')) {
     redirect('/dashboard')
   }
 
   const params = await searchParams
   const page = parseInt(params.page || '1')
-  const limit = 9
+  const limit = 12 // Aumentado para mejor aprovechamiento de grid
   const skip = (page - 1) * limit
   const mostrarInactivos = params.inactivos === 'true'
 
+  // 2. Lógica de Base de Datos
   await connectDB()
-  const filter: any = { activo: mostrarInactivos ? false : true }
+  const filter: any = { activo: !mostrarInactivos }
   if (session.user?.role === 'admin_centro') filter.centroId = session.user.centroId
 
   const [usuarios, total] = await Promise.all([
-    Usuario.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).populate('centroId', 'nombre codigo').lean(),
+    Usuario.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate('centroId', 'nombre codigo')
+      .lean(),
     Usuario.countDocuments(filter),
   ])
 
-  const usuariosConCentro = usuarios.map((u: any) => ({
-    ...u,
-    centroNombre: u.centroId?.nombre || 'Sin centro',
-    centroCodigo: u.centroId?.codigo || '',
-  }))
+  // 3. Agrupación y Mapeo
+  const agrupados = usuarios.reduce((acc: Record<string, any>, u: any) => {
+    const centroKey = u.centroId?.nombre || 'Personal sin Centro Asignado'
+    if (!acc[centroKey]) acc[centroKey] = []
+    acc[centroKey].push(u)
+    return acc
+  }, {})
 
-  // Agrupar por centro
-  const agrupados: Record<string, any[]> = {}
-  usuariosConCentro.forEach((u: any) => {
-    const key = u.centroCodigo || 'sin-centro'
-    if (!agrupados[key]) agrupados[key] = []
-    agrupados[key].push(u)
-  })
-
-  const coloresRol: Record<string, string> = {
-    admin: 'bg-red-100 text-red-700',
-    admin_centro: 'bg-blue-100 text-blue-700',
-    docente: 'bg-green-100 text-green-700',
-    estudiante: 'bg-purple-100 text-purple-700',
-    superadmin: 'bg-yellow-100 text-yellow-700',
-    coordinador: 'bg-indigo-100 text-indigo-700',
-    tecnico_distrital: 'bg-teal-100 text-teal-700',
+  const variantesRol: Record<string, string> = {
+    superadmin: 'destructive', // Rojo/Amarillo
+    admin: 'default', // Negro/Azul
+    admin_centro: 'outline',
+    docente: 'secondary',
+    coordinador: 'secondary',
   }
 
   return (
-    <div>
-      <div className="flex items-center gap-2">
-        <Link href="/admin/usuarios/centros" className="text-xs px-3 py-2 rounded-lg border dark:border-slate-600">
-          📁 Por centro
-        </Link>
-        <Link href={`?inactivos=${!mostrarInactivos}`} className="text-xs px-3 py-2 rounded-lg border dark:border-slate-600">
-          {mostrarInactivos ? 'Ver activos' : 'Ver inactivos'}
-        </Link>
-        <Link href="/admin/usuarios/nuevo" className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">+ Nuevo Usuario</Link>
+    <div className="space-y-8 pb-10">
+      {/* Header Principal */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-slate-900 p-6 rounded-2xl border shadow-sm">
+        <div>
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            <Users className="h-6 w-6 text-blue-600" />
+            Gestión de Usuarios
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {mostrarInactivos ? 'Listado de cuentas suspendidas' : 'Cuentas activas en el sistema'}
+          </p>
+        </div>
+        
+        <div className="flex flex-wrap items-center gap-3">
+          <Button variant="outline" asChild size="sm">
+            <Link href="/admin/usuarios/centros">
+              <School className="mr-2 h-4 w-4" /> Por Centro
+            </Link>
+          </Button>
+          
+          <Button variant="ghost" asChild size="sm">
+            <Link href={`?inactivos=${!mostrarInactivos}`}>
+              <Filter className="mr-2 h-4 w-4" />
+              {mostrarInactivos ? 'Ver Activos' : 'Ver Inactivos'}
+            </Link>
+          </Button>
+
+          <Button asChild size="sm" className="bg-blue-600 hover:bg-blue-700">
+            <Link href="/admin/usuarios/nuevo">
+              <UserPlus className="mr-2 h-4 w-4" /> Nuevo Usuario
+            </Link>
+          </Button>
+        </div>
       </div>
 
-      {Object.entries(agrupados).map(([centroKey, users]) => (
-        <div key={centroKey} className="mb-8">
-          <div className="flex items-center gap-2 mb-3">
-            <span className="text-lg">🏫</span>
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-              {users[0]?.centroNombre}
-            </h2>
-            <span className="text-sm text-gray-500 dark:text-gray-400">({users.length} usuarios)</span>
+      {/* Renderizado de Grupos */}
+      {Object.entries(agrupados).map(([centroNombre, users]: [string, any]) => (
+        <section key={centroNombre} className="animate-in fade-in slide-in-from-bottom-3 duration-500">
+          <div className="flex items-center gap-3 mb-4 px-2">
+            <div className="h-8 w-1 bg-blue-500 rounded-full" />
+            <h2 className="text-lg font-bold tracking-tight">{centroNombre}</h2>
+            <Badge variant="secondary" className="font-mono">{users.length}</Badge>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
             {users.map((u: any) => (
-              <div key={u._id} className={`bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4 ${!u.activo ? 'opacity-50' : ''}`}>
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-full bg-gray-100 dark:bg-slate-700 flex items-center justify-center text-lg font-bold text-gray-600 dark:text-gray-300">
-                    {u.nombre?.charAt(0)?.toUpperCase()}
+              <Card key={u._id} className={`group overflow-hidden transition-all hover:shadow-md ${!u.activo ? 'bg-slate-50 opacity-75' : ''}`}>
+                <CardContent className="p-5">
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-4">
+                      <div className="h-12 w-12 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-slate-800 dark:to-slate-700 flex items-center justify-center text-blue-700 dark:text-blue-400 font-bold text-xl">
+                        {u.nombre?.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="space-y-1">
+                        <p className="font-semibold leading-none">{u.nombre}</p>
+                        <p className="text-xs text-muted-foreground truncate max-w-[150px]">{u.email}</p>
+                      </div>
+                    </div>
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuLabel>Acciones</DropdownMenuLabel>
+                        <DropdownMenuItem asChild>
+                          <Link href={`/admin/usuarios/editar/${u._id}`} className="cursor-pointer">
+                            <Edit2 className="mr-2 h-4 w-4" /> Editar Perfil
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className={u.activo ? "text-red-600" : "text-green-600"}>
+                          {u.activo ? (
+                            <><UserX className="mr-2 h-4 w-4" /> Desactivar</>
+                          ) : (
+                            <><UserCheck className="mr-2 h-4 w-4" /> Activar Cuenta</>
+                          )}
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
-                  <div className="min-w-0">
-                    <p className="font-medium text-gray-900 dark:text-white truncate">{u.nombre}</p>
-                    <p className="text-xs text-gray-500 truncate">{u.email}</p>
-                  </div>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className={`text-xs px-2 py-0.5 rounded-full capitalize ${coloresRol[u.rol] || 'bg-gray-100 text-gray-600'}`}>
-                    {u.rol?.replace('_', ' ')}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    {u.activo && (
-                      <Link href={`/admin/usuarios/editar/${u._id}`} className="text-xs text-blue-600 hover:underline">Editar</Link>
+
+                  <div className="mt-5 flex flex-wrap items-center gap-2">
+                    <Badge variant={variantesRol[u.rol] as any || 'outline'} className="capitalize">
+                      {u.rol?.replace('_', ' ')}
+                    </Badge>
+                    {u.grado && (
+                      <Badge variant="outline" className="text-[10px] uppercase border-slate-300">
+                        🎓 {u.grado.replace('-', ' ')}
+                      </Badge>
                     )}
-                    <Link href={`?page=${page}&inactivos=${mostrarInactivos}`} className={`text-xs ${u.activo ? 'text-red-500' : 'text-green-500'}`}>
-                      {u.activo ? 'Desactivar' : 'Activar'}
-                    </Link>
                   </div>
-                </div>
-                {u.grado && <p className="text-xs text-gray-400 mt-2">🎓 {u.grado?.replace('-', ' ')}</p>}
-                {u.categoriaDocente && <p className="text-xs text-gray-400 mt-1 capitalize">📖 {u.categoriaDocente?.replace('-', ' ')}</p>}
-              </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
-        </div>
+        </section>
       ))}
 
-      <PaginacionServer totalPaginas={Math.ceil(total / limit)} paginaActual={page} />
+      {/* Footer / Paginación */}
+      <div className="pt-6 border-t">
+        <PaginacionServer totalPaginas={Math.ceil(total / limit)} paginaActual={page} />
+      </div>
     </div>
   )
 }

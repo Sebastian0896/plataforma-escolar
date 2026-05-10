@@ -4,6 +4,25 @@ import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 
+// Componentes de Shadcn UI
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Checkbox } from "@/components/ui/checkbox"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Separator } from "@/components/ui/separator"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Loader2, Save, X, ChevronLeft, User, School, BookOpen } from "lucide-react"
+
+// --- Datos Maestros (Igual que en NuevoUsuario) ---
 const MATERIAS_DISPONIBLES = [
   { slug: 'frances', label: 'Francés' },
   { slug: 'ingles', label: 'Inglés' },
@@ -21,26 +40,18 @@ const MATERIAS_POR_CATEGORIA: Record<string, string[]> = {
   'otras-materias': ['educacion-fisica', 'artistica'],
 }
 
-const GRADOS_PRIMER_CICLO_PRIMARIA = ['1ro-primaria', '2do-primaria', '3ro-primaria']
-const GRADOS_SEGUNDO_CICLO_PRIMARIA = ['4to-primaria', '5to-primaria', '6to-primaria']
-const GRADOS_PRIMER_CICLO_SECUNDARIA = ['1ro-secundaria', '2do-secundaria', '3ro-secundaria']
-const GRADOS_SEGUNDO_CICLO_SECUNDARIA = ['4to-secundaria', '5to-secundaria', '6to-secundaria']
-
-function getGradosPorCiclo(nivel: string, ciclo: string): string[] {
-  if (!nivel || !ciclo) return []
-  if (nivel === 'nivel-primario') {
-    return ciclo === 'primer-ciclo' ? GRADOS_PRIMER_CICLO_PRIMARIA : GRADOS_SEGUNDO_CICLO_PRIMARIA
-  }
-  if (nivel === 'nivel-secundario') {
-    return ciclo === 'primer-ciclo' ? GRADOS_PRIMER_CICLO_SECUNDARIA : GRADOS_SEGUNDO_CICLO_SECUNDARIA
-  }
-  return []
+const GRADOS: Record<string, string[]> = {
+  'nivel-primario-primer-ciclo': ['1ro-primaria', '2do-primaria', '3ro-primaria'],
+  'nivel-primario-segundo-ciclo': ['4to-primaria', '5to-primaria', '6to-primaria'],
+  'nivel-secundario-primer-ciclo': ['1ro-secundaria', '2do-secundaria', '3ro-secundaria'],
+  'nivel-secundario-segundo-ciclo': ['4to-secundaria', '5to-secundaria', '6to-secundaria'],
 }
 
 export default function EditarUsuarioPage() {
   const router = useRouter()
-  const params = useParams()
+  const { id } = useParams()
   const { data: session } = useSession()
+  
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -56,49 +67,48 @@ export default function EditarUsuarioPage() {
     grados: [] as string[],
   })
 
+  // Carga inicial de datos
   useEffect(() => {
-    const cargar = async () => {
+    const fetchUserData = async () => {
       try {
-        const res = await fetch(`/api/usuarios?id=${params.id}`)
-        if (!res.ok) throw new Error('No encontrado')
+        const res = await fetch(`/api/usuarios?id=${id}`)
+        if (!res.ok) throw new Error('Usuario no encontrado')
         const data = await res.json()
 
+        // Buscar código del centro para mostrarlo
         let codigoCentro = ''
         if (data.centroId) {
-          try {
-            const resCentro = await fetch(`/api/centros?id=${data.centroId}`)
-            if (resCentro.ok) {
-              const centro = await resCentro.json()
-              codigoCentro = centro.codigo || ''
-            }
-          } catch {}
+          const resC = await fetch(`/api/centros?id=${data.centroId}`)
+          if (resC.ok) {
+            const cData = await resC.json()
+            codigoCentro = cData.codigo
+          }
         }
 
         setForm({
-          nombre: data.nombre || '', email: data.email || '', password: '',
-          genero: data.genero || '', rol: data.rol || '',
-          centroId: data.centroId || '', codigoCentro,
-          nivel: data.nivel || '', ciclo: data.ciclo || '', grado: data.grado || '', rne: data.rne || '',
-          categoriaDocente: data.categoriaDocente || '',
+          ...data,
+          password: '', // Password siempre vacío en edición por seguridad
+          codigoCentro: codigoCentro || '',
           materias: data.materias || [],
           niveles: data.niveles || [],
           ciclos: data.ciclos || {},
-          grados: data.grados || [],
+          grados: data.grados || []
         })
-      } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : 'Error al cargar')
+      } catch (err: any) {
+        setError(err.message)
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     }
-    cargar()
-  }, [params.id])
+    fetchUserData()
+  }, [id])
 
   const toggleArray = (campo: 'niveles' | 'materias' | 'grados', valor: string) => {
-    setForm((prev) => ({
+    setForm(prev => ({
       ...prev,
       [campo]: prev[campo].includes(valor)
-        ? prev[campo].filter((v) => v !== valor)
-        : [...prev[campo], valor],
+        ? prev[campo].filter(v => v !== valor)
+        : [...prev[campo], valor]
     }))
   }
 
@@ -107,236 +117,272 @@ export default function EditarUsuarioPage() {
     setSaving(true)
     setError('')
 
-    let centroId = form.centroId
-
-    if ((session?.user?.role === 'admin' || session?.user?.role === 'superadmin') && form.codigoCentro) {
-      try {
-        const resCentro = await fetch(`/api/centros?codigo=${form.codigoCentro.toUpperCase()}`)
-        if (!resCentro.ok) { setError('Código de centro no encontrado'); setSaving(false); return }
-        const centroData = await resCentro.json()
-        centroId = centroData._id
-      } catch { setError('Error al validar el centro'); setSaving(false); return }
-    }
-
-    const body: any = {
-      id: params.id, nombre: form.nombre, email: form.email, rol: form.rol, genero: form.genero, centroId,
-    }
-    if (form.password) body.password = form.password
-
-    if (form.rol === 'estudiante') {
-      body.nivel = form.nivel; body.ciclo = form.ciclo; body.grado = form.grado; body.rne = form.rne
-    }
-    if (form.rol === 'docente') {
-      body.niveles = form.niveles
-      body.ciclos = form.ciclos
-      body.grados = form.grados
-      body.categoriaDocente = form.categoriaDocente
-      body.materias = form.materias
-    }
-
     try {
-      const res = await fetch('/api/usuarios', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-      if (!res.ok) { const data = await res.json(); throw new Error(data.error || 'Error') }
+      let centroIdFinal = form.centroId
+
+      // Validar centro si el admin cambió el código
+      if (['admin', 'superadmin'].includes(session?.user?.role || '') && form.codigoCentro) {
+        const resCentro = await fetch(`/api/centros?codigo=${form.codigoCentro.toUpperCase()}`)
+        if (resCentro.ok) {
+          const centroData = await resCentro.json()
+          centroIdFinal = centroData._id
+        }
+      }
+
+      const body: any = { ...form, id, centroId: centroIdFinal }
+      if (!body.password) delete body.password
+
+      const res = await fetch('/api/usuarios', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      })
+
+      if (!res.ok) throw new Error('Error al actualizar el perfil')
+
       router.push('/admin/usuarios/centros')
       router.refresh()
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error')
+    } catch (err: any) {
+      setError(err.message)
       setSaving(false)
     }
   }
 
-  const inputClass = "w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
-  const labelClass = "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-  const cardClass = "bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5"
-  const readonlyClass = "w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-gray-100 dark:bg-slate-600 text-gray-900 dark:text-white cursor-not-allowed"
-
-  if (loading) return <div className="text-gray-500 dark:text-gray-400">Cargando...</div>
+  if (loading) return (
+    <div className="flex h-96 items-center justify-center">
+      <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+    </div>
+  )
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Editar Usuario</h1>
-      <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
-        <div className={cardClass}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div><label className={labelClass}>Nombre</label><input type="text" value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} className={inputClass} required /></div>
-            <div><label className={labelClass}>Email</label><input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className={inputClass} required /></div>
-            <div><label className={labelClass}>Contraseña (dejar vacío)</label><input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className={inputClass} placeholder="••••••••" /></div>
-            <div>
-              <label className={labelClass}>Género</label>
-              <select value={form.genero} onChange={(e) => setForm({ ...form, genero: e.target.value })} className={inputClass}>
-                <option value="">Seleccionar...</option>
-                <option value="masculino">Masculino</option>
-                <option value="femenino">Femenino</option>
-                <option value="otro">Otro</option>
-              </select>
-            </div>
-            <div>
-              <label className={labelClass}>Rol</label>
-              <select value={form.rol} onChange={(e) => {
-                const nuevoRol = e.target.value
-                setForm({
-                  ...form, rol: nuevoRol,
-                  ...(nuevoRol === 'estudiante' ? { categoriaDocente: '', materias: [], niveles: [], ciclos: {}, grados: [] } : {}),
-                  ...(nuevoRol === 'docente' ? { nivel: '', ciclo: '', grado: '', rne: '' } : {}),
-                  ...(nuevoRol === 'admin' || nuevoRol === 'admin_centro' ? { nivel: '', ciclo: '', grado: '', rne: '', categoriaDocente: '', materias: [], niveles: [], ciclos: {}, grados: [] } : {}),
-                })
-              }} className={inputClass} required>
-                <option value="estudiante">Estudiante</option>
-                <option value="docente">Docente</option>
-                <option value="admin_centro">Admin Centro</option>
-                <option value="admin">Admin</option>
-              </select>
-            </div>
+    <div className="container max-w-4xl py-6 space-y-8">
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <Button variant="ghost" size="sm" onClick={() => router.back()} className="-ml-2">
+            <ChevronLeft className="h-4 w-4 mr-1" /> Volver
+          </Button>
+          <h1 className="text-3xl font-bold tracking-tight">Editar Perfil</h1>
+          <p className="text-muted-foreground text-sm">Actualiza la información y permisos del usuario.</p>
+        </div>
+      </div>
 
-            {(session?.user?.role === 'admin' || session?.user?.role === 'superadmin') && (
-              <div>
-                <label className={labelClass}>Código del Centro</label>
-                <input
-                  type="text"
-                  value={form.codigoCentro}
-                  onChange={(e) => setForm({ ...form, codigoCentro: e.target.value.toUpperCase() })}
-                  onBlur={async () => {
-                    if (form.codigoCentro) {
-                      const res = await fetch(`/api/centros?codigo=${form.codigoCentro}`)
-                      if (res.ok) { const c = await res.json(); setForm(prev => ({ ...prev, centroId: c._id })) }
-                    }
-                  }}
-                  className={inputClass}
-                  placeholder="Ej: SALE2025"
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Card: Información Principal */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <User className="h-5 w-5" /> Datos del Usuario
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="nombre">Nombre Completo</Label>
+              <Input id="nombre" value={form.nombre} onChange={(e) => setForm({...form, nombre: e.target.value})} required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Correo Electrónico</Label>
+              <Input id="email" type="email" value={form.email} onChange={(e) => setForm({...form, email: e.target.value})} required />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="pass">Contraseña (opcional)</Label>
+              <Input id="pass" type="password" placeholder="Dejar en blanco para mantener" value={form.password} onChange={(e) => setForm({...form, password: e.target.value})} />
+            </div>
+            <div className="space-y-2">
+              <Label>Género</Label>
+              <Select value={form.genero} onValueChange={(v) => setForm({...form, genero: v})}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="masculino">Masculino</SelectItem>
+                  <SelectItem value="femenino">Femenino</SelectItem>
+                  <SelectItem value="otro">Otro</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Card: Rol y Centro */}
+        <Card className="border-blue-100 dark:border-blue-900 bg-blue-50/20">
+          <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+             <div className="space-y-2">
+              <Label>Rol del Sistema</Label>
+              <Select value={form.rol} onValueChange={(v) => setForm({...form, rol: v})}>
+                <SelectTrigger className="bg-white dark:bg-slate-950"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="estudiante">Estudiante</SelectItem>
+                  <SelectItem value="docente">Docente</SelectItem>
+                  <SelectItem value="admin_centro">Admin de Centro</SelectItem>
+                  <SelectItem value="admin">Administrador</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            {['admin', 'superadmin'].includes(session?.user?.role || '') && (
+              <div className="space-y-2">
+                <Label>Centro Educativo (Código)</Label>
+                <Input 
+                  value={form.codigoCentro} 
+                  className="font-mono bg-white dark:bg-slate-950" 
+                  onChange={(e) => setForm({...form, codigoCentro: e.target.value.toUpperCase()})} 
                 />
               </div>
             )}
+          </CardContent>
+        </Card>
 
-            {/* Estudiante */}
-            {form.rol === 'estudiante' && (
-              <>
-                <div><label className={labelClass}>Nivel</label><select value={form.nivel} onChange={(e) => setForm({ ...form, nivel: e.target.value, ciclo: '', grado: '' })} className={inputClass} required><option value="">Seleccionar...</option><option value="nivel-primario">Primario</option><option value="nivel-secundario">Secundario</option></select></div>
-                <div><label className={labelClass}>Ciclo</label><select value={form.ciclo} onChange={(e) => setForm({ ...form, ciclo: e.target.value })} className={inputClass} required disabled={!form.nivel}><option value="">Seleccionar...</option><option value="primer-ciclo">Primer Ciclo</option><option value="segundo-ciclo">Segundo Ciclo</option></select></div>
-                <div><label className={labelClass}>Grado</label><select value={form.grado} onChange={(e) => setForm({ ...form, grado: e.target.value })} className={inputClass} required disabled={!form.ciclo}><option value="">Seleccionar...</option>{getGradosPorCiclo(form.nivel, form.ciclo).map(g => <option key={g} value={g}>{g.replace('-', ' ')}</option>)}</select></div>
-                <div><label className={labelClass}>RNE</label><input type="text" value={form.rne} onChange={(e) => setForm({ ...form, rne: e.target.value })} className={inputClass} /></div>
-              </>
-            )}
+        {/* Sección: Estudiante */}
+        {form.rol === 'estudiante' && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2"><School className="h-5 w-5" /> Datos Estudiantiles</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="space-y-2">
+                <Label>Nivel</Label>
+                <Select value={form.nivel} onValueChange={(v) => setForm({...form, nivel: v, ciclo: '', grado: ''})}>
+                  <SelectTrigger><SelectValue placeholder="Nivel" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="nivel-primario">Primario</SelectItem>
+                    <SelectItem value="nivel-secundario">Secundario</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Ciclo</Label>
+                <Select disabled={!form.nivel} value={form.ciclo} onValueChange={(v) => setForm({...form, ciclo: v, grado: ''})}>
+                  <SelectTrigger><SelectValue placeholder="Ciclo" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="primer-ciclo">Primer Ciclo</SelectItem>
+                    <SelectItem value="segundo-ciclo">Segundo Ciclo</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Grado</Label>
+                <Select disabled={!form.ciclo} value={form.grado} onValueChange={(v) => setForm({...form, grado: v})}>
+                  <SelectTrigger><SelectValue placeholder="Grado" /></SelectTrigger>
+                  <SelectContent>
+                    {GRADOS[`${form.nivel}-${form.ciclo}`]?.map(g => (
+                      <SelectItem key={g} value={g}>{g.replace('-', ' ')}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-            {/* Docente */}
-            {form.rol === 'docente' && (
-              <>
-                <div><label className={labelClass}>Categoría</label><select value={form.categoriaDocente} onChange={(e) => setForm({ ...form, categoriaDocente: e.target.value, materias: [] })} className={inputClass} required><option value="">Seleccionar...</option><option value="idiomas">Idiomas</option><option value="materias-basicas">Materias Básicas</option><option value="otras-materias">Otras Materias</option></select></div>
-                <div>
-                  <label className={labelClass}>Niveles</label>
-                  <div className="flex gap-2">
+        {/* Sección: Docente */}
+        {form.rol === 'docente' && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2"><BookOpen className="h-5 w-5" /> Carga Académica</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label>Categoría</Label>
+                  <Select value={form.categoriaDocente} onValueChange={(v) => setForm({...form, categoriaDocente: v, materias: []})}>
+                    <SelectTrigger><SelectValue placeholder="Seleccionar categoría" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="idiomas">Idiomas</SelectItem>
+                      <SelectItem value="materias-basicas">Materias Básicas</SelectItem>
+                      <SelectItem value="otras-materias">Otras Materias</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>Niveles que atiende</Label>
+                  <div className="flex gap-4 pt-2">
                     {['nivel-primario', 'nivel-secundario'].map(n => (
-                      <label key={n} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs border cursor-pointer ${form.niveles.includes(n) ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 text-blue-700 dark:text-blue-400' : 'border-gray-200 dark:border-slate-600'}`}>
-                        <input type="checkbox" checked={form.niveles.includes(n)} onChange={() => toggleArray('niveles', n)} className="sr-only" />
-                        {n === 'nivel-primario' ? 'Primario' : 'Secundario'}
-                      </label>
+                      <div key={n} className="flex items-center space-x-2">
+                        <Checkbox 
+                          id={n} 
+                          checked={form.niveles.includes(n)} 
+                          onCheckedChange={() => toggleArray('niveles', n)} 
+                        />
+                        <label htmlFor={n} className="text-sm cursor-pointer">{n.includes('primario') ? 'Primario' : 'Secundario'}</label>
+                      </div>
                     ))}
                   </div>
                 </div>
-              </>
-            )}
-          </div>
-
-          {/* Materias */}
-          {form.rol === 'docente' && form.categoriaDocente && (
-            <div className="mt-4">
-              <label className={labelClass}>Materias que imparte</label>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {MATERIAS_DISPONIBLES.filter(m => MATERIAS_POR_CATEGORIA[form.categoriaDocente]?.includes(m.slug)).map(m => (
-                  <label key={m.slug} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs border cursor-pointer ${form.materias.includes(m.slug) ? 'bg-green-50 dark:bg-green-900/20 border-green-300 text-green-700 dark:text-green-400' : 'border-gray-200 dark:border-slate-600'}`}>
-                    <input type="checkbox" checked={form.materias.includes(m.slug)} onChange={() => toggleArray('materias', m.slug)} className="sr-only" />
-                    {m.label}
-                  </label>
-                ))}
               </div>
-            </div>
-          )}
 
-          {/* Grados */}
-          {form.rol === 'docente' && form.niveles.length > 0 && (
-            <div className="mt-4 space-y-4">
-              <label className={labelClass}>Grados que imparte</label>
-              {form.niveles.map(nivel => (
-                <div key={nivel} className="p-3 bg-gray-50 dark:bg-slate-700/30 rounded-lg">
-                  <div className="flex items-center gap-3 mb-2">
-                    <p className="text-sm font-semibold">{nivel === 'nivel-primario' ? 'Primaria' : 'Secundaria'}</p>
-                    <select value={form.ciclos[nivel] || ''} onChange={(e) => setForm({ ...form, ciclos: { ...form.ciclos, [nivel]: e.target.value } })} className="text-xs px-2 py-1.5 border rounded-lg dark:bg-slate-600 dark:text-white">
-                      <option value="">Seleccionar ciclo...</option>
-                      <option value="primer-ciclo">Primer Ciclo</option>
-                      <option value="segundo-ciclo">Segundo Ciclo</option>
-                    </select>
+              {/* Materias */}
+              {form.categoriaDocente && (
+                <div className="space-y-3">
+                  <Label>Materias Asignadas</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {MATERIAS_DISPONIBLES
+                      .filter(m => MATERIAS_POR_CATEGORIA[form.categoriaDocente]?.includes(m.slug))
+                      .map(m => (
+                        <Badge
+                          key={m.slug}
+                          variant={form.materias.includes(m.slug) ? "default" : "outline"}
+                          className="cursor-pointer px-3 py-1"
+                          onClick={() => toggleArray('materias', m.slug)}
+                        >
+                          {m.label}
+                        </Badge>
+                      ))}
                   </div>
-                  {form.ciclos[nivel] && (
-                    <>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                        {getGradosPorCiclo(nivel, form.ciclos[nivel]).map(g => (
-                          <label key={g} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs border cursor-pointer ${form.grados.includes(g) ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 text-blue-700 dark:text-blue-400' : 'border-gray-200 dark:border-slate-600'}`}>
-                            <input type="checkbox" checked={form.grados.includes(g)} onChange={() => toggleArray('grados', g)} className="sr-only" />
-                            {g.replace('-', ' ')}
-                          </label>
+                </div>
+              )}
+
+              {/* Selección de Grados para Docente */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {form.niveles.map(nivel => (
+                  <div key={nivel} className="p-4 border rounded-lg space-y-3 bg-slate-50/50">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-bold uppercase">{nivel.split('-')[1]}</span>
+                      <Select 
+                        value={form.ciclos[nivel] || ''} 
+                        onValueChange={(v) => setForm({...form, ciclos: {...form.ciclos, [nivel]: v}})}
+                      >
+                        <SelectTrigger className="w-32 h-8 text-xs"><SelectValue placeholder="Ciclo" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="primer-ciclo">1er Ciclo</SelectItem>
+                          <SelectItem value="segundo-ciclo">2do Ciclo</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {form.ciclos[nivel] && (
+                      <div className="grid grid-cols-2 gap-2">
+                        {GRADOS[`${nivel}-${form.ciclos[nivel]}`].map(g => (
+                          <div key={g} className="flex items-center space-x-2 bg-white p-2 rounded border shadow-sm">
+                            <Checkbox 
+                              id={g} 
+                              checked={form.grados.includes(g)} 
+                              onCheckedChange={() => toggleArray('grados', g)} 
+                            />
+                            <label htmlFor={g} className="text-[11px] font-medium leading-none cursor-pointer">
+                              {g.replace('-', ' ')}
+                            </label>
+                          </div>
                         ))}
                       </div>
-                      <label className="flex items-center gap-2 text-xs mt-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={getGradosPorCiclo(nivel, form.ciclos[nivel]).every(g => form.grados.includes(g))}
-                          onChange={(e) => {
-                            const gradosCiclo = getGradosPorCiclo(nivel, form.ciclos[nivel])
-                            if (e.target.checked) {
-                              setForm({ ...form, grados: [...new Set([...form.grados, ...gradosCiclo])] })
-                            } else {
-                              setForm({ ...form, grados: form.grados.filter(g => !gradosCiclo.includes(g)) })
-                            }
-                          }}
-                          className="rounded"
-                        />
-                        <span className="text-gray-600 dark:text-gray-400">Seleccionar ciclo completo</span>
-                      </label>
-                    </>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-                    {/* Nivel completo */}
-          {form.niveles.length > 0 && (
-            <div className="mt-4 pt-3 border-t border-gray-200 dark:border-slate-600">
-              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Selección rápida</p>
-              {form.niveles.map(nivel => {
-                const todosLosGrados = nivel === 'nivel-primario'
-                  ? [...GRADOS_PRIMER_CICLO_PRIMARIA, ...GRADOS_SEGUNDO_CICLO_PRIMARIA]
-                  : [...GRADOS_PRIMER_CICLO_SECUNDARIA, ...GRADOS_SEGUNDO_CICLO_SECUNDARIA]
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-                return (
-                  <label key={nivel} className="flex items-center gap-2 text-xs cursor-pointer mb-1">
-                    <input
-                      type="checkbox"
-                      checked={todosLosGrados.every(g => form.grados.includes(g))}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setForm({ ...form, grados: [...new Set([...form.grados, ...todosLosGrados])] })
-                        } else {
-                          setForm({ ...form, grados: form.grados.filter(g => !todosLosGrados.includes(g)) })
-                        }
-                      }}
-                      className="rounded"
-                    />
-                    <span className="text-gray-600 dark:text-gray-400 font-medium">
-                      Nivel {nivel === 'nivel-primario' ? 'Primario' : 'Secundario'} completo
-                    </span>
-                  </label>
-                )
-              })}
-            </div>
-          )}
-        </div>
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
-        {error && <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-400">{error}</div>}
-
-        <div className="flex items-center gap-3">
-          <button type="submit" disabled={saving} className="bg-blue-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
-            {saving ? 'Guardando...' : 'Guardar Cambios'}
-          </button>
-          <button type="button" onClick={() => router.back()} className="text-sm text-gray-500 dark:text-gray-400">Cancelar</button>
+        {/* Footer Actions */}
+        <div className="flex items-center justify-end gap-4 pt-4">
+          <Button variant="outline" type="button" onClick={() => router.back()} disabled={saving}>
+            <X className="h-4 w-4 mr-2" /> Cancelar
+          </Button>
+          <Button type="submit" disabled={saving} className="min-w-[150px]">
+            {saving ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Save className="h-4 w-4 mr-2" />}
+            Guardar Cambios
+          </Button>
         </div>
       </form>
     </div>

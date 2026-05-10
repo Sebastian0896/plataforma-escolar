@@ -1,42 +1,51 @@
+// components/NotificacionesBell.tsx
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import Link from 'next/link'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { useSession } from 'next-auth/react'
+import { Bell, CheckCheck, Clock, FileText, StickyNote, PlusCircle, RefreshCw, BarChart3, MessageSquare, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
 
 interface Props {
   up?: boolean
   defaultOpen?: boolean
   onClose?: () => void
+  soloPanel?: boolean
 }
 
-export default function NotificacionesBell({ up = false, defaultOpen = false, onClose }: Props) {
-  const { data: session } = useSession()
+export default function NotificacionesBell({ up = false, defaultOpen = false, onClose, soloPanel = false }: Props) {
   const router = useRouter()
   const [notificaciones, setNotificaciones] = useState<any[]>([])
   const [totalNoLeidas, setTotalNoLeidas] = useState(0)
-  const [abierto, setAbierto] = useState(defaultOpen)
-  const ref = useRef<HTMLDivElement>(null)
+  const [open, setOpen] = useState(defaultOpen)
+
+  const fetchData = async () => {
+    const [resNoLeidas, resTodas] = await Promise.all([
+      fetch('/api/notificaciones?noLeidas=true'),
+      fetch('/api/notificaciones')
+    ])
+    const d1 = await resNoLeidas.json()
+    const d2 = await resTodas.json()
+    setTotalNoLeidas(d1.totalNoLeidas || 0)
+    setNotificaciones(d2.notificaciones || [])
+  }
+
+  useEffect(() => { fetchData() }, [])
 
   useEffect(() => {
-    fetch('/api/notificaciones?noLeidas=true').then(r => r.json()).then(d => setTotalNoLeidas(d.totalNoLeidas || 0))
-    fetch('/api/notificaciones').then(r => r.json()).then(d => setNotificaciones(d.notificaciones || []))
+    const handler = () => setOpen(true)
+    document.addEventListener('toggle-notifications', handler)
+    return () => document.removeEventListener('toggle-notifications', handler)
   }, [])
 
-  useEffect(() => {
-    const handleClick = (e: MouseEvent) => { if (ref.current && !ref.current.contains(e.target as Node)) setAbierto(false) }
-    document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
-  }, [])
-
-  const marcarLeida = async (id: string) => {
+  const marcarLeida = async (id: string, e?: React.MouseEvent) => {
+    e?.stopPropagation()
     await fetch('/api/notificaciones', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, leida: true }) })
     setNotificaciones(prev => prev.map(x => x._id === id ? { ...x, leida: true } : x))
     setTotalNoLeidas(prev => Math.max(0, prev - 1))
-    setAbierto(false)
   }
 
   const marcarTodas = async () => {
@@ -45,81 +54,101 @@ export default function NotificacionesBell({ up = false, defaultOpen = false, on
     setNotificaciones(prev => prev.map(n => ({ ...n, leida: true })))
   }
 
-  const iconos: Record<string, string> = {
-    recordatorio: '⏰', pendiente: '📋', senal: '📌', nueva_plan: '🆕', actualizacion: '🔄', resumen: '📊',
+  const handleAction = async (n: any) => {
+    if (!n.leida) await marcarLeida(n._id)
+    setOpen(false)
+    onClose?.()
+    if (n.planificacionId) {
+      router.push(`/estudiante/${n.grado}/${n.planificacionSlug || n.planificacionId}`)
+    }
+  }
+
+  const iconos: Record<string, React.ReactNode> = {
+    recordatorio: <Clock className="w-4 h-4 text-amber-500" />,
+    pendiente: <FileText className="w-4 h-4 text-blue-500" />,
+    senal: <StickyNote className="w-4 h-4 text-rose-500" />,
+    nueva_plan: <PlusCircle className="w-4 h-4 text-emerald-500" />,
+    actualizacion: <RefreshCw className="w-4 h-4 text-indigo-500" />,
+    resumen: <BarChart3 className="w-4 h-4 text-orange-500" />,
+  }
+
+  const Panel = () => (
+    <div className="flex flex-col h-full bg-background">
+      <div className="flex items-center justify-between p-4 border-b">
+        <h3 className="font-bold text-sm">Notificaciones</h3>
+        <div className="flex items-center gap-1">
+          {totalNoLeidas > 0 && (
+            <Button variant="ghost" size="sm" onClick={marcarTodas} className="h-8 text-xs">
+              <CheckCheck className="w-3 h-3 mr-1" /> Marcar todas
+            </Button>
+          )}
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setOpen(false); onClose?.() }}>
+            <X className="w-4 h-4" />
+          </Button>
+        </div>
+      </div>
+      <ScrollArea className={cn("flex-1", up ? "max-h-[60vh]" : "max-h-[400px]")}>
+        {notificaciones.length === 0 ? (
+          <div className="flex flex-col items-center justify-center p-10 opacity-40">
+            <Bell className="w-10 h-10 mb-2" />
+            <p className="text-sm">Sin notificaciones</p>
+          </div>
+        ) : (
+          <div>
+            {notificaciones.map((n) => (
+              <div key={n._id} onClick={() => handleAction(n)}
+                className={cn("p-4 cursor-pointer flex gap-3 border-l-2 transition-colors",
+                  !n.leida ? "bg-primary/5 border-l-primary hover:bg-primary/10" : "border-l-transparent hover:bg-muted/50")}>
+                <div className="mt-1 shrink-0">{iconos[n.tipo] || <MessageSquare className="w-4 h-4" />}</div>
+                <div className="flex-1 space-y-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className={cn("text-sm truncate", !n.leida ? "font-bold" : "font-medium text-muted-foreground")}>{n.titulo}</p>
+                    {!n.leida && <span className="w-2 h-2 bg-primary rounded-full shrink-0" />}
+                  </div>
+                  <p className="text-xs text-muted-foreground line-clamp-2">{n.mensaje}</p>
+                  <p className="text-[10px] text-muted-foreground/60">
+                    {new Date(n.createdAt).toLocaleDateString('es-DO', { hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </ScrollArea>
+    </div>
+  )
+
+  // Modal para soloPanel o mobile
+  if (open && (soloPanel || up)) {
+    return (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="absolute inset-0 bg-black/30" onClick={() => { setOpen(false); onClose?.() }} />
+        <div className="relative w-full max-w-md max-h-[80vh] bg-background rounded-2xl shadow-xl overflow-hidden z-10 animate-in zoom-in-95">
+          <Panel />
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div ref={ref} className="relative">
-      <Button variant="ghost" size="icon" onClick={() => setAbierto(!abierto)} className="relative">
-        🔔
+    <>
+      <Button variant="ghost" size="icon" className="relative" onClick={() => setOpen(!open)}>
+        <Bell className="w-5 h-5 text-muted-foreground" />
         {totalNoLeidas > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 w-5 h-5 bg-destructive text-destructive-foreground text-[10px] font-bold rounded-full flex items-center justify-center">
+          <Badge className="absolute -top-1 -right-1 h-5 min-w-[20px] px-1 flex items-center justify-center rounded-full bg-destructive text-white">
             {totalNoLeidas}
-          </span>
+          </Badge>
         )}
       </Button>
 
-      {abierto && (
-        up ? (
-          <>
-            <div className="fixed inset-0 z-40 bg-black/20" onClick={() => setAbierto(false)} />
-            <div className="fixed bottom-16 left-0 right-0 z-50 bg-background rounded-t-2xl border shadow-xl max-h-[60vh]">
-              <div className="flex items-center justify-between p-3 border-b sticky top-0 bg-background">
-                <h3 className="font-semibold text-sm">Notificaciones</h3>
-                {totalNoLeidas > 0 && <Button variant="link" size="sm" onClick={marcarTodas}>Marcar todas leídas</Button>}
-              </div>
-              <ScrollArea className="max-h-[50vh]">
-                {notificaciones.map(n => (
-                  <div key={n._id} className={`p-3 border-b hover:bg-muted cursor-pointer ${!n.leida ? 'bg-primary/5' : ''}`}>
-                    <div className="flex items-start gap-2">
-                      <span className="text-lg">{iconos[n.tipo] || '📢'}</span>
-                      <div className="flex-1 min-w-0">
-                        {n.planificacionId ? (
-                          <span onClick={async (e) => { e.preventDefault(); await marcarLeida(n._id); router.push(`/estudiante/${n.grado}/${n.planificacionSlug || n.planificacionId}`) }} className="text-sm font-medium hover:text-primary cursor-pointer">{n.titulo}</span>
-                        ) : <p className="text-sm font-medium">{n.titulo}</p>}
-                        <p className="text-xs text-muted-foreground mt-0.5">{n.mensaje}</p>
-                        <div className="flex items-center justify-between mt-1">
-                          <p className="text-[10px] text-muted-foreground">{new Date(n.createdAt).toLocaleString('es-DO')}</p>
-                          <button onClick={async (e) => { e.stopPropagation(); await marcarLeida(n._id) }} className="text-xs hover:underline">{n.leida ? '👁️' : '✅'}</button>
-                        </div>
-                      </div>
-                      {!n.leida && <span className="w-2 h-2 rounded-full bg-primary mt-1.5 flex-shrink-0" />}
-                    </div>
-                  </div>
-                ))}
-              </ScrollArea>
-            </div>
-          </>
-        ) : (
-          <div className="absolute z-50 top-full mt-2 right-0 w-80 bg-background rounded-xl border shadow-xl">
-            <div className="flex items-center justify-between p-3 border-b">
-              <h3 className="font-semibold text-sm">Notificaciones</h3>
-              {totalNoLeidas > 0 && <Button variant="link" size="sm" onClick={marcarTodas}>Marcar todas leídas</Button>}
-            </div>
-            <ScrollArea className="max-h-96">
-              {notificaciones.map(n => (
-                <div key={n._id} className={`p-3 border-b hover:bg-muted cursor-pointer ${!n.leida ? 'bg-primary/5' : ''}`}>
-                  <div className="flex items-start gap-2">
-                    <span className="text-lg">{iconos[n.tipo] || '📢'}</span>
-                    <div className="flex-1 min-w-0">
-                      {n.planificacionId ? (
-                        <span onClick={async (e) => { e.preventDefault(); await marcarLeida(n._id); router.push(`/estudiante/${n.grado}/${n.planificacionSlug || n.planificacionId}`) }} className="text-sm font-medium hover:text-primary cursor-pointer">{n.titulo}</span>
-                      ) : <p className="text-sm font-medium">{n.titulo}</p>}
-                      <p className="text-xs text-muted-foreground mt-0.5">{n.mensaje}</p>
-                      <div className="flex items-center justify-between mt-1">
-                        <p className="text-[10px] text-muted-foreground">{new Date(n.createdAt).toLocaleString('es-DO')}</p>
-                        <button onClick={async (e) => { e.stopPropagation(); await marcarLeida(n._id) }} className="text-xs hover:underline">{n.leida ? '👁️' : '✅'}</button>
-                      </div>
-                    </div>
-                    {!n.leida && <span className="w-2 h-2 rounded-full bg-primary mt-1.5 flex-shrink-0" />}
-                  </div>
-                </div>
-              ))}
-            </ScrollArea>
+      {open && !up && (
+        <>
+          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          <div className="absolute right-0 top-full mt-2 z-50 w-[380px] bg-background rounded-xl shadow-xl border overflow-hidden">
+            <Panel />
           </div>
-        )
+        </>
       )}
-    </div>
+    </>
   )
 }

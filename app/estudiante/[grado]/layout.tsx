@@ -13,17 +13,36 @@ export default async function EstudianteLayout({
   params: Params
 }) {
   const { grado } = await params
-  const session = await auth();
+
+  const session = await auth()
   const centroId = session?.user?.centroId
 
   const estructura = await getEstructuraCompleta(centroId)
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
+      
+      {/* Navbar */}
       <Navbar />
-      <div className="flex">
-        <SidebarEstudiante estructura={estructura} grado={grado} />
-        <main className="flex-1 p-6 max-w-4xl mx-auto w-full">{children}</main>
+
+      <div className="flex min-h-[calc(100vh-4rem)]">
+        
+        {/* Sidebar */}
+        <SidebarEstudiante
+          estructura={estructura}
+          grado={grado}
+        />
+
+        {/* Main Content */}
+        <main className="flex-1 overflow-x-hidden">
+          
+          <div className="mx-auto w-full max-w-5xl px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
+            
+            <div className="space-y-6">
+              {children}
+            </div>
+          </div>
+        </main>
       </div>
     </div>
   )

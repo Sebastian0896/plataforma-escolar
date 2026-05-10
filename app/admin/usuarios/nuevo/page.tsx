@@ -3,7 +3,18 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Button } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Badge } from "@/components/ui/badge"
+import { Separator } from "@/components/ui/separator"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Loader2, UserPlus, ArrowLeft } from "lucide-react"
 
+// --- Constantes de configuración (se mantienen igual) ---
 const MATERIAS_DISPONIBLES = [
   { slug: 'frances', label: 'Francés' },
   { slug: 'ingles', label: 'Inglés' },
@@ -91,8 +102,6 @@ export default function NuevoUsuarioPage() {
       } catch { setError('Error al validar el centro'); setLoading(false); return }
     }
 
-    if (session?.user?.role === 'admin_centro') centroId = session.user.centroId
-
     try {
       const res = await fetch('/api/usuarios', {
         method: 'POST',
@@ -102,217 +111,311 @@ export default function NuevoUsuarioPage() {
       if (!res.ok) { const data = await res.json(); throw new Error(data.error) }
       router.push('/admin/usuarios/centros')
       router.refresh()
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error')
+    } catch (err: any) {
+      setError(err.message || 'Error al crear usuario')
       setLoading(false)
     }
   }
 
-  const inputClass = "w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white"
-  const labelClass = "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-  const cardClass = "bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5"
-
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Nuevo Usuario</h1>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className={cardClass}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div><label className={labelClass}>Nombre</label><input type="text" value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} className={inputClass} required /></div>
-            <div><label className={labelClass}>Email</label><input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className={inputClass} required /></div>
-            <div><label className={labelClass}>Contraseña</label><input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className={inputClass} required minLength={6} /></div>
-            <div>
-              <label className={labelClass}>Género</label>
-              <select value={form.genero} onChange={(e) => setForm({ ...form, genero: e.target.value })} className={inputClass}>
-                <option value="">Seleccionar...</option>
-                <option value="masculino">Masculino</option>
-                <option value="femenino">Femenino</option>
-                <option value="otro">Otro</option>
-              </select>
+    <div className="max-w-4xl mx-auto py-8 px-4">
+      <div className="flex items-center gap-4 mb-6">
+        <Button variant="ghost" size="icon" onClick={() => router.back()}>
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+        <h1 className="text-3xl font-bold tracking-tight">Nuevo Usuario</h1>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>Información Personal</CardTitle>
+            <CardDescription>Datos básicos de acceso y perfil.</CardDescription>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="nombre">Nombre Completo</Label>
+              <Input id="nombre" value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} required />
             </div>
-            <div>
-              <label className={labelClass}>Rol</label>
-              <select value={form.rol} onChange={(e) => setForm({ ...form, rol: e.target.value, categoriaDocente: '', materias: [], niveles: [], ciclos: {}, grados: [], grado: '', rne: '' })} className={inputClass} required>
-                <option value="">Seleccionar...</option>
-                {rolesPermitidos.map(r => <option key={r} value={r}>{r.replace('_', ' ')}</option>)}
-              </select>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">Correo Electrónico</Label>
+              <Input id="email" type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="password">Contraseña</Label>
+              <Input id="password" type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required minLength={6} />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Género</Label>
+              <Select value={form.genero} onValueChange={(v) => setForm({ ...form, genero: v })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Seleccionar..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="masculino">Masculino</SelectItem>
+                  <SelectItem value="femenino">Femenino</SelectItem>
+                  <SelectItem value="otro">Otro</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Rol del Sistema</Label>
+              <Select 
+                value={form.rol} 
+                onValueChange={(v) => setForm({ ...form, rol: v, categoriaDocente: '', materias: [], niveles: [], ciclos: {}, grados: [], grado: '', rne: '' })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Asignar un rol..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {rolesPermitidos.map(r => (
+                    <SelectItem key={r} value={r}>{r.replace('_', ' ').toUpperCase()}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {(session?.user?.role === 'admin' || session?.user?.role === 'superadmin') && (
-              <div>
-                <label className={labelClass}>Código del Centro</label>
-                <input type="text" value={form.codigoCentro} onChange={(e) => setForm({ ...form, codigoCentro: e.target.value.toUpperCase() })} className={inputClass} placeholder="Ej: SALE2025" />
+              <div className="space-y-2">
+                <Label htmlFor="codigo">Código del Centro</Label>
+                <Input 
+                  id="codigo" 
+                  value={form.codigoCentro} 
+                  onChange={(e) => setForm({ ...form, codigoCentro: e.target.value.toUpperCase() })} 
+                  placeholder="Ej: SALE2025" 
+                />
               </div>
             )}
+          </CardContent>
+        </Card>
 
-            {/* Estudiante */}
-            {form.rol === 'estudiante' && (
-              <>
-                <div>
-                  <label className={labelClass}>Nivel</label>
-                  <select value={form.nivel} onChange={(e) => setForm({ ...form, nivel: e.target.value, ciclo: '', grado: '' })} className={inputClass} required>
-                    <option value="">Seleccionar...</option>
-                    <option value="nivel-primario">Primario</option>
-                    <option value="nivel-secundario">Secundario</option>
-                  </select>
-                </div>
-                <div>
-                  <label className={labelClass}>Ciclo</label>
-                  <select value={form.ciclo} onChange={(e) => setForm({ ...form, ciclo: e.target.value })} className={inputClass} required disabled={!form.nivel}>
-                    <option value="">Seleccionar...</option>
-                    <option value="primer-ciclo">Primer Ciclo</option>
-                    <option value="segundo-ciclo">Segundo Ciclo</option>
-                  </select>
-                </div>
-                <div>
-                  <label className={labelClass}>Grado</label>
-                  <select value={form.grado} onChange={(e) => setForm({ ...form, grado: e.target.value })} className={inputClass} required disabled={!form.ciclo}>
-                    <option value="">Seleccionar...</option>
-                    {getGradosPorCiclo(form.nivel, form.ciclo).map(g => <option key={g} value={g}>{g.replace('-', ' ')}</option>)}
-                  </select>
-                </div>
-                <div><label className={labelClass}>RNE</label><input type="text" value={form.rne} onChange={(e) => setForm({ ...form, rne: e.target.value })} className={inputClass} /></div>
-              </>
-            )}
+        {/* Sección específica para ESTUDIANTES */}
+        {form.rol === 'estudiante' && (
+          <Card className="border-blue-200 dark:border-blue-900">
+            <CardHeader>
+              <CardTitle className="text-blue-600">Datos Académicos (Estudiante)</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label>Nivel</Label>
+                <Select value={form.nivel} onValueChange={(v) => setForm({ ...form, nivel: v, ciclo: '', grado: '' })}>
+                  <SelectTrigger><SelectValue placeholder="Nivel..." /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="nivel-primario">Primario</SelectItem>
+                    <SelectItem value="nivel-secundario">Secundario</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Ciclo</Label>
+                <Select disabled={!form.nivel} value={form.ciclo} onValueChange={(v) => setForm({ ...form, ciclo: v, grado: '' })}>
+                  <SelectTrigger><SelectValue placeholder="Ciclo..." /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="primer-ciclo">Primer Ciclo</SelectItem>
+                    <SelectItem value="segundo-ciclo">Segundo Ciclo</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Grado</Label>
+                <Select disabled={!form.ciclo} value={form.grado} onValueChange={(v) => setForm({ ...form, grado: v })}>
+                  <SelectTrigger><SelectValue placeholder="Grado..." /></SelectTrigger>
+                  <SelectContent>
+                    {getGradosPorCiclo(form.nivel, form.ciclo).map(g => (
+                      <SelectItem key={g} value={g}>{g.replace('-', ' ')}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="md:col-span-3 space-y-2">
+                <Label htmlFor="rne">RNE (Registro Nacional de Estudiante)</Label>
+                <Input id="rne" value={form.rne} onChange={(e) => setForm({ ...form, rne: e.target.value })} placeholder="Opcional" />
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-            {/* Docente */}
-            {form.rol === 'docente' && (
-              <>
-                <div>
-                  <label className={labelClass}>Categoría</label>
-                  <select value={form.categoriaDocente} onChange={(e) => setForm({ ...form, categoriaDocente: e.target.value, materias: [] })} className={inputClass} required>
-                    <option value="">Seleccionar...</option>
-                    <option value="idiomas">Idiomas</option>
-                    <option value="materias-basicas">Materias Básicas</option>
-                    <option value="otras-materias">Otras Materias</option>
-                  </select>
+        {/* Sección específica para DOCENTES */}
+        {form.rol === 'docente' && (
+          <Card className="border-green-200 dark:border-green-900">
+            <CardHeader>
+              <CardTitle className="text-green-600">Configuración de Docente</CardTitle>
+              <CardDescription>Materias, niveles y grados bajo su responsabilidad.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Label>Categoría de Docente</Label>
+                  <Select value={form.categoriaDocente} onValueChange={(v) => setForm({ ...form, categoriaDocente: v, materias: [] })}>
+                    <SelectTrigger><SelectValue placeholder="Seleccionar categoría..." /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="idiomas">Idiomas</SelectItem>
+                      <SelectItem value="materias-basicas">Materias Básicas</SelectItem>
+                      <SelectItem value="otras-materias">Otras Materias</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
-                <div>
-                  <label className={labelClass}>Niveles</label>
-                  <div className="flex gap-2">
+
+                <div className="space-y-3">
+                  <Label>Niveles en los que imparte</Label>
+                  <div className="flex gap-4">
                     {['nivel-primario', 'nivel-secundario'].map(n => (
-                      <label key={n} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs border cursor-pointer ${form.niveles.includes(n) ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 text-blue-700 dark:text-blue-400' : 'border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-400'}`}>
-                        <input type="checkbox" checked={form.niveles.includes(n)} onChange={() => toggleArray('niveles', n)} className="sr-only" />
-                        {n === 'nivel-primario' ? 'Primario' : 'Secundario'}
-                      </label>
+                      <div key={n} className="flex items-center space-x-2">
+                        <Checkbox 
+                          id={n} 
+                          checked={form.niveles.includes(n)} 
+                          onCheckedChange={() => toggleArray('niveles', n)}
+                        />
+                        <label htmlFor={n} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                          {n === 'nivel-primario' ? 'Primario' : 'Secundario'}
+                        </label>
+                      </div>
                     ))}
                   </div>
                 </div>
-              </>
-            )}
-          </div>
-
-          {/* Materias */}
-          {form.rol === 'docente' && form.categoriaDocente && (
-            <div className="mt-4">
-              <label className={labelClass}>Materias que imparte</label>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {MATERIAS_DISPONIBLES.filter(m => MATERIAS_POR_CATEGORIA[form.categoriaDocente]?.includes(m.slug)).map(m => (
-                  <label key={m.slug} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs border cursor-pointer ${form.materias.includes(m.slug) ? 'bg-green-50 dark:bg-green-900/20 border-green-300 text-green-700 dark:text-green-400' : 'border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-400'}`}>
-                    <input type="checkbox" checked={form.materias.includes(m.slug)} onChange={() => toggleArray('materias', m.slug)} className="sr-only" />
-                    {m.label}
-                  </label>
-                ))}
               </div>
-            </div>
-          )}
 
-          {/* Grados por nivel */}
-          {form.rol === 'docente' && form.niveles.length > 0 && (
-            <div className="mt-4 space-y-4">
-              <label className={labelClass}>Grados que imparte</label>
-              {form.niveles.map(nivel => (
-                <div key={nivel} className="p-3 bg-gray-50 dark:bg-slate-700/30 rounded-lg">
-                  <div className="flex items-center gap-3 mb-2">
-                    <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                      {nivel === 'nivel-primario' ? 'Primaria' : 'Secundaria'}
-                    </p>
-                    <select
-                      value={form.ciclos[nivel] || ''}
-                      onChange={(e) => setForm({ ...form, ciclos: { ...form.ciclos, [nivel]: e.target.value } })}
-                      className="text-xs px-2 py-1.5 border rounded-lg dark:bg-slate-600 dark:text-white"
-                    >
-                      <option value="">Seleccionar ciclo...</option>
-                      <option value="primer-ciclo">Primer Ciclo</option>
-                      <option value="segundo-ciclo">Segundo Ciclo</option>
-                    </select>
+              {form.categoriaDocente && (
+                <div className="space-y-3">
+                  <Label>Materias</Label>
+                  <div className="flex flex-wrap gap-2">
+                    {MATERIAS_DISPONIBLES.filter(m => MATERIAS_POR_CATEGORIA[form.categoriaDocente]?.includes(m.slug)).map(m => (
+                      <Badge 
+                        key={m.slug}
+                        variant={form.materias.includes(m.slug) ? "default" : "outline"}
+                        className="cursor-pointer py-1.5 px-3"
+                        onClick={() => toggleArray('materias', m.slug)}
+                      >
+                        {m.label}
+                      </Badge>
+                    ))}
                   </div>
+                </div>
+              )}
 
-                  {form.ciclos[nivel] && (
-                    <>
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                        {getGradosPorCiclo(nivel, form.ciclos[nivel]).map(g => (
-                          <label key={g} className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs border cursor-pointer ${form.grados.includes(g) ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-300 text-blue-700 dark:text-blue-400' : 'border-gray-200 dark:border-slate-600 text-gray-600 dark:text-gray-400'}`}>
-                            <input type="checkbox" checked={form.grados.includes(g)} onChange={() => toggleArray('grados', g)} className="sr-only" />
-                            {g.replace('-', ' ')}
-                          </label>
-                        ))}
+              <Separator />
+
+              {form.niveles.length > 0 && (
+                <div className="space-y-4">
+                  <Label className="text-base font-bold">Grados asignados por nivel</Label>
+                  {form.niveles.map(nivel => (
+                    <div key={nivel} className="p-4 rounded-lg bg-slate-50 dark:bg-slate-900 border space-y-4">
+                      <div className="flex flex-col md:flex-row md:items-center gap-4">
+                        <span className="font-semibold min-w-24">
+                          {nivel === 'nivel-primario' ? '📌 Primaria' : '📌 Secundaria'}
+                        </span>
+                        <Select 
+                          value={form.ciclos[nivel] || ''} 
+                          onValueChange={(v) => setForm({ ...form, ciclos: { ...form.ciclos, [nivel]: v } })}
+                        >
+                          <SelectTrigger className="w-full md:w-[200px] h-8 text-xs">
+                            <SelectValue placeholder="Seleccionar ciclo..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="primer-ciclo">Primer Ciclo</SelectItem>
+                            <SelectItem value="segundo-ciclo">Segundo Ciclo</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </div>
 
-                      {/* Ciclo completo */}
-                      <label className="flex items-center gap-2 text-xs mt-2 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={getGradosPorCiclo(nivel, form.ciclos[nivel]).every(g => form.grados.includes(g))}
-                          onChange={(e) => {
-                            const gradosCiclo = getGradosPorCiclo(nivel, form.ciclos[nivel])
-                            if (e.target.checked) {
-                              setForm({ ...form, grados: [...new Set([...form.grados, ...gradosCiclo])] })
-                            } else {
-                              setForm({ ...form, grados: form.grados.filter(g => !gradosCiclo.includes(g)) })
-                            }
-                          }}
-                          className="rounded"
-                        />
-                        <span className="text-gray-600 dark:text-gray-400">Seleccionar ciclo completo</span>
-                      </label>
-                    </>
-                  )}
+                      {form.ciclos[nivel] && (
+                        <div className="space-y-3">
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                            {getGradosPorCiclo(nivel, form.ciclos[nivel]).map(g => (
+                              <div key={g} className="flex items-center space-x-2">
+                                <Checkbox 
+                                  id={g} 
+                                  checked={form.grados.includes(g)} 
+                                  onCheckedChange={() => toggleArray('grados', g)}
+                                />
+                                <label htmlFor={g} className="text-xs">{g.replace('-', ' ')}</label>
+                              </div>
+                            ))}
+                          </div>
+                          
+                          <div className="flex items-center space-x-2 mt-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+                            <Checkbox 
+                              id={`all-${nivel}`}
+                              checked={getGradosPorCiclo(nivel, form.ciclos[nivel]).every(g => form.grados.includes(g))}
+                              onCheckedChange={(checked) => {
+                                const gradosCiclo = getGradosPorCiclo(nivel, form.ciclos[nivel])
+                                if (checked) {
+                                  setForm({ ...form, grados: [...new Set([...form.grados, ...gradosCiclo])] })
+                                } else {
+                                  setForm({ ...form, grados: form.grados.filter(g => !gradosCiclo.includes(g)) })
+                                }
+                              }}
+                            />
+                            <Label htmlFor={`all-${nivel}`} className="text-xs text-muted-foreground">Seleccionar ciclo completo</Label>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+
+                  {/* Selección Rápida Nivel Completo */}
+                  <div className="pt-2">
+                    <p className="text-xs font-medium text-muted-foreground mb-2">Selección rápida por nivel completo:</p>
+                    <div className="flex flex-wrap gap-4">
+                      {form.niveles.map(nivel => {
+                        const todosLosGrados = nivel === 'nivel-primario'
+                          ? [...GRADOS_PRIMER_CICLO_PRIMARIA, ...GRADOS_SEGUNDO_CICLO_PRIMARIA]
+                          : [...GRADOS_PRIMER_CICLO_SECUNDARIA, ...GRADOS_SEGUNDO_CICLO_SECUNDARIA]
+
+                        return (
+                          <div key={nivel} className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`full-${nivel}`}
+                              checked={todosLosGrados.every(g => form.grados.includes(g))}
+                              onCheckedChange={(checked) => {
+                                if (checked) {
+                                  setForm({ ...form, grados: [...new Set([...form.grados, ...todosLosGrados])] })
+                                } else {
+                                  setForm({ ...form, grados: form.grados.filter(g => !todosLosGrados.includes(g)) })
+                                }
+                              }}
+                            />
+                            <Label htmlFor={`full-${nivel}`} className="text-xs font-semibold">
+                              {nivel === 'nivel-primario' ? 'Toda la Primaria' : 'Toda la Secundaria'}
+                            </Label>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
                 </div>
-              ))}
-            </div>
-          )}
+              )}
+            </CardContent>
+          </Card>
+        )}
 
-          {/* Nivel completo */}
-          {form.niveles.length > 0 && (
-            <div className="mt-4 pt-3 border-t border-gray-200 dark:border-slate-600">
-              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Selección rápida</p>
-              {form.niveles.map(nivel => {
-                const todosLosGrados = nivel === 'nivel-primario'
-                  ? [...GRADOS_PRIMER_CICLO_PRIMARIA, ...GRADOS_SEGUNDO_CICLO_PRIMARIA]
-                  : [...GRADOS_PRIMER_CICLO_SECUNDARIA, ...GRADOS_SEGUNDO_CICLO_SECUNDARIA]
+        {error && (
+          <Alert variant="destructive">
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
-                return (
-                  <label key={nivel} className="flex items-center gap-2 text-xs cursor-pointer mb-1">
-                    <input
-                      type="checkbox"
-                      checked={todosLosGrados.every(g => form.grados.includes(g))}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setForm({ ...form, grados: [...new Set([...form.grados, ...todosLosGrados])] })
-                        } else {
-                          setForm({ ...form, grados: form.grados.filter(g => !todosLosGrados.includes(g)) })
-                        }
-                      }}
-                      className="rounded"
-                    />
-                    <span className="text-gray-600 dark:text-gray-400 font-medium">
-                      Nivel {nivel === 'nivel-primario' ? 'Primario' : 'Secundario'} completo
-                    </span>
-                  </label>
-                )
-              })}
-            </div>
-          )}
-        </div>
-
-        {error && <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-sm text-red-700 dark:text-red-400">{error}</div>}
-
-        <div className="flex items-center gap-3">
-          <button type="submit" disabled={loading} className="bg-blue-600 text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50">
-            {loading ? 'Creando...' : 'Crear Usuario'}
-          </button>
-          <button type="button" onClick={() => router.back()} className="text-sm text-gray-500 dark:text-gray-400">Cancelar</button>
+        <div className="flex items-center justify-end gap-4">
+          <Button variant="outline" type="button" onClick={() => router.back()}>
+            Cancelar
+          </Button>
+          <Button type="submit" disabled={loading} className="px-8">
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Creando...
+              </>
+            ) : (
+              <>
+                <UserPlus className="mr-2 h-4 w-4" />
+                Crear Usuario
+              </>
+            )}
+          </Button>
         </div>
       </form>
     </div>
