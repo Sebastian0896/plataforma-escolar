@@ -1,6 +1,9 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 interface Props {
   slug: string
@@ -17,66 +20,68 @@ export default function InstrumentoModal({ slug, onClose }: Props) {
       .then(d => { setData(d); setLoading(false) })
   }, [slug])
 
-  const exportarPDF = async () => {
-    const res = await fetch(`/api/instrumentos/pdf?slug=${slug}`)
-    const blob = await res.blob()
-    const url = URL.createObjectURL(blob)
-    window.open(url)
-  }
-
-  if (loading) return <div className="text-center py-8 text-gray-500">Generando instrumento...</div>
+  const exportarPDF = () => window.open(`/api/instrumentos/pdf?slug=${slug}`, '_blank')
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white dark:bg-slate-800 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white">📋 Instrumento de Evaluación</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
-        </div>
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl max-h-[90vh]">
+        <DialogHeader>
+          <DialogTitle>📋 Instrumento de Evaluación</DialogTitle>
+        </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Datos */}
-          <div className="bg-gray-50 dark:bg-slate-700/30 rounded-xl p-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400">Tipo sugerido</p>
-            <p className="text-lg font-bold text-blue-700 dark:text-blue-400">{data?.tipo}</p>
-          </div>
+        {loading ? (
+          <p className="text-center py-8 text-muted-foreground">Generando instrumento...</p>
+        ) : (
+          <ScrollArea className="max-h-[60vh]">
+            <div className="space-y-6 p-1">
+              <div className="bg-muted rounded-xl p-4">
+                <p className="text-sm text-muted-foreground">Tipo sugerido</p>
+                <p className="text-lg font-bold text-primary">{data?.tipo}</p>
+              </div>
 
-          {/* Criterios */}
-          <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Criterios de Evaluación</h3>
-            <div className="space-y-2">
-              {data?.criterios?.map((c: string, i: number) => (
-                <div key={i} className="flex items-start gap-3 p-3 bg-gray-50 dark:bg-slate-700/30 rounded-lg">
-                  <span className="text-blue-600 font-bold">{i + 1}.</span>
-                  <p className="text-sm text-gray-700 dark:text-gray-300">{c}</p>
+              <div>
+                <h3 className="font-semibold mb-3">Criterios de Evaluación</h3>
+                <div className="space-y-2">
+                  {data?.criterios?.map((c: string, i: number) => (
+                    <div key={i} className="flex items-start gap-3 p-3 bg-muted rounded-lg">
+                      <span className="text-primary font-bold">{i + 1}.</span>
+                      <p className="text-sm">{c}</p>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
+              </div>
 
-          {/* Recomendaciones */}
-          <div>
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Recomendaciones</h3>
-            <div className="space-y-2">
-              {data?.recomendaciones?.map((r: string, i: number) => (
-                <div key={i} className="flex items-start gap-3 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg">
-                  <span className="text-amber-600">💡</span>
-                  <p className="text-sm text-amber-800 dark:text-amber-300">{r}</p>
+              <div>
+                <h3 className="font-semibold mb-3">Recomendaciones</h3>
+                <div className="space-y-2">
+                  {data?.recomendaciones?.map((r: string, i: number) => (
+                    <div key={i} className="flex items-start gap-3 p-3 bg-amber-50 dark:bg-amber-950 rounded-lg">
+                      <span>💡</span>
+                      <p className="text-sm text-amber-900 dark:text-amber-100">{r}</p>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
+              </div>
 
-        <div className="flex gap-3 mt-6">
-          <button onClick={exportarPDF} className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-700">
-            📄 Exportar PDF
-          </button>
-          <button onClick={onClose} className="bg-gray-200 dark:bg-slate-700 px-4 py-2 rounded-lg text-sm">
-            Cerrar
-          </button>
+              {data?.ejemplos && (
+                <div>
+                  <h3 className="font-semibold mb-3">Ejemplos</h3>
+                  <div className="space-y-2">
+                    {data.ejemplos.map((e: string, i: number) => (
+                      <div key={i} className="p-3 bg-muted rounded-lg text-sm">{e}</div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </ScrollArea>
+        )}
+
+        <div className="flex gap-3 mt-4">
+          <Button variant="destructive" onClick={exportarPDF}>📄 Exportar PDF</Button>
+          <Button variant="outline" onClick={onClose}>Cerrar</Button>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }

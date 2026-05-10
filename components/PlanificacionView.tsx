@@ -1,28 +1,20 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 import { Planificacion, Rol } from '@/lib/types'
 import MomentoSection from './MomentoSection'
-
-import { useSession } from 'next-auth/react'
-import Image from 'next/image'
-
 import BotonPDF from './BotonPDF'
 import InstrumentoModal from './InstrumentoModal'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 
 const getLang = (materia: string): string => {
   const langMap: Record<string, string> = {
-    'Francés': 'fr-FR',
-    'Frances': 'fr-FR',
-    'francés': 'fr-FR',
-    'frances': 'fr-FR',
-    'Inglés': 'en-US',
-    'Ingles': 'en-US',
-    'inglés': 'en-US',
-    'ingles': 'en-US',
+    'Francés': 'fr-FR', 'Frances': 'fr-FR', 'francés': 'fr-FR', 'frances': 'fr-FR',
+    'Inglés': 'en-US', 'Ingles': 'en-US', 'inglés': 'en-US', 'ingles': 'en-US',
   }
-
-  
   return langMap[materia] || 'fr-FR'
 }
 
@@ -31,192 +23,102 @@ interface PlanificacionViewProps {
   soloEstudiante?: boolean
 }
 
-export default function PlanificacionView({
-  planificacion,
-  soloEstudiante = false,
-}: PlanificacionViewProps) {
+export default function PlanificacionView({ planificacion, soloEstudiante = false }: PlanificacionViewProps) {
   const { data: session } = useSession()
+  const [showInstrumento, setShowInstrumento] = useState(false)
+  const [centroNombre, setCentroNombre] = useState(planificacion.centroEducativo || '')
   const lang = getLang(planificacion.materia)
 
-  const [centroNombre, setCentroNombre] = useState(planificacion.centroEducativo || '')
-  const [showInstrumento, setShowInstrumento] = useState(false)
-  const rol: Rol = soloEstudiante ? 'estudiante' : (session ? 'profesor' : 'estudiante')
-  
+  const rol: Rol = soloEstudiante ? 'estudiante' : session ? 'profesor' : 'estudiante'
+
   useEffect(() => {
-  if (planificacion.centroId) {
-    fetch(`/api/centros?id=${planificacion.centroId}`)
-      .then(r => r.json())
-      .then(c => { if (c.nombre) setCentroNombre(c.nombre) })
-      .catch(() => {})
-  }
-}, [planificacion.centroId])
+    if (planificacion.centroId) {
+      fetch(`/api/centros?id=${planificacion.centroId}`)
+        .then(r => r.json())
+        .then(c => { if (c.nombre) setCentroNombre(c.nombre) })
+        .catch(() => {})
+    }
+  }, [planificacion.centroId])
 
-  function formatear(texto: string): string {
-  if (!texto) return ''
-  return texto
-    .split('-')
-    .map((palabra) => palabra.charAt(0).toUpperCase() + palabra.slice(1))
-    .join(' ')
-  }
   return (
-    <article className="animate-in">
+    <article className="animate-in pb-8">
       <header className="mb-6">
-        <div className="flex justify-between items-center gap-2 text-sm text-gray-500 dark:text-gray-300 mb-4">
-          <div className=''>
-            <span className='mx-1'>{formatear(planificacion.materia)}</span>
-            <span className='mx-1'>/</span>
-            <span className='mx-1'>{planificacion.tema}</span>
-          </div>
-          {/* {!soloEstudiante && session && (
-            <span className="ml-auto text-xs bg-gray-50 dark:bg-slate-800/50 px-2 py-1 rounded">
-              👩‍🏫 Vista docente
-            </span>
-          )} */}
-            <button
-              onClick={() => setShowInstrumento(true)}
-              className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-purple-700"
-            >
-              📋 Instrumento de Evaluación
-            </button>
-        </div>
-
-        {showInstrumento && (
-          <InstrumentoModal slug={planificacion.slug} onClose={() => setShowInstrumento(false)} />
-        )}
-
-        {/* Cabecera institucional */}
-        <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden mb-4">
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-5 py-4 flex items-center gap-4">
-                        
-            {/* <div className="w-14 h-14 bg-white dark:bg-slate-800 rounded-xl flex items-center justify-center flex-shrink-0 shadow-md overflow-hidden relative">
-              <Image
-                src="/logo-salome-urena.png"
-                alt="Logo Centro Educativo Salomé Ureña"
-                width={56}
-                height={56}
-                className="object-contain p-1"
-                priority
-              />
-            </div> */}
-            <div className="text-white">
-              <h2 className="text-lg font-bold leading-tight">
-                {centroNombre || 'Centro Educativo'}
-              </h2>
-              <p className="text-blue-100 text-xs">Formando el futuro con excelencia</p>
-            </div>
-            
+        <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span>{planificacion.materia}</span>
+            <span>/</span>
+            <span>{planificacion.tema}</span>
           </div>
 
-          <div className="p-5">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="flex items-start gap-3 p-3 bg-blue-50/50 rounded-lg border border-blue-100">
-                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    className="w-5 h-5 text-blue-600"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Maestro</h3>
-                  <p className="text-sm text-gray-700 dark:text-gray-200">
-                    {planificacion.maestro || 'Sebastián González Rodríguez'}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3 p-3 bg-purple-50/50 rounded-lg border border-purple-100">
-                <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    className="w-5 h-5 text-purple-600"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Coordinadora</h3>
-                  <p className="text-sm text-gray-700text-gray-700 dark:text-gray-200">
-                    {planificacion.coordinadora || 'Susana'}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-4 pt-4 border-t border-gray-100 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-              <div>
-                <span className="text-gray-500 dark:text-gray-400 block">Año escolar</span>
-                <span className="font-medium text-gray-700 dark:text-gray-200">
-                  {planificacion.anoEscolar || '2025-2026'}
-                </span>
-              </div>
-              <div>
-                <span className="text-gray-500 dark:text-gray-400 block">Asignatura</span>
-                <span className="font-medium text-gray-700 dark:text-gray-200">{formatear(planificacion.materia)}</span>
-              </div>
-              <div>
-                <span className="text-gray-500 dark:text-gray-400 block">Tema</span>
-                <span className="font-medium text-gray-700 dark:text-gray-200">{planificacion.tema}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <h1 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-3">
-          {planificacion.tema}
-        </h1>
-
-        <div className="grid gap-2 bg-white dark:bg-slate-800 p-4 rounded-xl border border-gray-200 dark:border-slate-700">
-          <div>
-            <span className="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 tracking-wide">
-              Competencia
-            </span>
-            <p className="text-sm text-gray-800text-gray-800 dark:text-gray-100 mt-0.5">{planificacion.competencia}</p>
-          </div>
-          <div>
-            <span className="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 tracking-wide">
-              Indicador de Logro
-            </span>
-            <p className="text-sm text-gray-800 dark:text-gray-100 mt-0.5">{planificacion.indicadorLogro}</p>
-          </div>
-          {planificacion.contenidoEstudianteGeneral && (
-            <div>
-              <span className="text-xs font-semibold uppercase text-gray-500 dark:text-gray-400 tracking-wide">
-                📖 Para los estudiantes
-              </span>
-              <p className="text-sm text-gray-800 dark:text-gray-100 mt-0.5">
-                {planificacion.contenidoEstudianteGeneral}
-              </p>
+          {!soloEstudiante && (
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={() => setShowInstrumento(true)}>
+                📋 Instrumento
+              </Button>
+              <BotonPDF slug={planificacion.slug} grado={planificacion.grado} />
             </div>
           )}
         </div>
-      </header>
-      <div className="flex items-center justify-between mb-4">
-        <h1 className="text-2xl font-bold">{planificacion.tema}</h1>
-        {!soloEstudiante && (
-          <BotonPDF slug={planificacion.slug} grado={planificacion.grado} />
-        )}
-      </div>
 
-      {/* Momentos */}
+        {/* Cabecera institucional */}
+        <Card className="overflow-hidden mb-4">
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-5 py-4 flex items-center gap-4">
+            <div className="text-white">
+              <h2 className="text-lg font-bold leading-tight">{centroNombre}</h2>
+              <p className="text-blue-100 text-xs">Formando el futuro con excelencia</p>
+            </div>
+          </div>
+          <CardContent className="grid grid-cols-2 sm:grid-cols-2 gap-4 p-5">
+            <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+              <div>
+                <h3 className="text-sm font-semibold">Maestro</h3>
+                <p className="text-sm">{planificacion.maestro || 'Sebastián González Rodríguez'}</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+              <div>
+                <h3 className="text-sm font-semibold">Coordinadora</h3>
+                <p className="text-sm">{planificacion.coordinadora || 'Susana'}</p>
+              </div>
+            </div>
+            <div className="col-span-2 pt-4 border-t grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+              <div><span className="text-muted-foreground block">Año escolar</span><span className="font-medium">{planificacion.anoEscolar || '2025-2026'}</span></div>
+              <div><span className="text-muted-foreground block">Asignatura</span><span className="font-medium">{planificacion.materia}</span></div>
+              <div><span className="text-muted-foreground block">Tema</span><span className="font-medium">{planificacion.tema}</span></div>
+              <div><span className="text-muted-foreground block">Idioma</span><span className="font-medium">{lang === 'fr-FR' ? 'Francés' : 'Inglés'}</span></div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <h1 className="text-2xl lg:text-3xl font-bold mb-3">{planificacion.tema}</h1>
+
+        <Card>
+          <CardContent className="grid gap-2 p-4">
+            <div>
+              <span className="text-xs font-semibold uppercase text-muted-foreground">Competencia</span>
+              <p className="text-sm mt-0.5">{planificacion.competencia}</p>
+            </div>
+            <div>
+              <span className="text-xs font-semibold uppercase text-muted-foreground">Indicador de Logro</span>
+              <p className="text-sm mt-0.5">{planificacion.indicadorLogro}</p>
+            </div>
+            {planificacion.contenidoEstudianteGeneral && (
+              <div>
+                <span className="text-xs font-semibold uppercase text-muted-foreground">📖 Para los estudiantes</span>
+                <p className="text-sm mt-0.5">{planificacion.contenidoEstudianteGeneral}</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </header>
+
       <div className="space-y-4">
         {planificacion.momentos.map((momento, idx) => (
           <MomentoSection key={idx} momento={momento} rol={rol} lang={lang} />
         ))}
       </div>
+
+      {showInstrumento && <InstrumentoModal slug={planificacion.slug} onClose={() => setShowInstrumento(false)} />}
     </article>
   )
 }

@@ -1,11 +1,11 @@
-// app/login/page.tsx
 'use client'
 
 import { signIn } from 'next-auth/react'
 import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
-
-/* export const metadata = { title: 'Iniciar Sesión' } */
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
 function LoginForm() {
   const searchParams = useSearchParams()
@@ -20,20 +20,11 @@ function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-
-    if (bloqueado) {
-      setLoginError('Demasiados intentos. Esperá un minuto.')
-      return
-    }
-
+    if (bloqueado) { setLoginError('Demasiados intentos. Esperá un minuto.'); return }
     setLoading(true)
     setLoginError('')
 
-    const result = await signIn('credentials', {
-      email,
-      password,
-      redirect: false,
-    })
+    const result = await signIn('credentials', { email, password, redirect: false })
 
     if (result?.error) {
       const nuevo = intentos + 1
@@ -41,80 +32,65 @@ function LoginForm() {
       if (nuevo >= 5) {
         setBloqueado(true)
         setLoginError('Demasiados intentos. Esperá un minuto.')
-        setTimeout(() => {
-          setBloqueado(false)
-          setIntentos(0)
-        }, 60000)
+        setTimeout(() => { setBloqueado(false); setIntentos(0) }, 60000)
       } else {
         setLoginError('Email o contraseña incorrectos')
       }
       setLoading(false)
       return
     }
-
     window.location.href = '/dashboard'
   }
 
   return (
     <div className="w-full max-w-sm">
       <div className="text-center mb-8">
-        <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+        <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
           <span className="text-2xl">📚</span>
         </div>
-        <h1 className="text-xl font-bold text-gray-900 dark:text-white">Iniciar Sesión</h1>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Plataforma Educativa</p>
+        <h1 className="text-xl font-bold">Iniciar Sesión</h1>
+        <p className="text-sm text-muted-foreground mt-1">Plataforma Educativa</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6">
-        {(error || loginError) && (
-          <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-sm text-red-700 dark:text-red-400">
-            {loginError || (error === 'CredentialsSignin' ? 'Email o contraseña incorrectos' : 'Error al iniciar sesión')}
-          </div>
-        )}
+      <Card>
+        <CardContent className="p-6">
+          {(error || loginError) && (
+            <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-xl text-sm text-destructive">
+              {loginError || (error === 'CredentialsSignin' ? 'Email o contraseña incorrectos' : 'Error al iniciar sesión')}
+            </div>
+          )}
 
-        {intentos >= 3 && intentos < 5 && (
-          <p className="text-xs text-amber-600 dark:text-amber-400 mb-3 text-center">
-            {5 - intentos} intentos restantes antes del bloqueo
-          </p>
-        )}
+          {intentos >= 3 && intentos < 5 && (
+            <p className="text-xs text-amber-600 dark:text-amber-400 mb-3 text-center">
+              {5 - intentos} intentos restantes antes del bloqueo
+            </p>
+          )}
 
-        <div className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
-            <input
-              type="email" id="email" value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="admin@salome.edu.do" required autoFocus
-              disabled={bloqueado}
-            />
-          </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Contraseña</label>
-            <input
-              type="password" id="password" value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 dark:border-slate-600 rounded-xl text-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="••••••••" required
-              disabled={bloqueado}
-            />
-          </div>
-          <button
-            type="submit" disabled={loading || bloqueado}
-            className="w-full bg-blue-600 text-white py-3 rounded-xl text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {bloqueado ? 'Bloqueado por 1 minuto' : loading ? 'Ingresando...' : 'Ingresar'}
-          </button>
-        </div>
-      </form>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">Email</label>
+              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
+                placeholder="admin@salome.edu.do" required autoFocus disabled={bloqueado} />
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">Contraseña</label>
+              <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••" required disabled={bloqueado} />
+            </div>
+            <Button type="submit" className="w-full" disabled={loading || bloqueado}>
+              {bloqueado ? 'Bloqueado por 1 minuto' : loading ? 'Ingresando...' : 'Ingresar'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   )
 }
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-slate-950 p-4">
-      <Suspense fallback={<div className="text-gray-500">Cargando...</div>}>
+    <div className="min-h-screen flex items-center justify-center bg-muted p-4">
+      <Suspense fallback={<div className="text-muted-foreground">Cargando...</div>}>
         <LoginForm />
       </Suspense>
     </div>

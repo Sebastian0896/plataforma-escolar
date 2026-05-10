@@ -1,38 +1,75 @@
-import { auth } from "@/auth"
-import { redirect } from "next/navigation"
-import AdminSidebar from "@/components/admin/AdminSidebar"
-import Navbar from "@/components/Navbar"
-import Breadcrumbs from "@/components/Breadcrumbs"
-import MobileFooter from "@/components/MobileFooter"
+import { auth } from '@/auth'
+import { redirect } from 'next/navigation'
 
-export const runtime = "nodejs"
+import Navbar from '@/components/Navbar'
+import Breadcrumbs from '@/components/Breadcrumbs'
+import MobileFooter from '@/components/MobileFooter'
+import AdminSidebar from '@/components/admin/AdminSidebar'
 
-export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+export const runtime = 'nodejs'
+
+export default async function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
   const session = await auth()
-  if (!session) return redirect("/login")
+
+  if (!session) {
+    return redirect('/login')
+  }
 
   const rol = session.user?.role
 
-  // Registro usa su propio layout
+  // Registro usa layout independiente
   if (rol === 'registro') {
     return <>{children}</>
   }
 
-  const rolesPermitidos = ['admin', 'admin_centro', 'superadmin', 'docente', 'registro']
-  if (!rolesPermitidos.includes(session.user?.role || '')) {
+  const rolesPermitidos = [
+    'admin',
+    'admin_centro',
+    'superadmin',
+    'docente',
+    'registro',
+  ]
+
+  if (
+    !rolesPermitidos.includes(
+      session.user?.role || ''
+    )
+  ) {
     redirect('/dashboard')
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen bg-muted/30">
+      {/* Navbar */}
       <Navbar />
-      <div className="flex flex-1">
+
+      {/* Layout */}
+      <div className="flex">
+        {/* Sidebar */}
         <AdminSidebar />
-        <main className="flex-1 max-w-6xl mx-auto w-full bg-gray-50 dark:bg-slate-950">
-          <Breadcrumbs />
-          {children}
+
+        {/* Main */}
+        <main className=" flex-1 w-full bg-background">
+          {/* Content Wrapper */}
+          <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 sm:py-8 md:px-6 lg:px-8 lg:py-8">
+            {/* Breadcrumbs */}
+            <div className="mb-6">
+              <Breadcrumbs />
+            </div>
+
+            {/* Page Content */}
+            <div className="mt-6 space-y-8 pb-24">
+              {children}
+            </div>
+          </div>
         </main>
       </div>
+
+      {/* Mobile Footer */}
       <MobileFooter />
     </div>
   )

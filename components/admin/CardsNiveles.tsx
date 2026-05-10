@@ -3,7 +3,9 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import type { NivelInfo } from '@/lib/types'
-import BotonEliminar from './BotonEliminar'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { ChevronRight, Plus } from 'lucide-react'
 
 interface Props {
   estructura: NivelInfo[]
@@ -16,14 +18,7 @@ export default function CardsNiveles({ estructura }: Props) {
   const [gradoSel, setGradoSel] = useState<any>(null)
   const [materiaSel, setMateriaSel] = useState<any>(null)
 
-  const volver = () => {
-    if (vista === 'temas') setVista('materias')
-    else if (vista === 'materias') setVista('grados')
-    else if (vista === 'grados') setVista('ciclos')
-    else if (vista === 'ciclos') setVista('niveles')
-  }
-
-  const totalTemas = (item: any) => {
+  const totalTemas = (item: any): number => {
     if (item.temas) return item.temas.length
     if (item.materias) return item.materias.reduce((acc: number, m: any) => acc + totalTemas(m), 0)
     if (item.grados) return item.grados.reduce((acc: number, g: any) => acc + totalTemas(g), 0)
@@ -34,72 +29,30 @@ export default function CardsNiveles({ estructura }: Props) {
   return (
     <div>
       {/* Breadcrumbs */}
-      
-      <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-6">
-        <button onClick={() => { setVista('niveles'); setNivelSel(null) }} className="hover:text-blue-600">📚 Planificaciones</button>
-
-       
-        
-        {nivelSel && (
-          <>
-            <span>›</span>
-            <button onClick={() => { setVista('ciclos'); setCicloSel(null) }} className="hover:text-blue-600">{nivelSel.nombre}</button>
-          </>
-          
-        )}
-
-        
-        {cicloSel && (
-          <>
-            <span>›</span>
-            <button onClick={() => { setVista('grados'); setGradoSel(null) }} className="hover:text-blue-600">{cicloSel.nombre}</button>
-          </>
-        )}
-        {gradoSel && (
-          <>
-            <span>›</span>
-            <button onClick={() => { setVista('materias'); setMateriaSel(null) }} className="hover:text-blue-600">{gradoSel.nombre}</button>
-          </>
-        )}
-        {materiaSel && (
-          <>
-            <span>›</span>
-            <span className="text-gray-900 dark:text-white">{materiaSel.nombre}</span>
-          </>
-        )}
-      </div>
-
-        
-      <div className='flex justify-end'>
-        {/* Breadcrumbs */}
-        
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-            <Link href="/admin/planificaciones/nueva" className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
-              + Nueva
-            </Link>
-            
-          </div>
-          
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <button onClick={() => { setVista('niveles'); setNivelSel(null) }} className="hover:text-primary">📚 Planificaciones</button>
+          {nivelSel && <><ChevronRight className="w-4 h-4" /><button onClick={() => { setVista('ciclos'); setCicloSel(null) }} className="hover:text-primary">{nivelSel.nombre}</button></>}
+          {cicloSel && <><ChevronRight className="w-4 h-4" /><button onClick={() => { setVista('grados'); setGradoSel(null) }} className="hover:text-primary">{cicloSel.nombre}</button></>}
+          {gradoSel && <><ChevronRight className="w-4 h-4" /><button onClick={() => { setVista('materias'); setMateriaSel(null) }} className="hover:text-primary">{gradoSel.nombre}</button></>}
+          {materiaSel && <><ChevronRight className="w-4 h-4" /><span className="text-foreground">{materiaSel.nombre}</span></>}
         </div>
+        <Link href="/admin/planificaciones/nueva">
+          <Button size="sm"><Plus className="w-4 h-4 mr-1" /> Nueva</Button>
+        </Link>
       </div>
-
-      
-
 
       {/* Niveles */}
       {vista === 'niveles' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {estructura.map(nivel => (
-            <button
-              key={nivel.slug}
-              onClick={() => { setNivelSel(nivel); setVista('ciclos') }}
-              className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5 text-left hover:shadow-md transition-shadow"
-            >
-              <div className="text-3xl mb-2">🏫</div>
-              <h3 className="font-semibold text-gray-900 dark:text-white">{nivel.nombre}</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{totalTemas(nivel)} planificaciones</p>
-            </button>
+            <Card key={nivel.slug} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => { setNivelSel(nivel); setVista('ciclos') }}>
+              <CardContent className="p-5">
+                <div className="text-3xl mb-2">🏫</div>
+                <h3 className="font-semibold">{nivel.nombre}</h3>
+                <p className="text-sm text-muted-foreground">{totalTemas(nivel)} planificaciones</p>
+              </CardContent>
+            </Card>
           ))}
         </div>
       )}
@@ -108,15 +61,13 @@ export default function CardsNiveles({ estructura }: Props) {
       {vista === 'ciclos' && nivelSel && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {nivelSel.ciclos.map(ciclo => (
-            <button
-              key={ciclo.slug}
-              onClick={() => { setCicloSel(ciclo); setVista('grados') }}
-              className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5 text-left hover:shadow-md transition-shadow"
-            >
-              <div className="text-3xl mb-2">📘</div>
-              <h3 className="font-semibold text-gray-900 dark:text-white">{ciclo.nombre}</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{totalTemas(ciclo)} planificaciones</p>
-            </button>
+            <Card key={ciclo.slug} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => { setCicloSel(ciclo); setVista('grados') }}>
+              <CardContent className="p-5">
+                <div className="text-3xl mb-2">📘</div>
+                <h3 className="font-semibold">{ciclo.nombre}</h3>
+                <p className="text-sm text-muted-foreground">{totalTemas(ciclo)} planificaciones</p>
+              </CardContent>
+            </Card>
           ))}
         </div>
       )}
@@ -125,15 +76,13 @@ export default function CardsNiveles({ estructura }: Props) {
       {vista === 'grados' && cicloSel && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {cicloSel.grados.map(grado => (
-            <button
-              key={grado.slug}
-              onClick={() => { setGradoSel(grado); setVista('materias') }}
-              className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5 text-left hover:shadow-md transition-shadow"
-            >
-              <div className="text-3xl mb-2">👨‍🎓</div>
-              <h3 className="font-semibold text-gray-900 dark:text-white">{grado.nombre}</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{totalTemas(grado)} planificaciones</p>
-            </button>
+            <Card key={grado.slug} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => { setGradoSel(grado); setVista('materias') }}>
+              <CardContent className="p-5">
+                <div className="text-3xl mb-2">👨‍🎓</div>
+                <h3 className="font-semibold">{grado.nombre}</h3>
+                <p className="text-sm text-muted-foreground">{totalTemas(grado)} planificaciones</p>
+              </CardContent>
+            </Card>
           ))}
         </div>
       )}
@@ -142,41 +91,37 @@ export default function CardsNiveles({ estructura }: Props) {
       {vista === 'materias' && gradoSel && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {gradoSel.materias.map(materia => (
-            <button
-              key={materia.slug}
-              onClick={() => { setMateriaSel(materia); setVista('temas') }}
-              className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-5 text-left hover:shadow-md transition-shadow"
-            >
-              <div className="text-3xl mb-2">📖</div>
-              <h3 className="font-semibold text-gray-900 dark:text-white">{materia.nombre}</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{materia.temas.length} planificaciones</p>
-            </button>
+            <Card key={materia.slug} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => { setMateriaSel(materia); setVista('temas') }}>
+              <CardContent className="p-5">
+                <div className="text-3xl mb-2">📖</div>
+                <h3 className="font-semibold">{materia.nombre}</h3>
+                <p className="text-sm text-muted-foreground">{materia.temas.length} planificaciones</p>
+              </CardContent>
+            </Card>
           ))}
         </div>
       )}
 
-      {/* Temas (lista final con acciones) */}
+      {/* Temas */}
       {vista === 'temas' && materiaSel && (
         <div className="space-y-2">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white">{materiaSel.nombre}</h2>
-            {/* <Link href="/admin/planificaciones/nueva" className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">+ Nueva</Link> */}
-          </div>
+          <h2 className="text-xl font-bold">{materiaSel.nombre}</h2>
           {materiaSel.temas.map((tema: any) => (
-            <div key={tema.slug} className="bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700 px-5 py-3 flex items-center justify-between">
+            <Card key={tema.slug} className="flex items-center justify-between p-4">
               <div>
-                <p className="font-medium text-gray-900 dark:text-white">{tema.tema}</p>
-                <p className="text-xs text-gray-500">/{gradoSel?.slug}/{materiaSel.slug}/{tema.slug}</p>
+                <p className="font-medium">{tema.tema}</p>
+                <p className="text-xs text-muted-foreground">/{gradoSel?.slug}/{materiaSel.slug}/{tema.slug}</p>
               </div>
-              <div className="flex items-center gap-3">
-                <Link href={`/admin/planificaciones/editar/${materiaSel.slug}/${tema.slug}`} className="text-sm text-blue-600 hover:underline">Editar</Link>
-                <Link href={`/admin/planificaciones/clonar/${tema.slug}`} className="text-xs text-green-600 hover:underline">
-                  📋 Clonar
+              <div className="flex gap-2">
+                <Link href={`/admin/planificaciones/editar/${materiaSel.slug}/${tema.slug}`}>
+                  <Button variant="outline" size="sm">✏️ Editar</Button>
                 </Link>
-                {/* <button id={tema.id} className="text-sm text-red-500 hover:text-red-700">Eliminar</button> */}
-                <BotonEliminar id={tema.id} />
+                <Link href={`/admin/planificaciones/clonar/${tema.slug}`}>
+                  <Button variant="outline" size="sm">📋 Clonar</Button>
+                </Link>
+                <Button variant="destructive" size="sm" onClick={() => handleDelete(tema.id)}>🗑️</Button>
               </div>
-            </div>
+            </Card>
           ))}
         </div>
       )}

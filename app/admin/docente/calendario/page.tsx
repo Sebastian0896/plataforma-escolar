@@ -1,130 +1,268 @@
 'use client'
 
+import { useEffect, useMemo, useState } from 'react'
 import { useSession } from 'next-auth/react'
-import { useState, useEffect } from 'react'
-import Calendar from 'react-calendar'
 import Link from 'next/link'
-import 'react-calendar/dist/Calendar.css'
 
-const coloresMateria: Record<string, { bg: string; dot: string }> = {
-  ingles: { bg: 'bg-blue-100 dark:bg-blue-900/30', dot: 'bg-blue-500' },
-  frances: { bg: 'bg-indigo-100 dark:bg-indigo-900/30', dot: 'bg-indigo-500' },
-  'lengua-espanola': { bg: 'bg-red-100 dark:bg-red-900/30', dot: 'bg-red-500' },
-  matematica: { bg: 'bg-green-100 dark:bg-green-900/30', dot: 'bg-green-500' },
-  'ciencias-sociales': { bg: 'bg-amber-100 dark:bg-amber-900/30', dot: 'bg-amber-500' },
-  'ciencias-naturales': { bg: 'bg-emerald-100 dark:bg-emerald-900/30', dot: 'bg-emerald-500' },
-  'educacion-fisica': { bg: 'bg-orange-100 dark:bg-orange-900/30', dot: 'bg-orange-500' },
-  artistica: { bg: 'bg-pink-100 dark:bg-pink-900/30', dot: 'bg-pink-500' },
-}
+import {
+  ChevronLeft,
+  ChevronRight,
+  CalendarDays,
+  BookOpen,
+} from 'lucide-react'
 
-export default function CalendarioPage() {
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
+
+export default function SemanaPage() {
   const { data: session } = useSession()
+
   const [planificaciones, setPlanificaciones] = useState<any[]>([])
-  const [fecha, setFecha] = useState(new Date())
-  const [cargando, setCargando] = useState(true)
+  const [semanaOffset, setSemanaOffset] = useState(0)
+
+  const hoy = new Date()
+
+  const lunes = useMemo(() => {
+    const fecha = new Date(hoy)
+
+    fecha.setDate(
+      hoy.getDate() -
+        hoy.getDay() +
+        1 +
+        semanaOffset * 7
+    )
+
+    fecha.setHours(0, 0, 0, 0)
+
+    return fecha
+  }, [semanaOffset])
+
+  const dias = [
+    'Lunes',
+    'Martes',
+    'Miércoles',
+    'Jueves',
+    'Viernes',
+  ]
+
+  const fechasSemana = dias.map((_, i) => {
+    const f = new Date(lunes)
+
+    f.setDate(lunes.getDate() + i)
+
+    return f
+  })
 
   useEffect(() => {
     if (session?.user) {
-      fetch('/api/docente/calendario')
-        .then(r => r.json())
-        .then(data => {
-          setPlanificaciones(data || [])
-          setCargando(false)
-        })
+      fetch('/api/planificaciones?todas=true')
+        .then((r) => r.json())
+        .then((d) =>
+          setPlanificaciones(
+            Array.isArray(d?.planificaciones)
+              ? d.planificaciones
+              : []
+          )
+        )
     }
   }, [session])
 
-  // Agrupar por fecha
-  const porFecha: Record<string, any[]> = {}
-  planificaciones.forEach(p => {
-    if (p.fechaProgramada) {
-      const key = new Date(p.fechaProgramada).toDateString()
-      if (!porFecha[key]) porFecha[key] = []
-      porFecha[key].push(p)
-    }
-  })
+  const plansPorDia = (fecha: Date) =>
+    planificaciones.filter(
+      (p) =>
+        p.fechaProgramada &&
+        new Date(p.fechaProgramada).toDateString() ===
+          fecha.toDateString()
+    )
 
-  const fechaStr = fecha.toDateString()
-  const delDia = porFecha[fechaStr] || []
+  const getMateriaColor = (materia: string) => {
+    const map: Record<string, string> = {
+      ingles:
+        'border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/30',
+      frances:
+        'border-indigo-200 bg-indigo-50 dark:border-indigo-900 dark:bg-indigo-950/30',
+      'lengua-espanola':
+        'border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/30',
+      matematica:
+        'border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/30',
+      'ciencias-sociales':
+        'border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950/30',
+      'ciencias-naturales':
+        'border-emerald-200 bg-emerald-50 dark:border-emerald-900 dark:bg-emerald-950/30',
+      'educacion-fisica':
+        'border-orange-200 bg-orange-50 dark:border-orange-900 dark:bg-orange-950/30',
+      artistica:
+        'border-pink-200 bg-pink-50 dark:border-pink-900 dark:bg-pink-950/30',
+    }
+
+    return (
+      map[materia] ||
+      'border-border bg-muted/40'
+    )
+  }
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Calendario</h1>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Calendario */}
-        <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4">
-          <style>{`
-            .react-calendar { border: none !important; width: 100% !important; background: transparent !important; }
-            .react-calendar__tile { padding: 1em 0.5em !important; position: relative; }
-            .react-calendar__tile--active { background: #2563eb !important; color: white !important; border-radius: 8px; }
-            .dark .react-calendar { color: white; }
-            .dark .react-calendar__tile { color: #cbd5e1; }
-            .dark .react-calendar__tile:disabled { color: #475569 !important; }
-            .dark .react-calendar__navigation button { color: white; }
-            .dark .react-calendar__month-view__weekdays { color: #94a3b8; }
-          `}</style>
-          <Calendar
-            onChange={(value) => setFecha(value as Date)}
-            value={fecha}
-            tileClassName={({ date }) => {
-              const key = date.toDateString()
-              const plans = porFecha[key]
-              if (!plans || plans.length === 0) return ''
-              const color = coloresMateria[plans[0].materia] || coloresMateria['ingles']
-              return `${color.bg} !important rounded-lg`
-            }}
-            tileContent={({ date }) => {
-              const key = date.toDateString()
-              const plans = porFecha[key]
-              if (!plans || plans.length === 0) return null
-              const color = coloresMateria[plans[0].materia] || coloresMateria['ingles']
-              return (
-                <div className="flex justify-center gap-0.5 mt-1">
-                  {plans.map((_, i) => (
-                    <span key={i} className={`w-1.5 h-1.5 rounded-full ${color.dot}`} />
-                  ))}
-                </div>
-              )
-            }}
-          />
-        </div>
-
-        {/* Planificaciones del día */}
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 capitalize">
-            {fecha.toLocaleDateString('es-DO', { weekday: 'long', day: 'numeric', month: 'long' })}
-          </h2>
+          <div className="flex items-center gap-2">
+            <CalendarDays className="h-7 w-7 text-primary" />
 
-          {cargando ? (
-            <p className="text-gray-500">Cargando...</p>
-          ) : delDia.length === 0 ? (
-            <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-8 text-center">
-              <p className="text-4xl mb-3">📭</p>
-              <p className="text-gray-500 dark:text-gray-400">Sin planificaciones este día</p>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {delDia.map((p, i) => {
-                const color = coloresMateria[p.materia] || coloresMateria['ingles']
-                return (
-                  <Link
-                    key={i}
-                    href={`/dashboard/${p.nivel || 'nivel-secundario'}/${p.grado}/${p.slug}`}
-                    className={`block bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-4 hover:shadow-md transition-shadow`}
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className={`w-3 h-3 rounded-full ${color.dot}`} />
-                      <span className="text-xs font-medium capitalize text-gray-500">{p.materia}</span>
-                      <span className="text-xs text-gray-400">· {p.grado?.replace('-', ' ')}</span>
-                    </div>
-                    <h3 className="font-medium text-gray-900 dark:text-white">{p.tema}</h3>
-                  </Link>
-                )
-              })}
-            </div>
-          )}
+            <h1 className="text-3xl font-bold tracking-tight">
+              Planificación Semanal
+            </h1>
+          </div>
+
+          <p className="mt-2 text-muted-foreground">
+            Visualiza y organiza las actividades académicas de la semana.
+          </p>
         </div>
+
+        {/* Navigation */}
+        <div className="flex items-center gap-3 rounded-xl border bg-background p-2 shadow-sm">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              setSemanaOffset((s) => s - 1)
+            }
+          >
+            <ChevronLeft className="mr-1 h-4 w-4" />
+            Anterior
+          </Button>
+
+          <div className="min-w-[220px] text-center text-sm font-medium">
+            {fechasSemana[0].toLocaleDateString(
+              'es-DO',
+              {
+                day: 'numeric',
+                month: 'short',
+              }
+            )}{' '}
+            —{' '}
+            {fechasSemana[4].toLocaleDateString(
+              'es-DO',
+              {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+              }
+            )}
+          </div>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() =>
+              setSemanaOffset((s) => s + 1)
+            }
+          >
+            Siguiente
+            <ChevronRight className="ml-1 h-4 w-4" />
+          </Button>
+        </div>
+      </div>
+
+      <Separator />
+
+      {/* Week Grid */}
+      <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-5">
+        {fechasSemana.map((fecha, i) => {
+          const planes = plansPorDia(fecha)
+
+          const esHoy =
+            fecha.toDateString() ===
+            hoy.toDateString()
+
+          return (
+            <Card
+              key={i}
+              className={`relative overflow-hidden border shadow-sm transition-all hover:shadow-md ${
+                esHoy
+                  ? 'border-primary ring-1 ring-primary/20'
+                  : ''
+              }`}
+            >
+              {esHoy && (
+                <div className="absolute right-3 top-3">
+                  <Badge>Hoy</Badge>
+                </div>
+              )}
+
+              <CardHeader className="pb-3">
+                <CardTitle className="flex flex-col">
+                  <span
+                    className={`text-sm uppercase tracking-wide ${
+                      esHoy
+                        ? 'text-primary'
+                        : 'text-muted-foreground'
+                    }`}
+                  >
+                    {dias[i]}
+                  </span>
+
+                  <span className="mt-1 text-3xl font-bold">
+                    {fecha.getDate()}
+                  </span>
+
+                  <span className="text-sm text-muted-foreground">
+                    {fecha.toLocaleDateString('es-DO', {
+                      month: 'long',
+                    })}
+                  </span>
+                </CardTitle>
+              </CardHeader>
+
+              <CardContent className="space-y-3">
+                {planes.length === 0 ? (
+                  <div className="flex h-32 items-center justify-center rounded-xl border border-dashed text-center">
+                    <p className="text-sm text-muted-foreground">
+                      Sin planificaciones
+                    </p>
+                  </div>
+                ) : (
+                  planes.map((p) => (
+                    <Link
+                      key={p._id}
+                      href={`/dashboard/${
+                        p.nivel ||
+                        'nivel-secundario'
+                      }/${p.grado}/${p.slug}`}
+                    >
+                      <div
+                        className={`rounded-xl border p-3 transition-all hover:-translate-y-0.5 hover:shadow-sm ${getMateriaColor(
+                          p.materia
+                        )}`}
+                      >
+                        <div className="mb-2 flex items-center gap-2">
+                          <BookOpen className="h-4 w-4 opacity-70" />
+
+                          <span className="text-xs font-medium uppercase tracking-wide opacity-80">
+                            {p.materia?.replace(
+                              '-',
+                              ' '
+                            )}
+                          </span>
+                        </div>
+
+                        <h3 className="line-clamp-2 text-sm font-semibold leading-snug">
+                          {p.tema}
+                        </h3>
+
+                        <p className="mt-2 text-xs opacity-70">
+                          {p.grado?.replace('-', ' ')}
+                        </p>
+                      </div>
+                    </Link>
+                  ))
+                )}
+              </CardContent>
+            </Card>
+          )
+        })}
       </div>
     </div>
   )

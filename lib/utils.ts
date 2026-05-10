@@ -1,6 +1,6 @@
-export function getCicloByGrado(grado: string): string {
-  if (!grado) return ''
-  const primeros = ['1ro', '2do', '3ro']
-  const esPrimerCiclo = primeros.some(g => grado.startsWith(g))
-  return esPrimerCiclo ? 'primer-ciclo' : 'segundo-ciclo'
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
 }
