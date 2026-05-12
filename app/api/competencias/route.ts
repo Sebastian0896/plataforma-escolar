@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server'
-import { connectDB } from '@/lib/db'
-import Competencia from '@/lib/models/Competencia'
+import { prisma } from '@/lib/prisma'
 
 export const runtime = "nodejs"
 
 export async function GET() {
-  await connectDB()
-  const competencias = await Competencia.find({}).sort({ orden: 1 }).lean()
+  const competencias = await prisma.competencia.findMany({
+    orderBy: { orden: 'asc' },
+  })
   return NextResponse.json(competencias)
 }

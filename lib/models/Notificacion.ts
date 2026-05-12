@@ -4,11 +4,11 @@ export interface INotificacion extends Document {
   tipo: 'recordatorio' | 'pendiente' | 'senal' | 'nueva_plan' | 'actualizacion' | 'resumen'
   titulo: string
   mensaje: string
-  destinatarioId?: mongoose.Types.ObjectId
+  destinatarioId?: string
   grado?: string
   planificacionId?: mongoose.Types.ObjectId
   planificacionSlug?: string
-  centroId: mongoose.Types.ObjectId
+  centroId: string
   leida: boolean
   destacada: boolean
   createdAt: Date
@@ -18,11 +18,11 @@ const NotificacionSchema = new Schema<INotificacion>({
   tipo: { type: String, required: true },
   titulo: { type: String, required: true },
   mensaje: { type: String, required: true },
-  destinatarioId: { type: Schema.Types.ObjectId, ref: 'Usuario' },
+  destinatarioId: { type: String },
   grado: { type: String },
   planificacionId: { type: Schema.Types.ObjectId, ref: 'Planificacion' },
   planificacionSlug: { type: String },
-  centroId: { type: Schema.Types.ObjectId, ref: 'Centro', required: true },
+  centroId: { type: String, required: true },
   leida: { type: Boolean, default: false },
   destacada: { type: Boolean, default: false },
 }, { timestamps: true })

@@ -143,7 +143,7 @@ export default function EvaluacionesPage() {
 
   const guardar = async () => {
     setMensaje('')
-
+    console.log('📤 notas a enviar:', JSON.stringify(notas))
     const res = await fetch(
       '/api/evaluaciones',
       {
@@ -417,7 +417,7 @@ export default function EvaluacionesPage() {
 
                     {competencias.map((c) => (
                       <th
-                        key={c._id}
+                        key={c.id}
                         className="min-w-[150px] px-3 py-4 text-center text-xs font-semibold uppercase tracking-wide text-muted-foreground"
                       >
                         {c.nombre.length >
@@ -436,7 +436,7 @@ export default function EvaluacionesPage() {
                   {estudiantes.map(
                     (e: any) => (
                       <tr
-                        key={e._id}
+                        key={e.id}
                         className="border-t transition-colors hover:bg-muted/20"
                       >
                         {/* Student */}
@@ -455,14 +455,14 @@ export default function EvaluacionesPage() {
                             </div>
 
                             {resumen[
-                              e._id
+                              e.id
                             ] && (
                               <div className="flex flex-wrap gap-2">
                                 <Badge variant="secondary">
                                   ⭐{' '}
                                   {
                                     resumen[
-                                      e._id
+                                      e.id
                                     ]
                                       .estrellas
                                   }
@@ -472,14 +472,14 @@ export default function EvaluacionesPage() {
                                   📝{' '}
                                   {
                                     resumen[
-                                      e._id
+                                      e.id
                                     ]
                                       .tareas
                                   }
                                   /
                                   {
                                     resumen[
-                                      e._id
+                                      e.id
                                     ]
                                       .totalDias
                                   }
@@ -494,15 +494,15 @@ export default function EvaluacionesPage() {
                           (c) => {
                             const nota =
                               notas[
-                                e._id
+                                e.id
                               ]?.[
-                                c._id
+                                c.id
                               ]
 
                             return (
                               <td
                                 key={
-                                  c._id
+                                  c.id
                                 }
                                 className="px-3 py-5 text-center"
                               >
@@ -518,8 +518,8 @@ export default function EvaluacionesPage() {
                                     event
                                   ) =>
                                     setNota(
-                                      e._id,
-                                      c._id,
+                                      e.id,
+                                      c.id,
                                       Number(
                                         event
                                           .target

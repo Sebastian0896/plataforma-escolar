@@ -1,8 +1,8 @@
 import mongoose, { Schema, Document } from 'mongoose'
 
 export interface IDiario extends Document {
-  estudianteId: mongoose.Types.ObjectId
-  docenteId: mongoose.Types.ObjectId
+  estudianteId: string
+  docenteId: string
   grado: string
   materia: string
   periodo: string
@@ -11,12 +11,12 @@ export interface IDiario extends Document {
   tarea: boolean
   observacion: string
   puntosExtra: number
-  centroId: mongoose.Types.ObjectId
+  centroId: string
 }
 
 const DiarioSchema = new Schema<IDiario>({
-  estudianteId: { type: Schema.Types.ObjectId, ref: 'Usuario', required: true },
-  docenteId: { type: Schema.Types.ObjectId, ref: 'Usuario', required: true },
+  estudianteId: { type: String, required: true },
+  docenteId: { type: String, required: true },
   grado: { type: String, required: true },
   materia: { type: String, required: true },
   periodo: { type: String, default: 'P1' },
@@ -25,7 +25,7 @@ const DiarioSchema = new Schema<IDiario>({
   tarea: { type: Boolean, default: false },
   observacion: { type: String, default: '' },
   puntosExtra: { type: Number, default: 0 },
-  centroId: { type: Schema.Types.ObjectId, ref: 'Centro', required: true },
+  centroId: { type: String, required: true },
 }, { timestamps: true })
 
 //DiarioSchema.index({ estudianteId: 1, fecha: 1, materia: 1, periodo: 1 }, { unique: true })

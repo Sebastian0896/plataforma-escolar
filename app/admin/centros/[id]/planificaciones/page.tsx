@@ -1,28 +1,16 @@
 // app/admin/centros/[id]/planificaciones/page.tsx
 
 import { auth } from '@/auth'
-import { redirect } from 'next/navigation'
-import { connectDB } from '@/lib/db'
-import Centro from '@/lib/models/Centro'
-import Planificacion from '@/lib/models/Planificacion'
+import { redirect, notFound } from 'next/navigation'
+import { prisma } from '@/lib/prisma' // Importamos Prisma
+import { connectDB } from '@/lib/db' // Importamos conexión de Mongoose
+import Planificacion from '@/lib/models/Planificacion' // Modelo Mongoose
 import Link from 'next/link'
 import PaginacionServer from '@/components/PaginacionServer'
 
-import {
-  Card,
-  CardContent,
-} from '@/components/ui/card'
-
-import {
-  Badge,
-} from '@/components/ui/badge'
-
-import {
-  ArrowLeft,
-  CalendarDays,
-  FileText,
-  Pencil,
-} from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { ArrowLeft, CalendarDays, FileText, Pencil } from 'lucide-react'
 
 type Params = Promise<{ id: string }>
 
@@ -46,10 +34,18 @@ export default async function PlanificacionesPorCentroPage({
   const limit = 9
   const skip = (page - 1) * limit
 
+  // 1. Conectar Mongoose para la consulta de planificaciones
   await connectDB()
 
-  const centro = await Centro.findById(id).lean()
+  // 2. Obtener Centro con Prisma
+  const centro = await prisma.centro.findUnique({
+    where: { id }
+  })
 
+  if (!centro) notFound()
+
+  // 3. Obtener Planificaciones y Total con Mongoose
+  // Usamos una consulta que no falle si el id es un CUID (Prisma ID)
   const [planificaciones, total] = await Promise.all([
     Planificacion.find({
       centroId: id,
@@ -67,7 +63,7 @@ export default async function PlanificacionesPorCentroPage({
   ])
 
   return (
-    <div className="space-y-6 sm:space-y-8">
+    <div className="space-y-6 sm:space-y-8 px-4 sm:px-0">
       {/* Header */}
       <div className="space-y-4">
         <Link
@@ -75,7 +71,7 @@ export default async function PlanificacionesPorCentroPage({
           className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          {centro?.nombre}
+          {centro.nombre}
         </Link>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -89,10 +85,7 @@ export default async function PlanificacionesPorCentroPage({
             </p>
           </div>
 
-          <Badge
-            variant="secondary"
-            className="w-fit rounded-full px-3 py-1 text-xs"
-          >
+          <Badge variant="secondary" className="w-fit rounded-full px-3 py-1 text-xs">
             <FileText className="w-3.5 h-3.5 mr-1" />
             Centro educativo
           </Badge>
@@ -103,17 +96,13 @@ export default async function PlanificacionesPorCentroPage({
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-5">
         {planificaciones.map((p: any) => (
           <Card
-            key={p._id}
+            key={p._id.toString()}
             className="group transition-all duration-200 hover:shadow-md hover:-translate-y-1 border-slate-200 dark:border-slate-800"
           >
             <CardContent className="p-5 space-y-4">
-              {/* Top */}
               <div className="space-y-3">
                 <div className="flex items-start justify-between gap-3">
-                  <Badge
-                    variant="outline"
-                    className="rounded-full text-xs"
-                  >
+                  <Badge variant="outline" className="rounded-full text-xs">
                     {p.grado?.replace('-', ' ')}
                   </Badge>
 
@@ -131,7 +120,6 @@ export default async function PlanificacionesPorCentroPage({
                 </p>
               </div>
 
-              {/* Footer */}
               <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
                 <div className="flex items-center gap-1 text-xs text-slate-400">
                   <CalendarDays className="w-3.5 h-3.5" />
@@ -157,11 +145,9 @@ export default async function PlanificacionesPorCentroPage({
           <CardContent className="py-14 text-center">
             <div className="space-y-3">
               <div className="text-4xl">📚</div>
-
               <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
                 No hay planificaciones
               </h3>
-
               <p className="text-sm text-slate-500 dark:text-slate-400">
                 Este centro todavía no tiene planificaciones publicadas.
               </p>

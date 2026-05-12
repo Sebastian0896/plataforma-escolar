@@ -28,8 +28,8 @@ export async function getEstructuraCompleta(
     //if (materiasPermitidas?.length) filter.materia = { $in: materiasPermitidas }
     if (creadoPorId) {
       filter.creadoPor = typeof creadoPorId === 'string' 
-        ? new mongoose.Types.ObjectId(creadoPorId) 
-        : creadoPorId
+        ? creadoPorId
+        : undefined
     }
 
     //console.log('🔍 Filter final:', JSON.stringify(filter))

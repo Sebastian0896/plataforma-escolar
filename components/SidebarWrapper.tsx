@@ -2,40 +2,42 @@
 import { getEstructuraCompleta } from '@/lib/planificaciones'
 import { auth } from '@/auth'
 import Sidebar from './Sidebar'
-import mongoose from 'mongoose'
-import Centro from '@/lib/models/Centro'
+import { prisma } from '@/lib/prisma' // Importamos prisma
 
 export default async function SidebarWrapper() {
   const session = await auth()
-  const rol = session?.user?.role
-  const grados = session?.user?.grados || []
-  const categoria = session?.user?.categoriaDocente
-  const materias = session?.user?.materias || []
+  
+  if (!session) return <Sidebar estructura={[]} />
+
+  const rol = session.user?.role
+  const grados = session.user?.grados || []
+  const categoria = session.user?.categoriaDocente
+  const materias = session.user?.materias || []
 
   let estructura
-  let creadoPorId: any = undefined
+  let creadoPorId: string | undefined = undefined
 
-  // Docente siempre filtra por creadoPor
+  // 1. Lógica para Docente
   if (rol === 'docente') {
-    creadoPorId = session?.user?.id
-      ? new mongoose.Types.ObjectId(session.user.id)
-      : undefined
+    creadoPorId = session.user?.id || undefined
   }
 
-  console.log('🆔 creadoPorId antes de llamar:', creadoPorId)
+  // 2. Lógica para Admin Centro (tipo individual)
+  if (rol === 'admin_centro' && session.user.centroId) {
+    const centro = await prisma.centro.findUnique({
+      where: { id: session.user.centroId },
+      select: { tipo: true, nombre: true } // Solo traemos lo necesario
+    })
 
-  // Docente individual (admin_centro con centro tipo 'individual') también
-  if (rol === 'admin_centro') {
-  console.log('👤 centroId:', session.user.centroId)
-  const centro = await Centro.findById(session.user.centroId).lean()
-  console.log('🏫 centro:', centro?.nombre, 'tipo:', centro?.tipo)
-  if (centro?.tipo === 'individual') {
-    creadoPorId = new mongoose.Types.ObjectId(session.user.id)
-    console.log('✅ creadoPorId asignado')
+    if (centro?.tipo === 'individual') {
+      creadoPorId = session.user.id
+    }
   }
-}
 
-  if (rol === 'admin' || rol === 'coordinador' || rol === 'tecnico_distrital' || rol === 'superadmin') {
+  // 3. Obtención de la estructura según el rol
+  const rolesAdmin = ['admin', 'coordinador', 'tecnico_distrital', 'superadmin']
+
+  if (rolesAdmin.includes(rol || '')) {
     estructura = await getEstructuraCompleta()
   } else if (rol === 'docente' || rol === 'admin_centro') {
     const centroId = rol === 'admin_centro' ? session.user.centroId : undefined
@@ -45,7 +47,7 @@ export default async function SidebarWrapper() {
       rol === 'docente' ? categoria : undefined,
       rol === 'docente' && grados.length > 0 ? grados : undefined,
       rol === 'docente' && materias.length > 0 ? materias : undefined,
-      creadoPorId
+      creadoPorId // Pasamos el string directamente
     )
   } else {
     estructura = []

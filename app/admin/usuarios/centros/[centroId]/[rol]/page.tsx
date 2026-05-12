@@ -1,8 +1,6 @@
 import { auth } from '@/auth'
 import { redirect, notFound } from 'next/navigation'
-import { connectDB } from '@/lib/db'
-import Centro from '@/lib/models/Centro'
-import Usuario from '@/lib/models/Usuario'
+import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import PaginacionServer from '@/components/PaginacionServer'
 
@@ -45,17 +43,33 @@ export default async function UsuariosPorCentroRolPage({
   const { centroId, rol } = await params
   const sp = await searchParams
   const page = parseInt(sp.page || '1')
-  const limit = 12 // Ajustado para un grid de 3 o 4 columnas
+  const limit = 12 
   const skip = (page - 1) * limit
 
-  await connectDB()
-  const centro = await Centro.findById(centroId).lean()
+  // 1. Consulta del Centro
+  const centro = await prisma.centro.findUnique({
+    where: { id: centroId }
+  })
+  
   if (!centro) notFound()
 
-  const filter = { centroId: centro._id, rol, activo: true }
+  // 2. Consulta de Usuarios y Conteo (Paginado)
+  const whereFilter = { 
+    centroId: centro.id, 
+    rol: rol as any, // Cast a any si el enum de Prisma no coincide exactamente con el string
+    activo: true 
+  }
+
   const [usuarios, total] = await Promise.all([
-    Usuario.find(filter).sort({ nombre: 1 }).skip(skip).limit(limit).lean(),
-    Usuario.countDocuments(filter),
+    prisma.usuario.findMany({
+      where: whereFilter,
+      orderBy: { nombre: 'asc' },
+      skip: skip,
+      take: limit,
+    }),
+    prisma.usuario.count({
+      where: whereFilter
+    }),
   ])
 
   const coloresRol: Record<string, string> = {
@@ -67,7 +81,7 @@ export default async function UsuariosPorCentroRolPage({
   }
 
   return (
-    <div className="space-y-8 pb-12">
+    <div className="space-y-8 pb-12 px-4 sm:px-0">
       {/* Cabecera Dinámica */}
       <div className="flex flex-col gap-4 md:flex-row md:items-center justify-between">
         <div className="space-y-1">
@@ -96,8 +110,8 @@ export default async function UsuariosPorCentroRolPage({
 
       {/* Grid de Usuarios */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        {usuarios.map((u: any) => (
-          <Card key={u._id} className="group hover:shadow-lg transition-all duration-300 border-slate-200">
+        {usuarios.map((u) => (
+          <Card key={u.id} className="group hover:shadow-lg transition-all duration-300 border-slate-200">
             <CardContent className="pt-6">
               <div className="flex justify-between items-start mb-4">
                 <div className="h-12 w-12 rounded-full bg-gradient-to-tr from-slate-100 to-slate-200 flex items-center justify-center text-xl font-bold text-slate-600 border shadow-sm">
@@ -112,7 +126,7 @@ export default async function UsuariosPorCentroRolPage({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem asChild>
-                      <Link href={`/admin/usuarios/editar/${u._id}`}>
+                      <Link href={`/admin/usuarios/editar/${u.id}`}>
                         <Edit3 className="mr-2 h-4 w-4" /> Editar Perfil
                       </Link>
                     </DropdownMenuItem>
@@ -124,7 +138,7 @@ export default async function UsuariosPorCentroRolPage({
               </div>
 
               <div className="space-y-1">
-                <h3 className="font-bold text-slate-900 dark:text-white truncate" title={u.nombre}>
+                <h3 className="font-bold text-slate-900 dark:text-white truncate" title={u.nombre || ''}>
                   {u.nombre}
                 </h3>
                 <p className="text-xs text-muted-foreground flex items-center gap-1.5 truncate">
@@ -153,7 +167,7 @@ export default async function UsuariosPorCentroRolPage({
                 {u.rol.replace('_', ' ')}
               </Badge>
               <Link 
-                href={`/admin/usuarios/editar/${u._id}`} 
+                href={`/admin/usuarios/editar/${u.id}`} 
                 className="text-[11px] font-bold text-blue-600 hover:text-blue-700 underline-offset-4 hover:underline"
               >
                 Gestionar
@@ -178,9 +192,11 @@ export default async function UsuariosPorCentroRolPage({
       )}
 
       {/* Paginación */}
-      <div className="mt-10">
-        <PaginacionServer totalPaginas={Math.ceil(total / limit)} paginaActual={page} />
-      </div>
+      {total > limit && (
+        <div className="mt-10">
+          <PaginacionServer totalPaginas={Math.ceil(total / limit)} paginaActual={page} />
+        </div>
+      )}
     </div>
   )
 }

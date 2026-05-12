@@ -2,6 +2,7 @@
 import mongoose from 'mongoose'
 import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
+import { prisma } from '@/lib/prisma'
 import { connectDB } from '@/lib/db'
 import Planificacion from '@/lib/models/Planificacion'
 import Usuario from '@/lib/models/Usuario'
@@ -28,16 +29,17 @@ export async function GET() {
 
   const centroId = session.user.centroId
   const categoria = session.user.categoriaDocente
-  const docenteId = session.user?.id ? new mongoose.Types.ObjectId(session.user.id) : undefined
+  const docenteId = session.user?.id ? session.user.id : undefined
 
 
   // Total de planificaciones
   const totalPlanificaciones = await Planificacion.countDocuments({
-    centroId,
-    categoriaDocente: categoria,
-    creadoPor: docenteId,
-    publicado: true,
-  })
+  centroId: session.user?.centroId,
+  categoriaDocente: session.user?.categoriaDocente,
+  creadoPor: session.user?.id,
+  publicado: true,
+})
+
 
   // Por materia
   const porMateria = await Planificacion.aggregate([
@@ -69,12 +71,14 @@ export async function GET() {
       ? [session.user.grado]
       : []
 
-  const totalEstudiantes = await Usuario.countDocuments({
-    centroId,
-    grado: { $in: gradosDocente },
+  const totalEstudiantes = await prisma.usuario.count({
+  where: {
+    centroId: session.user?.centroId,
+    grado: { in: gradosDocente },
     rol: 'estudiante',
     activo: true,
-  })
+  },
+})
 
   // Pendientes: grados sin planificación esta semana
   const hoy = new Date()

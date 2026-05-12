@@ -1,8 +1,6 @@
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
-import { connectDB } from '@/lib/db'
-import Centro from '@/lib/models/Centro'
-import Usuario from '@/lib/models/Usuario'
+import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 
 // Shadcn UI & Icons
@@ -33,19 +31,38 @@ export default async function CategoriasPorCentroPage({ params }: { params: Para
   }
 
   const { centroId } = await params
-  await connectDB()
   
-  const centro = await Centro.findById(centroId).lean()
+  // Consulta del Centro con Prisma
+  const centro = await prisma.centro.findUnique({
+    where: { id: centroId }
+  })
+  
   if (!centro) redirect('/admin/usuarios/centros')
 
-  // Agregación para contar usuarios por rol dentro de este centro específico
-  const categorias = await Usuario.aggregate([
-    { $match: { centroId: centro._id, activo: true } },
-    { $group: { _id: '$rol', total: { $sum: 1 } } },
-    { $sort: { total: -1 } } // Ordenar por cantidad de usuarios
-  ])
+  // Agregación con Prisma: Agrupamos por el campo 'rol'
+  const categoriasRaw = await prisma.usuario.groupBy({
+    by: ['rol'],
+    where: { 
+      centroId: centro.id, 
+      activo: true 
+    },
+    _count: {
+      id: true
+    },
+    orderBy: {
+      _count: {
+        id: 'desc'
+      }
+    }
+  })
 
-  // Mapeo de iconos y colores por rol para una UI más intuitiva
+  // Adaptamos el formato de Prisma al que espera el componente (usando _id para mantener compatibilidad con tu lógica de UI)
+  const categorias = categoriasRaw.map(c => ({
+    _id: c.rol,
+    total: c._count.id
+  }))
+
+  // Mapeo de iconos y colores por rol
   const configRoles: Record<string, { icon: any, color: string, label: string }> = {
     admin: { icon: ShieldCheck, color: 'text-red-600 bg-red-50', label: 'Administradores' },
     admin_centro: { icon: Building2, color: 'text-blue-600 bg-blue-50', label: 'Directivos' },
@@ -57,7 +74,7 @@ export default async function CategoriasPorCentroPage({ params }: { params: Para
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-12 animate-in fade-in duration-500">
+    <div className="max-w-6xl mx-auto space-y-8 pb-12 animate-in fade-in duration-500 px-4 sm:px-0">
       
       {/* Breadcrumbs & Navigation */}
       <nav className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -94,7 +111,7 @@ export default async function CategoriasPorCentroPage({ params }: { params: Para
 
       {/* Grid de Categorías */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {categorias.map((c: any) => {
+        {categorias.map((c) => {
           const config = configRoles[c._id] || { icon: UserCircle, color: 'text-gray-600 bg-gray-50', label: c._id }
           const Icon = config.icon
 
@@ -124,7 +141,6 @@ export default async function CategoriasPorCentroPage({ params }: { params: Para
                     </p>
                   </div>
                   
-                  {/* Indicador de flecha que aparece al hacer hover */}
                   <div className="mt-4 flex items-center text-xs font-semibold text-primary opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all">
                     Acceder al listado <ChevronRight className="ml-1 h-3 w-3" />
                   </div>

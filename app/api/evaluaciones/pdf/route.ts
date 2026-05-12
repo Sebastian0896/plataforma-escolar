@@ -1,252 +1,218 @@
-import { NextResponse } from 'next/server'
+// app/api/evaluaciones/pdf/route.ts
+import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
-import { connectDB } from '@/lib/db'
-import Evaluacion from '@/lib/models/Evaluacion'
-import Usuario from '@/lib/models/Usuario'
-import { jsPDF } from 'jspdf'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 
-export const runtime = 'nodejs'
-
-export async function GET(request: Request) {
+export async function GET(req: NextRequest) {
   const session = await auth()
-
-  if (!session || session.user?.role !== 'docente') {
-    return NextResponse.json(
-      { error: 'No autorizado' },
-      { status: 401 }
-    )
+  if (!session) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
   }
 
-  const { searchParams } = new URL(request.url)
-
+  const { searchParams } = new URL(req.url)
   const grado = searchParams.get('grado')
   const materia = searchParams.get('materia')
+  const periodoNombre = searchParams.get('periodo') || 'P1'
 
   if (!grado || !materia) {
-    return NextResponse.json(
-      { error: 'Faltan grado y materia' },
-      { status: 400 }
-    )
+    return NextResponse.json({ error: 'Faltan parámetros' }, { status: 400 })
   }
 
-  await connectDB()
-
-  const periodos = ['P1', 'P2', 'P3', 'P4']
-
-  const estudiantes = await Usuario.find({
-    centroId: session.user.centroId,
-    rol: 'estudiante',
-    grado,
-    activo: true,
-  })
-    .select('nombre')
-    .sort({ nombre: 1 })
-    .lean()
-
-  const evaluaciones = await Evaluacion.find({
-    grado,
-    materia,
-    centroId: session.user.centroId,
-    periodo: { $in: periodos },
-  }).lean()
-
-  // Datos por estudiante
-  const datos: Record<string, Record<string, number>> = {}
-
-  estudiantes.forEach((e: any) => {
-    datos[e._id.toString()] = {}
-  })
-
-  evaluaciones.forEach((e: any) => {
-    const id = e.estudianteId?.toString()
-
-    if (id && e.notas && datos[id]) {
-      const valores = Object.values(e.notas) as number[]
-
-      const promedio =
-        valores.length > 0
-          ? Math.round(
-              valores.reduce((a, b) => a + b, 0) / valores.length
-            )
-          : 0
-
-      datos[id][e.periodo] = promedio
-    }
-  })
-
-  const doc = new jsPDF({
-    orientation: 'landscape',
-    unit: 'mm',
-    format: 'a4',
-  })
-
-  const pageWidth = doc.internal.pageSize.getWidth()
-  const pageHeight = doc.internal.pageSize.getHeight()
-
-  let y = 25
-
-  // =========================
-  // HEADER
-  // =========================
-  doc.setFillColor(30, 64, 175)
-  doc.rect(0, 0, pageWidth, 35, 'F')
-
-  doc.setTextColor(255, 255, 255)
-
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(18)
-
-  doc.text(
-    'Reporte de Evaluaciones',
-    pageWidth / 2,
-    15,
-    { align: 'center' }
-  )
-
-  doc.setFontSize(12)
-
-  doc.text(
-    `${materia} · ${grado.replace('-', ' ')} · Todos los períodos`,
-    pageWidth / 2,
-    25,
-    { align: 'center' }
-  )
-
-  doc.setTextColor(0, 0, 0)
-
-  y = 45
-
-  // =========================
-  // TABLA HEADER
-  // =========================
-  doc.setFillColor(230, 235, 255)
-  doc.rect(10, y - 6, pageWidth - 20, 10, 'F')
-
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(12)
-
-  doc.text('#', 14, y)
-  doc.text('Estudiante', 25, y)
-
-  let xCol = 120
-
-  periodos.forEach((p) => {
-    doc.text(p, xCol, y, {
-      align: 'center',
+  try {
+    // 1. Obtener el periodo (buscar por nombre y centro)
+    const periodo = await prisma.periodo.findFirst({
+      where: {
+        nombre: periodoNombre,
+        centroId: session.user.centroId,
+        activo: true,
+      },
     })
 
-    xCol += 30
-  })
-
-  doc.text('Prom', xCol, y, {
-    align: 'center',
-  })
-
-  y += 12
-
-  // =========================
-  // FILAS
-  // =========================
-  doc.setFont('helvetica', 'normal')
-  doc.setFontSize(12)
-
-  estudiantes.forEach((e: any, i: number) => {
-    if (y > pageHeight - 25) {
-      doc.addPage()
-      y = 20
+    if (!periodo) {
+      return NextResponse.json({ error: 'Periodo no encontrado' }, { status: 404 })
     }
 
-    const id = e._id.toString()
-    const notas = datos[id] || {}
+    // 2. Obtener estudiantes desde PostgreSQL
+    const estudiantes = await prisma.usuario.findMany({
+      where: {
+        centroId: session.user.centroId,
+        rol: 'estudiante',
+        grado: grado,
+        activo: true,
+      },
+      select: {
+        id: true,
+        nombre: true,
+        email: true,
+        grado: true,
+      },
+      orderBy: {
+        nombre: 'asc',
+      },
+    })
 
-    // Zebra rows
-    if (i % 2 === 0) {
-      doc.setFillColor(248, 250, 252)
-      doc.rect(10, y - 5, pageWidth - 20, 9, 'F')
+    if (estudiantes.length === 0) {
+      return NextResponse.json({ error: 'No hay estudiantes en este grado' }, { status: 404 })
     }
 
-    doc.text(String(i + 1), 14, y)
+    // 3. Obtener competencias
+    const competencias = await prisma.competencia.findMany({
+      orderBy: {
+        orden: 'asc',
+      },
+    })
 
-    doc.text(
-      (e.nombre || '').substring(0, 40),
-      25,
-      y
-    )
+    // 4. Obtener evaluaciones para estos estudiantes
+    const estudianteIds = estudiantes.map(e => e.id)
+    
+    const evaluaciones = await prisma.evaluacion.findMany({
+      where: {
+        estudianteId: { in: estudianteIds },
+        materia: materia,
+        periodoId: periodo.id,
+      },
+      select: {
+        id: true,
+        nota: true,
+        observaciones: true,
+        estudianteId: true,
+        competenciaId: true,
+      },
+    })
 
-    let x = 120
-    const valores: number[] = []
+    // 5. Organizar datos por estudiante
+    const datosEstudiantes = estudiantes.map(estudiante => {
+      const evaluacionesEstudiante = evaluaciones.filter(e => e.estudianteId === estudiante.id)
+      
+      const notasPorCompetencia: Record<string, number> = {}
+      let sumaNotas = 0
+      let cantidadNotas = 0
+      
+      competencias.forEach(comp => {
+        const evalComp = evaluacionesEstudiante.find(e => e.competenciaId === comp.id)
+        const nota = evalComp?.nota || 0
+        notasPorCompetencia[comp.nombre] = nota
+        if (nota > 0) {
+          sumaNotas += nota
+          cantidadNotas++
+        }
+      })
 
-    periodos.forEach((p) => {
-      const nota = notas[p]
+      const promedio = cantidadNotas > 0 ? (sumaNotas / cantidadNotas).toFixed(2) : '0.00'
 
-      if (nota !== undefined) {
-        valores.push(nota)
+      return {
+        nombre: estudiante.nombre,
+        promedio,
+        ...notasPorCompetencia,
       }
-
-      doc.text(
-        nota !== undefined ? String(nota) : '-',
-        x,
-        y,
-        { align: 'center' }
-      )
-
-      x += 30
     })
 
-    const promedio =
-      valores.length > 0
-        ? Math.round(
-            valores.reduce((a, b) => a + b, 0) /
-              valores.length
-          )
-        : null
+    // 6. Generar PDF
+    const doc = new jsPDF()
+    const fechaActual = new Date().toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    })
 
-    doc.text(
-      promedio !== null ? String(promedio) : '-',
-      x,
-      y,
-      { align: 'center' }
-    )
+    // Encabezado
+    doc.setFillColor(41, 128, 185)
+    doc.rect(0, 0, 210, 40, 'F')
 
-    y += 10
-  })
+    doc.setTextColor(255, 255, 255)
+    doc.setFontSize(18)
+    doc.setFont('helvetica', 'bold')
+    doc.text('REPORTE DE EVALUACIONES', 105, 20, { align: 'center' })
 
-  // =========================
-  // FOOTER
-  // =========================
-  const totalPages = doc.getNumberOfPages()
+    doc.setFontSize(11)
+    doc.setFont('helvetica', 'normal')
+    doc.text(`Grado: ${grado} | Materia: ${materia} | Periodo: ${periodoNombre}`, 105, 32, { align: 'center' })
+    doc.setTextColor(0, 0, 0)
 
-  for (let i = 1; i <= totalPages; i++) {
-    doc.setPage(i)
-
-    doc.setDrawColor(220, 220, 220)
-
-    doc.line(
-      10,
-      pageHeight - 12,
-      pageWidth - 10,
-      pageHeight - 12
-    )
-
+    // Información adicional
     doc.setFontSize(10)
-    doc.setTextColor(120, 120, 120)
+    doc.setFont('helvetica', 'normal')
+    doc.text(`Total de estudiantes: ${estudiantes.length}`, 14, 52)
+    doc.text(`Competencias evaluadas: ${competencias.length}`, 14, 60)
 
-    doc.text(
-      `Generado desde Oficina Virtual · Página ${i} de ${totalPages}`,
-      pageWidth / 2,
-      pageHeight - 6,
-      { align: 'center' }
-    )
+    // Tabla de notas
+    const columnasCompetencias = competencias.map(c => c.nombre.substring(0, 20)) // Acortar nombres largos
+    const columnas = ['Estudiante', ...columnasCompetencias, 'Promedio']
+
+    const tableData = datosEstudiantes.map(est => [
+      est.nombre,
+      ...columnasCompetencias.map(comp => {
+        const nota = est[comp as keyof typeof est]
+        return nota !== undefined && nota !== 0 ? `${nota}` : '-'
+      }),
+      est.promedio,
+    ])
+
+    autoTable(doc, {
+      head: [columnas],
+      body: tableData,
+      startY: 68,
+      theme: 'grid',
+      styles: {
+        fontSize: 8,
+        cellPadding: 2,
+        valign: 'middle',
+        halign: 'center',
+      },
+      headStyles: {
+        fillColor: [41, 128, 185],
+        textColor: [255, 255, 255],
+        fontStyle: 'bold',
+        fontSize: 9,
+      },
+      alternateRowStyles: {
+        fillColor: [248, 248, 250],
+      },
+      columnStyles: {
+        0: { halign: 'left', cellWidth: 45 },
+        ...Object.fromEntries(columnasCompetencias.map((_, i) => [i + 1, { cellWidth: 18 }])),
+        [columnas.length - 1]: { cellWidth: 20, fillColor: [230, 240, 255] },
+      },
+      margin: { left: 10, right: 10 },
+    })
+
+    // Pie de página
+    const pageCount = doc.getNumberOfPages()
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i)
+      
+      doc.setDrawColor(200, 200, 200)
+      doc.line(14, doc.internal.pageSize.height - 15, 196, doc.internal.pageSize.height - 15)
+      
+      doc.setFontSize(8)
+      doc.setFont('helvetica', 'italic')
+      doc.setTextColor(128, 128, 128)
+      doc.text(
+        `Documento generado el ${fechaActual} - Plataforma Educativa`,
+        14,
+        doc.internal.pageSize.height - 8
+      )
+      doc.text(
+        `Pagina ${i} de ${pageCount}`,
+        196,
+        doc.internal.pageSize.height - 8,
+        { align: 'right' }
+      )
+    }
+
+    const pdfBuffer = Buffer.from(doc.output('arraybuffer'))
+
+    return new NextResponse(pdfBuffer, {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `inline; filename="evaluaciones_${grado}_${materia}_${periodoNombre}.pdf"`,
+      },
+    })
+  } catch (error) {
+    console.error('Error generando PDF de evaluaciones:', error)
+    return NextResponse.json({ error: 'Error al generar el PDF' }, { status: 500 })
   }
-
-  const pdfBuffer = Buffer.from(
-    doc.output('arraybuffer')
-  )
-
-  return new NextResponse(pdfBuffer, {
-    headers: {
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': `inline; filename="evaluaciones-${grado}-${materia}.pdf"`,
-    },
-  })
 }

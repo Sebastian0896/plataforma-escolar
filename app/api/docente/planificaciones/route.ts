@@ -21,7 +21,7 @@ export async function GET() {
     filter.categoriaDocente = session.user.categoriaDocente
     if (session.user?.grados?.length) filter.grado = { $in: session.user.grados }
     if (session.user?.materias?.length) filter.materia = { $in: session.user.materias }
-    filter.creadoPor = new mongoose.Types.ObjectId(session.user.id)
+    filter.creadoPor = session.user.id
   }
 
   const planificaciones = await Planificacion.find(filter)

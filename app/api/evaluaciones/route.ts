@@ -1,16 +1,13 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { connectDB } from '@/lib/db'
-import Evaluacion from '@/lib/models/Evaluacion'
-import Periodo from '@/lib/models/Periodo'
+import { prisma } from '@/lib/prisma'
 
 export const runtime = "nodejs"
 
+// GET
 export async function GET(request: Request) {
   const session = await auth()
-  if (!session || session.user?.role !== 'docente') {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-  }
+  if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
   const { searchParams } = new URL(request.url)
   const grado = searchParams.get('grado')
@@ -21,72 +18,87 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'Grado y período requeridos' }, { status: 400 })
   }
 
-  await connectDB()
+  // Buscar o crear período
+  let periodoDoc = await prisma.periodo.findFirst({
+    where: { nombre: periodo, centroId: session.user?.centroId || '' },
+  })
 
-  
+  if (!periodoDoc) {
+    periodoDoc = await prisma.periodo.create({
+      data: {
+        nombre: periodo,
+        fechaInicio: new Date(),
+        fechaFin: new Date(),
+        centroId: session.user?.centroId || '',
+      },
+    })
+  }
 
-  const evaluaciones = await Evaluacion.find({
-    grado,
-    periodo,
-    materia,
-    centroId: session.user.centroId,
-  }).lean()
+  const evaluaciones = await prisma.evaluacion.findMany({
+    where: {
+      periodoId: periodoDoc.id,
+      materia: materia || undefined,
+      estudiante: { grado, activo: true },
+    },
+    include: { estudiante: true, competencia: true },
+  })
 
-  console.log('📋 Evaluaciones encontradas:', evaluaciones.length)
-console.log('📋 Primera:', JSON.stringify(evaluaciones[0]))
-
-  // Convertir a formato { estudianteId: { competenciaId: nota } }
+  // Formatear respuesta como el formato anterior
   const notas: Record<string, Record<string, number>> = {}
-  evaluaciones.forEach((e: any) => {
-    const id = e.estudianteId?.toString()
-    if (id && e.notas) {
-      const notasObj: Record<string, number> = {}
-        if (e.notas instanceof Map) {
-        e.notas.forEach((valor: number, key: string) => {
-            notasObj[key] = valor
-        })
-        } else if (typeof e.notas === 'object') {
-        Object.assign(notasObj, e.notas)
-        }
-        notas[id] = notasObj
-            }
-        })
+  evaluaciones.forEach(e => {
+    const estId = e.estudianteId
+    if (!notas[estId]) notas[estId] = {}
+    notas[estId][e.competenciaId] = e.nota
+  })
 
   return NextResponse.json({ notas })
 }
 
+// POST
 export async function POST(request: Request) {
   const session = await auth()
-  if (!session || session.user?.role !== 'docente') {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+
+  const { grado, periodo, materia, notas } = await request.json()
+
+  // Buscar o crear período
+  let periodoDoc = await prisma.periodo.findFirst({
+    where: { nombre: periodo, centroId: session.user?.centroId || '' },
+  })
+  if (!periodoDoc) {
+    periodoDoc = await prisma.periodo.create({
+      data: {
+        nombre: periodo,
+        fechaInicio: new Date(),
+        fechaFin: new Date(),
+        centroId: session.user?.centroId || '',
+      },
+    })
   }
 
-  const { grado, periodo, notas, materia } = await request.json()
-
-  await connectDB()
-
-  const materiaDocente = materia || session.user?.materias?.[0] || ''
-
-  const docs = Object.entries(notas).map(([estudianteId, competencias]) => ({
-    updateOne: {
-      filter: { estudianteId, periodo, materia: materiaDocente },
-      update: {
-        $set: {
-          estudianteId,
-          periodo,
-          grado,
-          materia: materiaDocente,
-          notas: competencias,
-          docenteId: session.user?.id,
-          centroId: session.user?.centroId,
+  // Guardar evaluaciones
+  for (const [estudianteId, competencias] of Object.entries(notas)) {
+    for (const [competenciaId, nota] of Object.entries(competencias as Record<string, number>)) {
+      console.log('🆔 estudianteId recibido:', estudianteId)
+      await prisma.evaluacion.upsert({
+        where: {
+          estudianteId_competenciaId_periodoId: {
+            estudianteId,
+            competenciaId,
+            periodoId: periodoDoc.id,
+          },
         },
-      },
-      upsert: true,
-    },
-  }))
-
-  if (docs.length > 0) {
-    await Evaluacion.bulkWrite(docs as any)
+        update: { nota, materia: materia || '' },
+        create: {
+          estudianteId,
+          competenciaId,
+          periodoId: periodoDoc.id,
+          materia: materia || '',
+          nota,
+          docenteId: session.user?.id || '',
+        },
+      })
+    }
   }
 
   return NextResponse.json({ success: true })

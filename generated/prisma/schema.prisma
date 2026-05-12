@@ -1,0 +1,112 @@
+// prisma/schema.prisma
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+  output          = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  // La URL se gestiona en prisma.config.ts según Prisma 7
+}
+
+// ========== MODELOS ==========
+
+model Centro {
+  id             String   @id @default(cuid())
+  nombre         String
+  codigo         String   @unique
+  logo           String?
+  plan           String   @default("gratis")
+  maxDocentes    Int      @default(1)
+  maxEstudiantes Int      @default(20)
+  tipo           String   @default("centro")
+  activo         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  usuarios Usuario[]
+  periodos Periodo[]
+}
+
+model Usuario {
+  id               String   @id @default(cuid())
+  nombre           String
+  email            String   @unique
+  password         String
+  rol              String   @default("estudiante")
+  genero           String?
+  grado            String?
+  // Arreglos de Strings soportados nativamente por Postgres
+  grados           String[] @default([])
+  niveles          String[] @default([])
+  ciclos           String[] @default([])
+  materias         String[] @default([])
+  categoriaDocente String?
+  rne              String?  @unique
+  activo           Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  centroId String?
+  centro   Centro? @relation(fields: [centroId], references: [id])
+
+  evaluacionesEstudiante Evaluacion[] @relation("EstudianteEvaluacion")
+  evaluacionesDocente    Evaluacion[] @relation("DocenteEvaluacion")
+}
+
+model Materia {
+  id               String   @id @default(cuid())
+  nombre           String
+  slug             String   @unique
+  categoriaDocente String
+  activo           Boolean  @default(true)
+  createdAt        DateTime @default(now())
+}
+
+model Competencia {
+  id        String   @id @default(cuid())
+  nombre    String
+  orden     Int
+  createdAt DateTime @default(now())
+
+  evaluaciones Evaluacion[]
+}
+
+model Periodo {
+  id          String   @id @default(cuid())
+  nombre      String
+  fechaInicio DateTime
+  fechaFin    DateTime
+  centroId    String
+  centro      Centro   @relation(fields: [centroId], references: [id])
+  activo      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  evaluaciones Evaluacion[]
+}
+
+model Evaluacion {
+  id            String   @id @default(cuid())
+  nota          Float
+  materia       String?
+  observaciones String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  estudianteId String
+  estudiante   Usuario @relation("EstudianteEvaluacion", fields: [estudianteId], references: [id])
+
+  competenciaId String
+  competencia   Competencia @relation(fields: [competenciaId], references: [id])
+
+  periodoId String
+  periodo   Periodo @relation(fields: [periodoId], references: [id])
+
+  docenteId String
+  docente   Usuario @relation("DocenteEvaluacion", fields: [docenteId], references: [id])
+
+  // Evita duplicados: Un estudiante solo tiene una nota por competencia en cada periodo
+  @@unique([estudianteId, competenciaId, periodoId])
+}
