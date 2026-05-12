@@ -24,6 +24,7 @@ import {
   X,
   ChevronRight,
   Settings,
+  BookOpen,  // ← Agregado para materias
 } from 'lucide-react'
 
 export default function AdminSidebar() {
@@ -74,6 +75,12 @@ export default function AdminSidebar() {
       roles: ['admin', 'docente'],
     },
     {
+      href: '/admin/materias',  // ← Nueva ruta
+      label: 'Gestionar materias',
+      icon: BookOpen,
+      roles: ['admin', 'superadmin', 'admin_centro'],  // ← Roles permitidos
+    },
+    {
       href: '/admin/usuarios/centros',
       label: 'Usuarios',
       icon: Users,
@@ -111,14 +118,14 @@ export default function AdminSidebar() {
       {isOpen && (
         <div
           onClick={() => setIsOpen(false)}
-          className="fixed inset-0 z-[60] bg-slate-950/40 backdrop-blur-sm lg:hidden transition-opacity animate-in fade-in"
+          className="fixed inset-0 z-[30] bg-slate-950/40 backdrop-blur-sm lg:hidden transition-opacity animate-in fade-in"
         />
       )}
 
       {/* Sidebar Container */}
       <aside
         className={`
-          fixed top-0 left-0 z-[70]
+          fixed top-0 left-0 z-[40]
           h-screen w-[280px]
           bg-white dark:bg-slate-950
           border-r border-slate-200 dark:border-slate-800

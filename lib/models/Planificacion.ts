@@ -41,8 +41,9 @@ export interface IPlanificacion extends Document {
   publicado: boolean
   fechaProgramada: { type: Date, default: null },
   momentos: IMomento[]
-  creadoPor?: mongoose.Types.ObjectId
-  centroId?: mongoose.Types.ObjectId
+  creadoPor?: string
+  centroId: { type: string, required: true },
+  //centroId?: mongoose.Types.ObjectId
 }
 
 const RecursoSchema = new Schema<IRecurso>({
@@ -86,8 +87,8 @@ const PlanificacionSchema = new Schema<IPlanificacion>({
   publicado: { type: Boolean, default: true },
   fechaProgramada: {type: Date},
   momentos: [MomentoSchema],
-  creadoPor: { type: Schema.Types.ObjectId, ref: 'Usuario' },
-  centroId: { type: Schema.Types.ObjectId, ref: 'Centro' },
+  creadoPor: { type: String },
+  centroId: { type: String },
 }, { timestamps: true })
 
 export default mongoose.models.Planificacion || mongoose.model<IPlanificacion>('Planificacion', PlanificacionSchema)

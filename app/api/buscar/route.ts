@@ -33,7 +33,7 @@ export async function GET(request: Request) {
 
   // Filtros según rol
   if (rol === 'docente') {
-    filter.creadoPor = new mongoose.Types.ObjectId(session.user.id as string)
+    filter.creadoPor = session.user.id
     filter.centroId = session.user.centroId
     filter.categoriaDocente = session.user.categoriaDocente
     if (session.user?.grados?.length) filter.grado = { $in: session.user.grados }

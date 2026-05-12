@@ -20,13 +20,13 @@ export default async function PlanificacionesPage() {
   let creadoPorId: any = undefined
 
   if (rol === 'docente') {
-    creadoPorId = session?.user?.id ? new mongoose.Types.ObjectId(session.user.id) : undefined
+    creadoPorId = session?.user?.id ?session.user.id : undefined
   }
 
   if (rol === 'admin_centro') {
     const centro = await Centro.findById(session.user.centroId).lean()
     if (centro?.tipo === 'individual') {
-      creadoPorId = session?.user?.id ? new mongoose.Types.ObjectId(session.user.id) : undefined
+      creadoPorId = session?.user?.id ?session.user.id : undefined
     }
   }
 

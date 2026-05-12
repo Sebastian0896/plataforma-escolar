@@ -80,12 +80,12 @@ export default function DocenteDashboard() {
       href: '/admin/docente/evaluaciones',
       icon: FileBarChart2,
     },
-    {
+    /* {
       title: 'Vista Previa',
       description: 'Como ven los estudiantes',
       href: '/dashboard',
       icon: Eye,
-    },
+    }, */
     {
       title: 'Calendario',
       description: 'Programación académica',

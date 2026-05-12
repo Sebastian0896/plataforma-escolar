@@ -90,8 +90,8 @@ export default function NuevoUsuarioPage() {
     if (!form.rol) { setError('Seleccioná un rol'); setLoading(false); return }
     if (form.rol === 'docente' && form.materias.length === 0) { setError('Seleccioná al menos una materia'); setLoading(false); return }
     if (form.rol === 'docente' && form.grados.length === 0) { setError('Seleccioná al menos un grado'); setLoading(false); return }
-
     let centroId = session?.user?.centroId
+    
 
     if ((session?.user?.role === 'admin' || session?.user?.role === 'superadmin') && form.codigoCentro) {
       try {
@@ -101,6 +101,18 @@ export default function NuevoUsuarioPage() {
         centroId = centroData._id
       } catch { setError('Error al validar el centro'); setLoading(false); return }
     }
+
+    if (form.codigoCentro) {
+      const resCentro = await fetch(`/api/centros?codigo=${form.codigoCentro.toUpperCase()}`)
+      if (resCentro.ok) {
+        const centroData = await resCentro.json()
+        centroId = centroData.id // ← Prisma devuelve { id: "cmp1..." }
+      } else {
+        setError('Código de centro no encontrado')
+        setLoading(false)
+        return
+      }
+    }    
 
     try {
       const res = await fetch('/api/usuarios', {

@@ -42,7 +42,7 @@ export default function MisEstudiantesPage() {
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {estudiantes.map((e: any) => (
-              <Card key={e._id}>
+              <Card key={e.id}>
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-lg font-bold text-primary">
@@ -55,7 +55,7 @@ export default function MisEstudiantesPage() {
                   </div>
                   <div className="flex items-center justify-between mt-3 pt-3 border-t">
                     <span className="text-xs text-muted-foreground capitalize">{e.genero || 'Sin especificar'}</span>
-                    <Link href={`/admin/docente/estudiantes/${e._id}`}>
+                    <Link href={`/admin/docente/estudiantes/${e.id}`}>
                       <Button variant="link" size="sm">Ver expediente →</Button>
                     </Link>
                   </div>

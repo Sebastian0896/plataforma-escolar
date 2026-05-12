@@ -6,6 +6,7 @@ import Usuario from '@/lib/models/Usuario'
 import { PLANES, ACTIVAR_PLANES } from '@/lib/planes'
 import Centro from '@/lib/models/Centro'
 import { usuarioSchema } from '@/lib/validations'
+import { prisma } from '@/lib/prisma'
 
 
 export const runtime = "nodejs"
@@ -31,14 +32,17 @@ function verificarPermiso(rolRequerido?: string) {
 }
 
 // GET — Listar usuarios
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const id = searchParams.get('id')
 
   // Buscar uno solo por ID
   if (id) {
-    await connectDB()
-    const usuario = await Usuario.findById(id).populate('centroId', 'nombre codigo').lean()
+    const usuario = await prisma.usuario.findUnique({
+      where: { id },
+      include: { centro: { select: { nombre: true, codigo: true } } },
+    })
     if (!usuario) return NextResponse.json({ error: 'No encontrado' }, { status: 404 })
     return NextResponse.json(usuario)
   }
@@ -47,36 +51,31 @@ export async function GET(request: Request) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
-  
-
   const mostrarInactivos = searchParams.get('inactivos') === 'true'
   const page = parseInt(searchParams.get('page') || '1')
   const limit = parseInt(searchParams.get('limit') || '9')
   const skip = (page - 1) * limit
 
-  const filter: any = { activo: mostrarInactivos ? false : true }
-  /* if (session.user?.role === 'admin_centro') {
-    filter.centroId = session.user.centroId
-  } */ // Funcionaba antes de sacar a superadmin de centro
+  const where: any = { activo: mostrarInactivos ? false : true }
   if (session.user?.centroId && session.user?.role === 'admin_centro') {
-  filter.centroId = session.user.centroId
-}
-  await connectDB()
+    where.centroId = session.user.centroId
+  }
 
   const [usuarios, total] = await Promise.all([
-    Usuario.find(filter)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .populate('centroId', 'nombre codigo')
-      .lean(),
-    Usuario.countDocuments(filter),
+    prisma.usuario.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+      include: { centro: { select: { nombre: true, codigo: true } } },
+    }),
+    prisma.usuario.count({ where }),
   ])
 
   const usuariosConCentro = usuarios.map((u: any) => ({
     ...u,
-    centroNombre: u.centroId?.nombre || 'Sin centro',
-    centroCodigo: u.centroId?.codigo || '',
+    centroNombre: u.centro?.nombre || 'Sin centro',
+    centroCodigo: u.centro?.codigo || '',
   }))
 
   return NextResponse.json({
@@ -88,173 +87,146 @@ export async function GET(request: Request) {
 }
 // POST — Crear usuario
 export async function POST(request: Request) {
-  const body = await request.json()
-
-  // Validar con Zod
-  const validation = usuarioSchema.safeParse(body)
-  
-  if (!validation.success) {
-    return NextResponse.json({ error: validation.error.errors[0].message }, { status: 400 })
-  }
-
-  const { nombre, email, password, rol, genero, nivel, ciclo, grado, rne, categoriaDocente, materias, niveles, ciclos, grados, centroId } = body
-
-
-  // Permitir crear el primer superadmin sin sesión
-  if (rol === 'superadmin') {
-  await connectDB()
-
-  const count = await Usuario.countDocuments({ rol: 'superadmin' })
-  if (count > 0) {
-    const session = await auth()
-    if (!session || session.user?.role !== 'superadmin') {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-    }
-  }
-} else {
-  const session = await auth()
-  if (!session || !puedeGestionar(session.user?.role || '', rol)) {
-    return NextResponse.json({ error: 'No autorizado para crear este rol' }, { status: 401 })
-  }
-}
-
-  // Verificar permisos
-  const session = await auth()
-  if (!session || !puedeGestionar(session.user?.role || '', rol)) {
-    return NextResponse.json({ error: 'No autorizado para crear este rol' }, { status: 401 })
-  }
-
-  if (!nombre || !email || !password || !rol) {
-    return NextResponse.json({ error: 'Campos requeridos' }, { status: 400 })
-  }
-
-  //console.log('📦 POST /api/usuarios - Body:', body)
-
-  // Después de verificar permisos, antes de crear:
-  if (ACTIVAR_PLANES) {
-    const centro = await Centro.findById(session.user?.centroId)
-    if (!centro) return NextResponse.json({ error: 'Centro no encontrado' }, { status: 400 })
-
-    const plan = PLANES[centro.plan || 'gratis']
-
-    if (rol === 'docente') {
-      const count = await Usuario.countDocuments({ centroId: centro._id, rol: 'docente', activo: true })
-      if (count >= plan.docentes) return NextResponse.json({ error: `Límite de docentes (${plan.docentes}) alcanzado` }, { status: 403 })
-    }
-
-    if (rol === 'estudiante') {
-      const count = await Usuario.countDocuments({ centroId: centro._id, rol: 'estudiante', activo: true })
-      if (count >= plan.estudiantes) return NextResponse.json({ error: `Límite de estudiantes (${plan.estudiantes}) alcanzado` }, { status: 403 })
-    }
-  }
-
   try {
-    await connectDB()
+    const body = await request.json()
+    const {
+      nombre, email, password, rol, genero,
+      rne, categoriaDocente, materias,
+      niveles, ciclos, grados, centroId, grado
+    } = body
 
-    const existe = await Usuario.findOne({ email })
-    if (existe) return NextResponse.json({ error: 'Email ya registrado' }, { status: 409 })
+    const session = await auth()
 
+    // 1. Validaciones de Seguridad y Roles
+    if (rol === 'superadmin') {
+      const count = await prisma.usuario.count({ where: { rol: 'superadmin' } })
+      if (count > 0) {
+        if (!session || session.user?.role !== 'superadmin') {
+          return NextResponse.json({ error: 'No autorizado para crear superadmins' }, { status: 401 })
+        }
+      }
+    } else {
+      if (!session || !puedeGestionar(session.user?.role || '', rol)) {
+        return NextResponse.json({ error: 'No autorizado para crear este rol' }, { status: 401 })
+      }
+    }
+
+    // 2. Validación de campos obligatorios
+    if (!nombre || !email || !password || !rol) {
+      return NextResponse.json({ error: 'Nombre, email, password y rol son requeridos' }, { status: 400 })
+    }
+
+    // 3. Verificar si el usuario ya existe
+    const existe = await prisma.usuario.findUnique({ where: { email } })
+    if (existe) {
+      return NextResponse.json({ error: 'El correo ya está registrado' }, { status: 409 })
+    }
+
+    // 4. Preparación de datos
     const passwordHash = await bcrypt.hash(password, 10)
 
-    // Determinar centroId
-    let centroAsignado = centroId
-    if (session.user?.role === 'admin_centro') {
-      centroAsignado = session.user.centroId // fuerza su centro
+    let idDelCentro = centroId
+    console.log('🏫 centroId recibido:', idDelCentro)
+    if (session?.user?.role === 'admin_centro') {
+      idDelCentro = session.user.centroId
     }
 
-    const ciclosArray = Array.isArray(ciclos) ? ciclos : Object.values(ciclos || {}).filter(Boolean)
 
-    const usuario: any = {
-      nombre, email, password: passwordHash, rol,
-      genero: genero || '',
-      centroId: centroAsignado || session.user?.centroId,
+    // Validar que el centro exista antes de conectarlo
+    if (idDelCentro) {
+      const centroExiste = await prisma.centro.findUnique({ where: { id: idDelCentro } })
+      if (!centroExiste) {
+        return NextResponse.json({ error: 'El centro especificado no existe' }, { status: 400 })
+      }
     }
 
-    if (rol === 'estudiante') {
-      usuario.nivel = nivel
-      usuario.ciclo = ciclo
-      usuario.grado = grado
-      usuario.rne = rne
-    }
+    // Convertir ciclos a array plano si es necesario
+    const ciclosArray = (rol === 'docente' && ciclos)
+      ? (Array.isArray(ciclos) ? ciclos : Object.values(ciclos))
+      : []
 
-    if (rol === 'docente') {
-      usuario.niveles = niveles || []
-      usuario.ciclos = [...new Set(ciclosArray)]
-      usuario.grados = grados || []
-      usuario.categoriaDocente = categoriaDocente
-      usuario.materias = materias || []
-    }
+    // 5. Creación del Usuario
+    const nuevoUsuario = await prisma.usuario.create({
+      data: {
+        nombre,
+        email,
+        password: passwordHash,
+        rol,
+        genero: genero || null,
+        centroId: idDelCentro || null,
+        grado: rol === 'estudiante' ? grado || null : null,
+        rne: rol === 'estudiante' ? rne || null : null,
+        niveles: rol === 'docente' ? niveles || [] : [],
+        ciclos: ciclosArray,
+        grados: rol === 'docente' ? grados || [] : [],
+        categoriaDocente: rol === 'docente' ? categoriaDocente || null : null,
+        materias: rol === 'docente' ? materias || [] : [],
+      },
+    })
 
-    await Usuario.create(usuario)
-    return NextResponse.json({ success: true }, { status: 201 })
+    return NextResponse.json({ success: true, id: nuevoUsuario.id }, { status: 201 })
+
   } catch (error: any) {
-    if (error.code === 11000) return NextResponse.json({ error: 'Email o RNE ya registrado' }, { status: 409 })
-      console.error('❌ Error POST /api/usuarios:', error)
-    return NextResponse.json({ error: 'Error del servidor: ' + error.message }, { status: 500 })
-    //return NextResponse.json({ error: error.message || 'Error del servidor' }, { status: 500 })
+    console.error("Error al crear usuario:", error)
+
+    if (error.code === 'P2002') {
+      return NextResponse.json({ error: 'El email ya existe' }, { status: 409 })
+    }
+
+    return NextResponse.json(
+      { error: 'Error interno del servidor al crear el usuario' },
+      { status: 500 }
+    )
   }
 }
 
 // PUT — Actualizar usuario
 export async function PUT(request: Request) {
-  const body = await request.json()
-  const { id, password, rol, ciclos, ...updateData } = body
-
-  // Verificar permisos
   const session = await auth()
-  if (!session || !puedeGestionar(session.user?.role || '', rol || '')) {
-    return NextResponse.json({ error: 'No autorizado para modificar este rol' }, { status: 401 })
+  if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+
+  const body = await request.json()
+  const { id, password, centroId } = body
+
+  // 1. Campos que SÍ pertenecen a la tabla Usuario
+  const dataToUpdate: any = {
+    nombre: body.nombre,
+    email: body.email,
+    rol: body.rol,
+    genero: body.genero,
+    grado: body.grado,
+    grados: body.grados,
+    niveles: body.niveles,
+    ciclos: body.ciclos,
+    materias: body.materias,
+    categoriaDocente: body.categoriaDocente,
+    rne: body.rne,
+    activo: body.activo,
+  }
+
+  // 2. Manejo de contraseña
+  if (password && password.trim() !== "") {
+    dataToUpdate.password = await bcrypt.hash(password, 10)
+  }
+
+  // 3. Relación: Aquí es donde conectas al Usuario con el Centro usando el ID
+  // El "codigo" del centro ya vive en la tabla Centro, no necesitas enviarlo aquí.
+  if (centroId) {
+    dataToUpdate.centro = {
+      connect: { id: centroId }
+    }
   }
 
   try {
-    if (password) {
-      updateData.password = await bcrypt.hash(password, 10)
-    }
-
-    if (ciclos) {
-      updateData.ciclos = [...new Set(Array.isArray(ciclos) ? ciclos : Object.values(ciclos).filter(Boolean))]
-    }
-
-    const unset: any = {}
-
-    if (rol === 'estudiante') {
-      unset.categoriaDocente = 1
-      unset.materias = 1
-      unset.niveles = 1
-      unset.ciclos = 1
-      unset.grados = 1
-    }
-
-    if (rol === 'docente') {
-      unset.nivel = 1
-      unset.ciclo = 1
-      unset.grado = 1
-      unset.rne = 1
-    }
-
-    if (rol === 'admin' || rol === 'admin_centro') {
-      unset.nivel = 1
-      unset.ciclo = 1
-      unset.grado = 1
-      unset.rne = 1
-      unset.categoriaDocente = 1
-      unset.materias = 1
-      unset.niveles = 1
-      unset.ciclos = 1
-      unset.grados = 1
-    }
-
-    await connectDB()
-
-    if (Object.keys(unset).length > 0) {
-      await Usuario.findByIdAndUpdate(id, { $unset: unset })
-    }
-
-    await Usuario.findByIdAndUpdate(id, updateData)
+    await prisma.usuario.update({
+      where: { id },
+      data: dataToUpdate
+    })
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    return NextResponse.json({ error: 'Error al actualizar' }, { status: 500 })
+    console.error("Error al actualizar:", error)
+    return NextResponse.json({ error: 'Error en la base de datos' }, { status: 500 })
   }
 }
 

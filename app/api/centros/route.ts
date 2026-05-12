@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { auth } from '@/auth'
+import { prisma } from '@/lib/prisma'
 import { connectDB } from '@/lib/db'
 import Centro from '@/lib/models/Centro'
 import Usuario from '@/lib/models/Usuario'
@@ -17,7 +18,7 @@ export async function GET(request: Request) {
 
   // Buscar por código (público para validación)
   if (codigo) {
-    const centro = await Centro.findOne({ codigo: codigo.toUpperCase(), activo: true }).lean()
+    const centro = await prisma.centro.findFirst({ where: { codigo: codigo.toUpperCase(), activo: true } })
     if (!centro) return NextResponse.json({ error: 'No encontrado' }, { status: 404 })
     return NextResponse.json(centro)
   }
@@ -29,7 +30,7 @@ export async function GET(request: Request) {
     if (session?.user?.role !== 'superadmin' && session?.user?.centroId !== id) {
       return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
     }
-    const centro = await Centro.findById(id).lean()
+    const centro = await prisma.centro.findUnique({ where: { id } })
     if (!centro) return NextResponse.json({ error: 'No encontrado' }, { status: 404 })
     return NextResponse.json(centro)
   }
