@@ -2,10 +2,6 @@ import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
 import { auth } from '@/auth'
 import { connectDB } from '@/lib/db'
-import Usuario from '@/lib/models/Usuario'
-import { PLANES, ACTIVAR_PLANES } from '@/lib/planes'
-import Centro from '@/lib/models/Centro'
-import { usuarioSchema } from '@/lib/validations'
 import { prisma } from '@/lib/prisma'
 
 
