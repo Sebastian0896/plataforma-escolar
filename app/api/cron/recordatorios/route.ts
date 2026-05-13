@@ -2,8 +2,6 @@ import { NextResponse } from 'next/server'
 import { connectDB } from '@/lib/db'
 import Planificacion from '@/lib/models/Planificacion'
 import Notificacion from '@/lib/models/Notificacion'
-import Usuario from '@/lib/models/Usuario'
-import mongoose from 'mongoose'
 
 export const runtime = "nodejs"
 

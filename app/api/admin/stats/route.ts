@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { connectDB } from '@/lib/db'
-import Centro from '@/lib/models/Centro'
-import Usuario from '@/lib/models/Usuario'
 import Planificacion from '@/lib/models/Planificacion'
 
 export const runtime = "nodejs"

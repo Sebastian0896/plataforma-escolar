@@ -2,8 +2,6 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { connectDB } from '@/lib/db'
 import Evaluacion from '@/lib/models/Evaluacion'
-import Usuario from '@/lib/models/Usuario'
-import Centro from '@/lib/models/Centro'
 import { jsPDF } from 'jspdf'
 
 export const runtime = "nodejs"

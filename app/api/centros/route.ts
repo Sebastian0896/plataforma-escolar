@@ -3,8 +3,6 @@ import bcrypt from 'bcryptjs'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { connectDB } from '@/lib/db'
-import Centro from '@/lib/models/Centro'
-import Usuario from '@/lib/models/Usuario'
 
 export const runtime = "nodejs"
 

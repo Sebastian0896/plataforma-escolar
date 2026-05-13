@@ -3,8 +3,6 @@ import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { getEstructuraCompleta } from '@/lib/planificaciones'
 import CardsNiveles from '@/components/admin/CardsNiveles'
-import mongoose from 'mongoose'
-import Centro from '@/lib/models/Centro'
 
 export const metadata = { title: 'Planificaciones' }
 

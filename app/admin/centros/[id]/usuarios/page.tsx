@@ -1,8 +1,6 @@
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { connectDB } from '@/lib/db'
-import Centro from '@/lib/models/Centro'
-import Usuario from '@/lib/models/Usuario'
 import Link from 'next/link'
 import PaginacionServer from '@/components/PaginacionServer'
 
