@@ -2,16 +2,19 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import type { NivelInfo } from '@/lib/types'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ChevronRight, Plus } from 'lucide-react'
+import { toast } from 'sonner'
 
 interface Props {
   estructura: NivelInfo[]
 }
 
 export default function CardsNiveles({ estructura }: Props) {
+  const router = useRouter()
   const [vista, setVista] = useState<'niveles' | 'ciclos' | 'grados' | 'materias' | 'temas'>('niveles')
   const [nivelSel, setNivelSel] = useState<NivelInfo | null>(null)
   const [cicloSel, setCicloSel] = useState<any>(null)
@@ -24,6 +27,22 @@ export default function CardsNiveles({ estructura }: Props) {
     if (item.grados) return item.grados.reduce((acc: number, g: any) => acc + totalTemas(g), 0)
     if (item.ciclos) return item.ciclos.reduce((acc: number, c: any) => acc + totalTemas(c), 0)
     return 0
+  }
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('¿Eliminar esta planificación?')) return
+    
+    try {
+      const res = await fetch(`/api/planificaciones/${id}`, { method: 'DELETE' })
+      if (res.ok) {
+        toast.success('Planificación eliminada')
+        router.refresh()
+      } else {
+        toast.error('Error al eliminar')
+      }
+    } catch (error) {
+      toast.error('Error al eliminar')
+    }
   }
 
   return (
@@ -107,13 +126,13 @@ export default function CardsNiveles({ estructura }: Props) {
         <div className="space-y-2">
           <h2 className="text-xl font-bold">{materiaSel.nombre}</h2>
           {materiaSel.temas.map((tema: any) => (
-            <Card key={tema.slug} className="flex items-center justify-between p-4">
+            <Card key={tema.id} className="flex items-center justify-between p-4">
               <div>
                 <p className="font-medium">{tema.tema}</p>
                 <p className="text-xs text-muted-foreground">/{gradoSel?.slug}/{materiaSel.slug}/{tema.slug}</p>
               </div>
               <div className="flex gap-2">
-                <Link href={`/admin/planificaciones/editar/${materiaSel.slug}/${tema.slug}`}>
+                <Link href={`/admin/planificaciones/editar/${tema.slug}`}>
                   <Button variant="outline" size="sm">✏️ Editar</Button>
                 </Link>
                 <Link href={`/admin/planificaciones/clonar/${tema.slug}`}>

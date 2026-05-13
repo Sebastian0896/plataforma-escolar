@@ -28,6 +28,7 @@ export default async function AdminLayout({
   const rolesPermitidos = [
     'admin',
     'admin_centro',
+    'coordinador',
     'superadmin',
     'docente',
     'registro',

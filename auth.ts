@@ -220,12 +220,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    async redirect({ url, baseUrl }) {
+    /* async redirect({ url, baseUrl }) {
       if (url === baseUrl || url === `${baseUrl}/` || url === `${baseUrl}/dashboard`) {
         return `${baseUrl}/dashboard`
       }
       return url
-    },
+    }, */
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
@@ -255,6 +255,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.centroNombre = token.centroNombre as string
       }
       return session
+    },
+    async redirect({ url, baseUrl }) {
+      // Después de login exitoso, siempre ir a /dashboard
+      // Luego el proxy se encargará de redirigir según rol
+      if (url === baseUrl || url === `${baseUrl}/`) {
+        return `${baseUrl}/dashboard`
+      }
+      return url
     },
   },
   pages: {

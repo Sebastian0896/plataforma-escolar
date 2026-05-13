@@ -1,8 +1,7 @@
-import mongoose from 'mongoose'
+// lib/planificaciones.ts
 import { connectDB } from './db'
 import Planificacion from './models/Planificacion'
 import type { Planificacion as IPlanificacion, NivelInfo } from './types'
-
 
 function formatear(texto: string): string {
   if (!texto) return ''
@@ -17,39 +16,44 @@ export async function getEstructuraCompleta(
   categoriaDocenteSlug?: string,
   gradosPermitidos?: string[],
   materiasPermitidas?: string[],
-  creadoPorId?: any
+  creadoPorId?: string
 ): Promise<NivelInfo[]> {
+  // Conectar a MongoDB (Planificaciones están aquí)
   await connectDB()
 
-    const filter: any = { publicado: true }
-    //if (centroId) filter.centroId = new mongoose.Types.ObjectId(centroId)
-    //if (categoriaDocenteSlug) filter.categoriaDocente = categoriaDocenteSlug
-    //if (gradosPermitidos?.length) filter.grado = { $in: gradosPermitidos }
-    //if (materiasPermitidas?.length) filter.materia = { $in: materiasPermitidas }
-    if (creadoPorId) {
-      filter.creadoPor = typeof creadoPorId === 'string' 
-        ? creadoPorId
-        : undefined
-    }
+  const filter: any = { publicado: true }
+  
+  // ✅ Filtrar por centroId (ahora es string, no ObjectId)
+  if (centroId) {
+    filter.centroId = centroId
+  }
+  
+  // Solo aplicar filtros si vienen definidos
+  if (categoriaDocenteSlug) {
+    filter.categoriaDocente = categoriaDocenteSlug
+  }
+  if (gradosPermitidos?.length) {
+    filter.grado = { $in: gradosPermitidos }
+  }
+  if (materiasPermitidas?.length) {
+    filter.materia = { $in: materiasPermitidas }
+  }
+  if (creadoPorId) {
+    filter.creadoPor = creadoPorId
+  }
 
-    //console.log('🔍 Filter final:', JSON.stringify(filter))
-    //console.log('🔍 categoriaDocenteSlug recibido:', categoriaDocenteSlug)
-  console.log('🔍 Filter:', JSON.stringify(filter))
-    const planificaciones = await Planificacion.find(filter).lean();
-    //const planificaciones = await Planificacion.find({publicado: true}).lean();
-    
-    //console.log('🔍 Parámetros recibidos:', { centroId, categoriaDocenteSlug, gradosPermitidos, materiasPermitidas, creadoPorId })
-    //console.log('🔍 Filter final:', JSON.stringify(filter))
-    //console.log('📊 Planificaciones encontradas:', planificaciones.length)
-    if (!planificaciones?.length) return []
-    
-    const nivelesMap = new Map<string, any>()
-    
-    for (const p of planificaciones) {
-      
+  console.log('🔍 Filter planificaciones:', JSON.stringify(filter))
+  
+  const planificaciones = await Planificacion.find(filter).lean()
+  
+  if (!planificaciones?.length) return []
+  
+  const nivelesMap = new Map<string, any>()
+  
+  for (const p of planificaciones) {
     if (!nivelesMap.has(p.nivel)) {
       nivelesMap.set(p.nivel, { 
-        nombre: formatear(p.nivel), // ← Aplicar formatear
+        nombre: formatear(p.nivel),
         slug: p.nivel, 
         ciclos: [] 
       })
@@ -75,11 +79,16 @@ export async function getEstructuraCompleta(
       grado.materias.push(materia)
     }
 
-    materia.temas.push({ id: p._id.toString(), slug: p.slug, tema: p.tema })
+    materia.temas.push({ 
+      id: p._id.toString(), 
+      slug: p.slug, 
+      tema: p.tema 
+    })
   }
 
   return Array.from(nivelesMap.values())
 }
+
 export async function getPlanificacion(
   nivelSlug: string,
   gradoSlug: string,

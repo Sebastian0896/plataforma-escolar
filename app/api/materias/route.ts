@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
   const session = await auth()
   
   // Verificar permisos
-  if (!session || !['admin', 'superadmin', 'admin_centro'].includes(session.user?.role || '')) {
+  if (!session || !['admin', 'superadmin', 'admin_centro', 'docente'].includes(session.user?.role || '')) {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
   }
 

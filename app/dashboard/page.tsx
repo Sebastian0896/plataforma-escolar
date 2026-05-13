@@ -1,33 +1,59 @@
-import {
-  Card,
-  CardContent,
-} from '@/components/ui/card'
+// app/dashboard/page.tsx
+import { auth } from '@/auth'
+import { redirect } from 'next/navigation'
+import { prisma } from '@/lib/prisma'
+import { DashboardContent } from '@/components/dashboard/DashboardContent'
 
-export default function DashboardPage() {
-  return (
-    <div className="flex items-center justify-center py-10 sm:py-16">
-      
-      <Card className="w-full max-w-2xl rounded-3xl border-border/60 shadow-sm">
-        
-        <CardContent className="flex flex-col items-center justify-center px-6 py-14 text-center sm:px-10">
-          
-          {/* Icon */}
-          <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-muted text-4xl">
-            📚
-          </div>
-
-          {/* Title */}
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
-            Planificaciones
-          </h1>
-
-          {/* Description */}
-          <p className="mt-3 max-w-md text-sm sm:text-base text-muted-foreground leading-relaxed">
-            Seleccioná un tema desde el menú lateral para comenzar a
-            visualizar o editar tus planificaciones.
-          </p>
-        </CardContent>
-      </Card>
-    </div>
-  )
+export default async function DashboardPage() {
+  const session = await auth()
+  
+  if (!session) redirect('/auth/login')
+  
+  const rol = session.user?.role
+  const centroId = session.user?.centroId
+  const usuarioId = session.user?.id
+  
+  // Datos comunes para todos los roles
+  let data = {
+    rol,
+    nombre: session.user?.name,
+    centroNombre: null as string | null,
+    totalDocentes: 0,
+    totalEstudiantes: 0,
+    planificacionesRecientes: 0,
+    proximasActividades: [] as any[],
+  }
+  
+  if (centroId) {
+    const [centro, docentes, estudiantes] = await Promise.all([
+      prisma.centro.findUnique({
+        where: { id: centroId },
+        select: { nombre: true, plan: true }
+      }),
+      prisma.usuario.count({
+        where: { centroId, rol: 'docente', activo: true }
+      }),
+      prisma.usuario.count({
+        where: { centroId, rol: 'estudiante', activo: true }
+      }),
+    ])
+    
+    data.centroNombre = centro?.nombre || null
+    data.totalDocentes = docentes
+    data.totalEstudiantes = estudiantes
+  }
+  
+  // Datos específicos según rol
+  if (rol === 'docente' && usuarioId) {
+    // Para docente: contar sus planificaciones
+    // Esto vendría de MongoDB
+    // data.planificacionesRecientes = await Planificacion.countDocuments({ creadoPor: usuarioId })
+  }
+  
+  if (rol === 'coordinador' && centroId) {
+    // Para coordinador: contar planificaciones de sus docentes
+    // data.planificacionesRecientes = await getPlanificacionesCountByCentro(centroId)
+  }
+  
+  return <DashboardContent data={data} />
 }

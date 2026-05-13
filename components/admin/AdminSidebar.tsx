@@ -1,3 +1,4 @@
+// components/AdminSidebar.tsx
 'use client'
 
 import Link from 'next/link'
@@ -8,8 +9,7 @@ import { useTheme } from 'next-themes'
 
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Separator } from '@/components/ui/separator'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 
 import {
@@ -24,7 +24,12 @@ import {
   X,
   ChevronRight,
   Settings,
-  BookOpen,  // ← Agregado para materias
+  BookOpen,
+  School,
+  ClipboardCheck,
+  CalendarDays,
+  Eye,
+  TrendingUp,
 } from 'lucide-react'
 
 export default function AdminSidebar() {
@@ -35,82 +40,171 @@ export default function AdminSidebar() {
 
   const user = session?.user
   const rol = user?.role
+  const centroId = user?.centroId
 
-  // Escuchar evento personalizado para abrir desde un Navbar externo
   useEffect(() => {
     const handler = () => setIsOpen((prev) => !prev)
     document.addEventListener('toggle-sidebar', handler)
     return () => document.removeEventListener('toggle-sidebar', handler)
   }, [])
 
-  // Cerrar sidebar al cambiar de ruta (importante en móvil)
   useEffect(() => {
     setIsOpen(false)
   }, [pathname])
 
-  const allLinks = [
-    {
-      href: rol === 'admin_centro' ? `/admin/centros/${user?.centroId}` : '/admin',
+  // Función para verificar si un enlace está activo
+  const isActiveLink = (href: string) => {
+    if (href === '/admin') {
+      return pathname === '/admin'
+    }
+    // Para rutas que empiezan con el href (ej: /admin/centro/...)
+    if (href !== '/admin' && pathname.startsWith(href)) {
+      return true
+    }
+    return false
+  }
+
+  // Enlaces según rol
+  const getLinks = () => {
+    const links = []
+
+    // Dashboard - todos los roles administrativos
+    links.push({
+      href: '/admin',
       label: 'Dashboard',
       icon: LayoutDashboard,
-      roles: ['admin', 'docente', 'admin_centro', 'superadmin'],
-    },
-    {
-      href: '/admin/docente',
-      label: 'Mi oficina',
-      icon: Home,
-      roles: ['docente', 'admin_centro'],
-      condicion: rol === 'admin_centro' ? !!user?.categoriaDocente : true,
-    },
-    {
-      href: '/dashboard',
-      label: 'Planificaciones',
-      icon: FileText,
-      roles: ['admin', 'docente', 'admin_centro', 'coordinador'],
-    },
-    {
-      href: '/admin/planificaciones/nueva',
-      label: 'Nueva planificación',
-      icon: PlusCircle,
-      roles: ['admin', 'docente'],
-    },
-    {
-      href: '/admin/materias',  // ← Nueva ruta
-      label: 'Gestionar materias',
-      icon: BookOpen,
-      roles: ['admin', 'superadmin', 'admin_centro'],  // ← Roles permitidos
-    },
-    {
-      href: '/admin/usuarios/centros',
-      label: 'Usuarios',
-      icon: Users,
-      roles: ['admin', 'admin_centro', 'superadmin'],
-    },
-    {
-      href: '/admin/centros',
-      label: 'Centros',
-      icon: Building2,
-      roles: ['superadmin'],
-    },
-    {
-      href: '/admin/centros/plan',
-      label: 'Planes',
-      icon: Crown,
-      roles: ['admin_centro', 'admin'],
-    },
-    {
-      href: '/admin/registro/comprobantes',
-      label: 'Comprobantes',
-      icon: FileText,
-      roles: ['registro'],
-    },
-  ]
+      roles: ['admin', 'superadmin', 'admin_centro', 'coordinador', 'docente', 'tecnico_distrital', 'registro'],
+    })
 
-  const links = allLinks.filter(
-    (link) =>
-      link.roles.includes(rol || '') &&
-      (link.condicion === undefined || link.condicion)
-  )
+    // Mi Panel Estudiantil (vista estudiante)
+    links.push({
+      href: '/dashboard',
+      label: 'Mi Panel Estudiantil',
+      icon: Eye,
+      roles: ['docente', 'coordinador', 'admin_centro'],
+    })
+
+    // Superadmin
+    if (rol === 'superadmin') {
+      links.push({
+        href: '/admin/centros',
+        label: 'Gestionar Centros',
+        icon: Building2,
+        roles: ['superadmin'],
+      })
+    }
+
+    // Admin y Superadmin - Materias
+    if (rol === 'admin' || rol === 'superadmin') {
+      links.push({
+        href: '/admin/materias',
+        label: 'Gestionar Materias',
+        icon: BookOpen,
+        roles: ['admin', 'superadmin'],
+      })
+    }
+
+    // Admin centro - Gestión de su centro (NO coordinador)
+    if (rol === 'admin_centro' && centroId) {
+      links.push({
+        href: `/admin/centro/${centroId}`,
+        label: 'Gestión del Centro',
+        icon: School,
+        roles: ['admin_centro'],
+      })
+      
+      links.push({
+        href: '/admin/materias',
+        label: 'Gestionar Materias',
+        icon: BookOpen,
+        roles: ['admin_centro'],
+      })
+      
+      links.push({
+        href: '/admin/usuarios/centros',
+        label: 'Gestionar Usuarios',
+        icon: Users,
+        roles: ['admin_centro'],
+      })
+      
+      links.push({
+        href: '/admin/centros/plan',
+        label: 'Planes',
+        icon: Crown,
+        roles: ['admin_centro'],
+      })
+    }
+
+    // Coordinador - Solo supervisión (NO gestión)
+    if (rol === 'coordinador' && centroId) {
+      links.push({
+        href: `/admin/centro/${centroId}/coordinador`,
+        label: 'Supervisión Académica',
+        icon: ClipboardCheck,
+        roles: ['coordinador'],
+      })
+      
+      // Estadísticas y reportes
+      links.push({
+        href: `/admin/centro/${centroId}/coordinador/estadisticas`,
+        label: 'Estadísticas',
+        icon: TrendingUp,
+        roles: ['coordinador'],
+      })
+    }
+
+    // Docente
+    if (rol === 'docente') {
+      links.push({
+        href: '/admin/docente/diario',
+        label: 'Diario del Docente',
+        icon: CalendarDays,
+        roles: ['docente'],
+      })
+      links.push({
+        href: '/admin/docente/asistencia',
+        label: 'Pase de Lista',
+        icon: ClipboardCheck,
+        roles: ['docente'],
+      })
+      links.push({
+        href: '/admin/docente/planificaciones',
+        label: 'Mis Planificaciones',
+        icon: FileText,
+        roles: ['docente'],
+      })
+      links.push({
+        href: '/admin/docente/planificaciones/nueva',
+        label: 'Nueva Planificación',
+        icon: PlusCircle,
+        roles: ['docente'],
+      })
+    }
+
+    // Registro
+    if (rol === 'registro') {
+      links.push({
+        href: '/admin/registro/inscripciones',
+        label: 'Inscripciones',
+        icon: Users,
+        roles: ['registro'],
+      })
+    }
+
+    // Técnico Distrital
+    if (rol === 'tecnico_distrital') {
+      links.push({
+        href: '/admin/distrital',
+        label: 'Panel Distrital',
+        icon: Building2,
+        roles: ['tecnico_distrital'],
+      })
+    }
+
+    return links
+  }
+
+  const links = getLinks()
 
   return (
     <>
@@ -154,7 +248,7 @@ export default function AdminSidebar() {
           </Button>
         </div>
 
-        {/* Perfil de Usuario Corto */}
+        {/* Perfil de Usuario */}
         <div className="p-4">
           <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800">
             <Avatar className="h-10 w-10 border-2 border-background shadow-sm">
@@ -178,8 +272,11 @@ export default function AdminSidebar() {
               Menú Principal
             </p>
             {links.map((link) => {
-              const isActive = pathname === link.href || pathname.startsWith(link.href + '/')
-
+              // Verificar que href sea válido
+              if (!link.href || link.href.includes('undefined')) return null
+              
+              const isActive = isActiveLink(link.href)
+              
               return (
                 <Link key={link.href} href={link.href}>
                   <Button
@@ -202,7 +299,7 @@ export default function AdminSidebar() {
           </div>
         </ScrollArea>
 
-        {/* Footer / Acciones finales */}
+        {/* Footer */}
         <div className="p-4 mt-auto border-t border-slate-100 dark:border-slate-800 space-y-2">
           <Button
             variant="ghost"

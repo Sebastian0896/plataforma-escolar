@@ -75,8 +75,8 @@ function PlanificacionCard({ plan }: { plan: any }) {
         </div>
         <div className="flex gap-1">
           <Link href={`/dashboard/${plan.nivel || 'nivel-secundario'}/${plan.grado}/${plan.slug}`}><Button variant="ghost" size="sm">👁️</Button></Link>
-          <Link href={`/admin/planificaciones/editar/${plan.materia}/${plan.slug}`}><Button variant="ghost" size="sm">✏️</Button></Link>
-          <Link href={`/admin/planificaciones/clonar/${plan.slug}`}><Button variant="ghost" size="sm">📋</Button></Link>
+          <Link href={`/admin/docente/planificaciones/editar/${plan.materia}/${plan.slug}`}><Button variant="ghost" size="sm">✏️</Button></Link>
+          <Link href={`/admin/docente/planificaciones/clonar/${plan.slug}`}><Button variant="ghost" size="sm">📋</Button></Link>
         </div>
       </CardContent>
     </Card>

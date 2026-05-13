@@ -1,0 +1,39 @@
+// proxy.ts
+import { auth } from '@/auth'
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+
+export const proxy = auth(async function proxy(req: NextRequest) {
+  const session = await auth()
+  const path = req.nextUrl.pathname
+  
+  // ✅ No redirigir si ya está en /dashboard
+  if (path === '/dashboard') {
+    return NextResponse.next()
+  }
+  
+  // Solo redirigir en la raíz
+  if (path === '/') {
+    const rol = session?.user?.role
+    const centroId = session?.user?.centroId
+    
+    if (rol === 'coordinador' && centroId) {
+      return NextResponse.redirect(new URL(`/admin/centro/${centroId}/coordinador`, req.url))
+    }
+    if (rol === 'docente') {
+      return NextResponse.redirect(new URL('/admin/docente', req.url))
+    }
+    if (rol === 'admin_centro' && centroId) {
+      return NextResponse.redirect(new URL(`/admin/centro/${centroId}`, req.url))
+    }
+    if (rol === 'admin' || rol === 'superadmin') {
+      return NextResponse.redirect(new URL('/admin', req.url))
+    }
+  }
+  
+  return NextResponse.next()
+})
+
+export const config = {
+  matcher: ['/', '/dashboard'],
+}

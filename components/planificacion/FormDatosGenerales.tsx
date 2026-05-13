@@ -7,12 +7,6 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
-const MATERIAS_POR_CATEGORIA: Record<string, string[]> = {
-  idiomas: ['frances', 'ingles'],
-  'materias-basicas': ['lengua-espanola', 'matematica', 'ciencias-sociales', 'ciencias-naturales'],
-  'otras-materias': ['educacion-fisica', 'artistica'],
-}
-
 const GRADOS_PRIMER_CICLO_PRIMARIA = ['1ro-primaria', '2do-primaria', '3ro-primaria']
 const GRADOS_SEGUNDO_CICLO_PRIMARIA = ['4to-primaria', '5to-primaria', '6to-primaria']
 const GRADOS_PRIMER_CICLO_SECUNDARIA = ['1ro-secundaria', '2do-secundaria', '3ro-secundaria']
@@ -68,13 +62,13 @@ export default function FormDatosGenerales({ datos, onChange }: Props) {
 
   // Cargar materias desde la API
   useEffect(() => {
+    const url = esDocente ? '/api/materias/docente' : '/api/materias'
     const cargarMaterias = async () => {
       try {
         setLoadingMaterias(true)
-        const res = await fetch('/api/materias')
+        const res = await fetch(url)
         const data = await res.json()
         
-        // ✅ Validar que sea array
         if (Array.isArray(data)) {
           setMaterias(data)
         } else if (data.materias && Array.isArray(data.materias)) {
@@ -118,12 +112,12 @@ export default function FormDatosGenerales({ datos, onChange }: Props) {
     }
   }, [session, esDocente, datos, onChange])
 
-  // ✅ Asegurar que materias sea array
+  // Asegurar que materias sea array
   const materiasList = Array.isArray(materias) ? materias : []
 
-  // ✅ Filtrar materias según categoría (con protección)
+  // ✅ CORREGIDO: Filtrar materias por categoría usando el campo categoriaDocente de la materia
   const materiasFiltradas = datos.categoriaDocente 
-    ? materiasList.filter(m => MATERIAS_POR_CATEGORIA[datos.categoriaDocente]?.includes(m.slug))
+    ? materiasList.filter(m => m.categoriaDocente === datos.categoriaDocente)
     : materiasList
 
   const set = (field: keyof DatosGenerales, value: string) => {
@@ -166,18 +160,18 @@ export default function FormDatosGenerales({ datos, onChange }: Props) {
               onValueChange={(v) => set('categoriaDocente', v)}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Seleccionar..." />
+                <SelectValue placeholder="Seleccionar categoría..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="idiomas">Idiomas</SelectItem>
-                <SelectItem value="materias-basicas">Materias Básicas</SelectItem>
-                <SelectItem value="otras-materias">Otras Materias</SelectItem>
+                <SelectItem value="idiomas">🌐 Idiomas</SelectItem>
+                <SelectItem value="materias-basicas">📚 Materias Básicas</SelectItem>
+                <SelectItem value="otras-materias">🎨 Otras Materias</SelectItem>
               </SelectContent>
             </Select>
           )}
         </div>
 
-        {/* Materia */}
+        {/* Materia - CORREGIDO: siempre habilitado */}
         <div>
           <label className="block text-sm font-medium mb-1">Materia</label>
           {loadingMaterias ? (
@@ -186,21 +180,32 @@ export default function FormDatosGenerales({ datos, onChange }: Props) {
             <Select 
               value={datos.materia} 
               onValueChange={(v) => set('materia', v)}
-              disabled={materiasFiltradas.length === 0}
             >
               <SelectTrigger>
                 <SelectValue placeholder={
-                  materiasFiltradas.length === 0 
-                    ? "No hay materias disponibles" 
-                    : "Seleccionar..."
+                  !datos.categoriaDocente 
+                    ? "Selecciona una categoría primero"
+                    : materiasFiltradas.length === 0
+                    ? "No hay materias para esta categoría"
+                    : "Seleccionar materia..."
                 } />
               </SelectTrigger>
               <SelectContent>
-                {materiasFiltradas.map((m) => (
-                  <SelectItem key={m.slug} value={m.slug}>
-                    {m.nombre}
-                  </SelectItem>
-                ))}
+                {!datos.categoriaDocente ? (
+                  <div className="p-2 text-center text-sm text-muted-foreground">
+                    ⚠️ Selecciona una categoría primero
+                  </div>
+                ) : materiasFiltradas.length === 0 ? (
+                  <div className="p-2 text-center text-sm text-muted-foreground">
+                    📭 No hay materias disponibles para esta categoría
+                  </div>
+                ) : (
+                  materiasFiltradas.map((m) => (
+                    <SelectItem key={m.id} value={m.slug}>
+                      {m.nombre}
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
           )}
@@ -214,11 +219,11 @@ export default function FormDatosGenerales({ datos, onChange }: Props) {
             onValueChange={(v) => set('nivel', v)}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Seleccionar..." />
+              <SelectValue placeholder="Seleccionar nivel..." />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="nivel-primario">Nivel Primario</SelectItem>
-              <SelectItem value="nivel-secundario">Nivel Secundario</SelectItem>
+              <SelectItem value="nivel-primario">🎒 Nivel Primario</SelectItem>
+              <SelectItem value="nivel-secundario">📖 Nivel Secundario</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -232,11 +237,11 @@ export default function FormDatosGenerales({ datos, onChange }: Props) {
             disabled={!datos.nivel}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Seleccionar..." />
+              <SelectValue placeholder={!datos.nivel ? "Selecciona nivel primero" : "Seleccionar ciclo..."} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="primer-ciclo">Primer Ciclo</SelectItem>
-              <SelectItem value="segundo-ciclo">Segundo Ciclo</SelectItem>
+              <SelectItem value="primer-ciclo">📘 Primer Ciclo</SelectItem>
+              <SelectItem value="segundo-ciclo">📗 Segundo Ciclo</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -250,7 +255,7 @@ export default function FormDatosGenerales({ datos, onChange }: Props) {
             disabled={!datos.ciclo}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Seleccionar..." />
+              <SelectValue placeholder={!datos.ciclo ? "Selecciona ciclo primero" : "Seleccionar grado..."} />
             </SelectTrigger>
             <SelectContent>
               {getGradosPorCiclo(datos.nivel, datos.ciclo).map((g) => (
@@ -333,7 +338,7 @@ export default function FormDatosGenerales({ datos, onChange }: Props) {
           />
         </div>
 
-        {/* Competencia - span 2 columnas */}
+        {/* Competencia */}
         <div className="md:col-span-2">
           <label className="block text-sm font-medium mb-1">Competencia</label>
           <Textarea 
@@ -345,7 +350,7 @@ export default function FormDatosGenerales({ datos, onChange }: Props) {
           />
         </div>
 
-        {/* Indicador de Logro - span 2 columnas */}
+        {/* Indicador de Logro */}
         <div className="md:col-span-2">
           <label className="block text-sm font-medium mb-1">Indicador de Logro</label>
           <Textarea 
@@ -357,7 +362,7 @@ export default function FormDatosGenerales({ datos, onChange }: Props) {
           />
         </div>
 
-        {/* Contenido visible para estudiantes - span 2 columnas */}
+        {/* Contenido visible para estudiantes */}
         <div className="md:col-span-2">
           <label className="block text-sm font-medium mb-1">Contenido visible para estudiantes</label>
           <Textarea 
