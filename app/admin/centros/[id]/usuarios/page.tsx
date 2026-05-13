@@ -1,6 +1,6 @@
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
-import { connectDB } from '@/lib/db'
+import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import PaginacionServer from '@/components/PaginacionServer'
 
@@ -35,20 +35,45 @@ export default async function UsuariosPorCentroPage({
   const limit = 9
   const skip = (page - 1) * limit
 
-  await connectDB()
+  // Obtener centro con Prisma
+  const centro = await prisma.centro.findUnique({
+    where: { id },
+    select: { id: true, nombre: true, codigo: true },
+  })
 
-  const centro = await Centro.findById(id).lean()
+  if (!centro) {
+    return (
+      <div className="p-8 text-center">
+        <p className="text-red-500">Centro no encontrado</p>
+      </div>
+    )
+  }
 
+  // Obtener usuarios y total con Prisma
   const [usuarios, total] = await Promise.all([
-    Usuario.find({ centroId: id, activo: true })
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean(),
-
-    Usuario.countDocuments({
-      centroId: id,
-      activo: true,
+    prisma.usuario.findMany({
+      where: {
+        centroId: id,
+        activo: true,
+      },
+      select: {
+        id: true,
+        nombre: true,
+        email: true,
+        rol: true,
+        createdAt: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      skip,
+      take: limit,
+    }),
+    prisma.usuario.count({
+      where: {
+        centroId: id,
+        activo: true,
+      },
     }),
   ])
 
@@ -62,7 +87,7 @@ export default async function UsuariosPorCentroPage({
             href={`/admin/centros/${id}`}
             className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
-            ← {centro?.nombre}
+            ← {centro.nombre}
           </Link>
 
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">
@@ -77,9 +102,9 @@ export default async function UsuariosPorCentroPage({
 
       {/* Grid */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {usuarios.map((u: any) => (
+        {usuarios.map((u) => (
           <Card
-            key={u._id}
+            key={u.id}
             className="border-border/60 shadow-sm hover:shadow-md transition-all duration-200 rounded-2xl"
           >
             <CardContent className="p-5">
