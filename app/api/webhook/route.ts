@@ -5,7 +5,10 @@ import crypto from 'crypto'
 
 export async function POST(req: NextRequest) {
   try {
+    console.log('🔵 WEBHOOK RECIBIDO - Time:', new Date().toISOString())
+  console.log('🔵 Headers:', Object.fromEntries(req.headers.entries()))
     const body = await req.text()
+  console.log('🔵 Body:', body)
     const signature = req.headers.get('x-signature')
 
     // Verificar firma

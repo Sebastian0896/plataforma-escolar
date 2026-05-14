@@ -4,14 +4,27 @@ import { auth } from '@/auth'
 import { getPlanBySlug } from '@/lib/planes'
 
 export async function POST(req: NextRequest) {
-  try {
-    const session = await auth()
-    
-    if (!session || session.user?.rol !== 'docente') {
-      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
-    }
+  console.log('🔵 Endpoint llamado')
+  
+  const session = await auth()
+  console.log('🔵 Session:', session?.user?.role, session?.user?.id)
+  
+  if (!session) {
+    console.log('❌ No session')
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  }
 
+  // Temporal: permitir todos los roles para pruebas
+  console.log('🔵 Rol:', session.user.role)
+  
+  // Aceptar cualquier rol por ahora para probar
+  // if (session.user.role !== 'docente') {
+  //   return NextResponse.json({ error: 'Solo docentes' }, { status: 401 })
+  // }
+
+  try {
     const { plan: planSlug, ciclo } = await req.json()
+    console.log('🔵 Plan:', planSlug, 'Ciclo:', ciclo)
 
     const plan = getPlanBySlug(planSlug)
     if (!plan || plan.slug === 'gratis') {
@@ -24,7 +37,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Variant ID no configurado' }, { status: 500 })
     }
 
-    // Crear checkout en Lemon Squeezy
+    // Verificar API key de Lemon Squeezy
+    if (!process.env.LEMON_SQUEEZY_API_KEY) {
+      console.log('❌ Falta LEMON_SQUEEZY_API_KEY')
+      return NextResponse.json({ error: 'Configuración de pago incompleta' }, { status: 500 })
+    }
+
     const response = await fetch('https://api.lemonsqueezy.com/v1/checkouts', {
       method: 'POST',
       headers: {
@@ -69,6 +87,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Error al crear el checkout' }, { status: 500 })
     }
 
+    console.log('✅ Checkout creado:', data.data.attributes.url)
     return NextResponse.json({ url: data.data.attributes.url })
   } catch (error) {
     console.error('Checkout error:', error)

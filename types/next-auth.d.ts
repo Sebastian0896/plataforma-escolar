@@ -14,7 +14,8 @@ declare module "next-auth" {
       materias?: string[]
       centroId?: string
       centroNombre?: string
-      centroTipo?: string  // ← AGREGAR (o tipo)
+      centroTipo?: string
+      plan?: string
     } & DefaultSession["user"]
   }
   interface User {
@@ -28,7 +29,8 @@ declare module "next-auth" {
     materias?: string[]
     centroId?: string
     centroNombre?: string
-    centroTipo?: string  // ← AGREGAR
+    centroTipo?: string
+    plan?: string
   }
 }
 
@@ -43,6 +45,7 @@ declare module "next-auth/jwt" {
     materias?: string[]
     centroId?: string
     centroNombre?: string
-    centroTipo?: string  // ← AGREGAR
+    centroTipo?: string
+    plan?: string
   }
 }
