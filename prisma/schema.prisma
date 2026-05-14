@@ -56,8 +56,8 @@ model Usuario {
 
   evaluacionesEstudiante Evaluacion[] @relation("EstudianteEvaluacion")
   evaluacionesDocente    Evaluacion[] @relation("DocenteEvaluacion")
+  
 
-  // NUEVO
   suscripciones Suscripcion[]
 }
 
