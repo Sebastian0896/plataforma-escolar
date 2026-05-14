@@ -107,7 +107,7 @@ export default function AdminSidebar() {
     // Admin centro - Gestión de su centro (NO coordinador)
     if (rol === 'admin_centro' && centroId) {
       links.push({
-        href: `/admin/centro/${centroId}`,
+        href: `/admin/centros/${centroId}`,
         label: 'Gestión del Centro',
         icon: School,
         roles: ['admin_centro'],
@@ -138,7 +138,7 @@ export default function AdminSidebar() {
     // Coordinador - Solo supervisión (NO gestión)
     if (rol === 'coordinador' && centroId) {
       links.push({
-        href: `/admin/centro/${centroId}/coordinador`,
+        href: `/admin/centros/${centroId}/coordinador`,
         label: 'Supervisión Académica',
         icon: ClipboardCheck,
         roles: ['coordinador'],
@@ -146,7 +146,7 @@ export default function AdminSidebar() {
       
       // Estadísticas y reportes
       links.push({
-        href: `/admin/centro/${centroId}/coordinador/estadisticas`,
+        href: `/admin/centros/${centroId}/coordinador/estadisticas`,
         label: 'Estadísticas',
         icon: TrendingUp,
         roles: ['coordinador'],
