@@ -69,6 +69,10 @@ export async function POST(req: NextRequest) {
     // =========================================
 
     const payload = JSON.parse(body)
+    console.log(
+      'PAYLOAD COMPLETO:',
+      JSON.stringify(payload, null, 2)
+    )
 
     const eventName = payload.meta?.event_name
 
