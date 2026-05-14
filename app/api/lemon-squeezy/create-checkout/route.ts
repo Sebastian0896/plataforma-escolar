@@ -46,25 +46,13 @@ export async function POST(req: NextRequest) {
         data: {
           type: 'checkouts',
           attributes: {
+            store_id: process.env.LEMON_SQUEEZY_STORE_ID,
+            variant_id: variantId,
             checkout_data: {
               custom: {
                 user_id: session.user.id,
                 user_email: session.user.email,
                 plan: planSlug,
-              },
-            },
-          },
-          relationships: {
-            store: {
-              data: {
-                type: 'stores',
-                id: process.env.LEMON_SQUEEZY_STORE_ID,
-              },
-            },
-            variant: {
-              data: {
-                type: 'variants',
-                id: variantId,
               },
             },
           },
