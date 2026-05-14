@@ -35,30 +35,44 @@ export async function POST(req: NextRequest) {
 
     console.log('🔵 Paso 7: API Key existe?', !!process.env.LEMON_SQUEEZY_API_KEY)
 
-    const response = await fetch('https://api.lemonsqueezy.com/v1/checkouts', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${process.env.LEMON_SQUEEZY_API_KEY}`,
-      },
-      body: JSON.stringify({
-        data: {
-          type: 'checkouts',
-          attributes: {
-            store_id: process.env.LEMON_SQUEEZY_STORE_ID,
-            variant_id: variantId,
-            checkout_data: {
-              custom: {
-                user_id: session.user.id,
-                user_email: session.user.email,
-                plan: planSlug,
-              },
-            },
+    // app/api/lemon-squeezy/create-checkout/route.ts
+
+const response = await fetch('https://api.lemonsqueezy.com/v1/checkouts', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/vnd.api+json',
+    'Accept': 'application/vnd.api+json',
+    'Authorization': `Bearer ${process.env.LEMON_SQUEEZY_API_KEY}`,
+  },
+  body: JSON.stringify({
+    data: {
+      type: 'checkouts',
+      attributes: {
+        checkout_data: {
+          custom: {
+            user_id: session.user.id,
+            user_email: session.user.email,
+            plan: planSlug,
           },
         },
-      }),
-    })
+      },
+      relationships: {
+        store: {
+          data: {
+            type: 'stores',
+            id: process.env.LEMON_SQUEEZY_STORE_ID,
+          },
+        },
+        variant: {
+          data: {
+            type: 'variants',
+            id: variantId,
+          },
+        },
+      },
+    },
+  }),
+})
 
     console.log('🔵 Paso 8: Respuesta Lemon:', response.status)
 
