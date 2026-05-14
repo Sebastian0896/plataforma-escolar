@@ -193,6 +193,31 @@ exports.Prisma.EvaluacionScalarFieldEnum = {
   docenteId: 'docenteId'
 };
 
+exports.Prisma.SuscripcionScalarFieldEnum = {
+  id: 'id',
+  usuarioId: 'usuarioId',
+  plan: 'plan',
+  estado: 'estado',
+  lemonCustomerId: 'lemonCustomerId',
+  lemonSubscriptionId: 'lemonSubscriptionId',
+  lemonVariantId: 'lemonVariantId',
+  fechaInicio: 'fechaInicio',
+  fechaFin: 'fechaFin',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+};
+
+exports.Prisma.PagoScalarFieldEnum = {
+  id: 'id',
+  suscripcionId: 'suscripcionId',
+  monto: 'monto',
+  moneda: 'moneda',
+  estado: 'estado',
+  lemonOrderId: 'lemonOrderId',
+  lemonPaymentId: 'lemonPaymentId',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -215,7 +240,9 @@ exports.Prisma.ModelName = {
   Materia: 'Materia',
   Competencia: 'Competencia',
   Periodo: 'Periodo',
-  Evaluacion: 'Evaluacion'
+  Evaluacion: 'Evaluacion',
+  Suscripcion: 'Suscripcion',
+  Pago: 'Pago'
 };
 
 /**

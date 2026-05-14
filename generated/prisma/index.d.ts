@@ -43,6 +43,16 @@ export type Periodo = $Result.DefaultSelection<Prisma.$PeriodoPayload>
  * 
  */
 export type Evaluacion = $Result.DefaultSelection<Prisma.$EvaluacionPayload>
+/**
+ * Model Suscripcion
+ * 
+ */
+export type Suscripcion = $Result.DefaultSelection<Prisma.$SuscripcionPayload>
+/**
+ * Model Pago
+ * 
+ */
+export type Pago = $Result.DefaultSelection<Prisma.$PagoPayload>
 
 /**
  * ##  Prisma Client ʲˢ
@@ -224,6 +234,26 @@ export class PrismaClient<
     * ```
     */
   get evaluacion(): Prisma.EvaluacionDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.suscripcion`: Exposes CRUD operations for the **Suscripcion** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Suscripcions
+    * const suscripcions = await prisma.suscripcion.findMany()
+    * ```
+    */
+  get suscripcion(): Prisma.SuscripcionDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.pago`: Exposes CRUD operations for the **Pago** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Pagos
+    * const pagos = await prisma.pago.findMany()
+    * ```
+    */
+  get pago(): Prisma.PagoDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -663,7 +693,9 @@ export namespace Prisma {
     Materia: 'Materia',
     Competencia: 'Competencia',
     Periodo: 'Periodo',
-    Evaluacion: 'Evaluacion'
+    Evaluacion: 'Evaluacion',
+    Suscripcion: 'Suscripcion',
+    Pago: 'Pago'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -679,7 +711,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "centro" | "usuario" | "materia" | "competencia" | "periodo" | "evaluacion"
+      modelProps: "centro" | "usuario" | "materia" | "competencia" | "periodo" | "evaluacion" | "suscripcion" | "pago"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1127,6 +1159,154 @@ export namespace Prisma {
           }
         }
       }
+      Suscripcion: {
+        payload: Prisma.$SuscripcionPayload<ExtArgs>
+        fields: Prisma.SuscripcionFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.SuscripcionFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SuscripcionPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.SuscripcionFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SuscripcionPayload>
+          }
+          findFirst: {
+            args: Prisma.SuscripcionFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SuscripcionPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.SuscripcionFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SuscripcionPayload>
+          }
+          findMany: {
+            args: Prisma.SuscripcionFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SuscripcionPayload>[]
+          }
+          create: {
+            args: Prisma.SuscripcionCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SuscripcionPayload>
+          }
+          createMany: {
+            args: Prisma.SuscripcionCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.SuscripcionCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SuscripcionPayload>[]
+          }
+          delete: {
+            args: Prisma.SuscripcionDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SuscripcionPayload>
+          }
+          update: {
+            args: Prisma.SuscripcionUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SuscripcionPayload>
+          }
+          deleteMany: {
+            args: Prisma.SuscripcionDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.SuscripcionUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.SuscripcionUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SuscripcionPayload>[]
+          }
+          upsert: {
+            args: Prisma.SuscripcionUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$SuscripcionPayload>
+          }
+          aggregate: {
+            args: Prisma.SuscripcionAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateSuscripcion>
+          }
+          groupBy: {
+            args: Prisma.SuscripcionGroupByArgs<ExtArgs>
+            result: $Utils.Optional<SuscripcionGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.SuscripcionCountArgs<ExtArgs>
+            result: $Utils.Optional<SuscripcionCountAggregateOutputType> | number
+          }
+        }
+      }
+      Pago: {
+        payload: Prisma.$PagoPayload<ExtArgs>
+        fields: Prisma.PagoFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.PagoFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PagoPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.PagoFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PagoPayload>
+          }
+          findFirst: {
+            args: Prisma.PagoFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PagoPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.PagoFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PagoPayload>
+          }
+          findMany: {
+            args: Prisma.PagoFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PagoPayload>[]
+          }
+          create: {
+            args: Prisma.PagoCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PagoPayload>
+          }
+          createMany: {
+            args: Prisma.PagoCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.PagoCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PagoPayload>[]
+          }
+          delete: {
+            args: Prisma.PagoDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PagoPayload>
+          }
+          update: {
+            args: Prisma.PagoUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PagoPayload>
+          }
+          deleteMany: {
+            args: Prisma.PagoDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.PagoUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.PagoUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PagoPayload>[]
+          }
+          upsert: {
+            args: Prisma.PagoUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$PagoPayload>
+          }
+          aggregate: {
+            args: Prisma.PagoAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregatePago>
+          }
+          groupBy: {
+            args: Prisma.PagoGroupByArgs<ExtArgs>
+            result: $Utils.Optional<PagoGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.PagoCountArgs<ExtArgs>
+            result: $Utils.Optional<PagoCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1241,6 +1421,8 @@ export namespace Prisma {
     competencia?: CompetenciaOmit
     periodo?: PeriodoOmit
     evaluacion?: EvaluacionOmit
+    suscripcion?: SuscripcionOmit
+    pago?: PagoOmit
   }
 
   /* Types for Logging */
@@ -1363,11 +1545,13 @@ export namespace Prisma {
   export type UsuarioCountOutputType = {
     evaluacionesEstudiante: number
     evaluacionesDocente: number
+    suscripciones: number
   }
 
   export type UsuarioCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     evaluacionesEstudiante?: boolean | UsuarioCountOutputTypeCountEvaluacionesEstudianteArgs
     evaluacionesDocente?: boolean | UsuarioCountOutputTypeCountEvaluacionesDocenteArgs
+    suscripciones?: boolean | UsuarioCountOutputTypeCountSuscripcionesArgs
   }
 
   // Custom InputTypes
@@ -1393,6 +1577,13 @@ export namespace Prisma {
    */
   export type UsuarioCountOutputTypeCountEvaluacionesDocenteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: EvaluacionWhereInput
+  }
+
+  /**
+   * UsuarioCountOutputType without action
+   */
+  export type UsuarioCountOutputTypeCountSuscripcionesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SuscripcionWhereInput
   }
 
 
@@ -1455,6 +1646,37 @@ export namespace Prisma {
    */
   export type PeriodoCountOutputTypeCountEvaluacionesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: EvaluacionWhereInput
+  }
+
+
+  /**
+   * Count Type SuscripcionCountOutputType
+   */
+
+  export type SuscripcionCountOutputType = {
+    pagos: number
+  }
+
+  export type SuscripcionCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    pagos?: boolean | SuscripcionCountOutputTypeCountPagosArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * SuscripcionCountOutputType without action
+   */
+  export type SuscripcionCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SuscripcionCountOutputType
+     */
+    select?: SuscripcionCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * SuscripcionCountOutputType without action
+   */
+  export type SuscripcionCountOutputTypeCountPagosArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PagoWhereInput
   }
 
 
@@ -2928,6 +3150,7 @@ export namespace Prisma {
     centro?: boolean | Usuario$centroArgs<ExtArgs>
     evaluacionesEstudiante?: boolean | Usuario$evaluacionesEstudianteArgs<ExtArgs>
     evaluacionesDocente?: boolean | Usuario$evaluacionesDocenteArgs<ExtArgs>
+    suscripciones?: boolean | Usuario$suscripcionesArgs<ExtArgs>
     _count?: boolean | UsuarioCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["usuario"]>
 
@@ -2998,6 +3221,7 @@ export namespace Prisma {
     centro?: boolean | Usuario$centroArgs<ExtArgs>
     evaluacionesEstudiante?: boolean | Usuario$evaluacionesEstudianteArgs<ExtArgs>
     evaluacionesDocente?: boolean | Usuario$evaluacionesDocenteArgs<ExtArgs>
+    suscripciones?: boolean | Usuario$suscripcionesArgs<ExtArgs>
     _count?: boolean | UsuarioCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UsuarioIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -3013,6 +3237,7 @@ export namespace Prisma {
       centro: Prisma.$CentroPayload<ExtArgs> | null
       evaluacionesEstudiante: Prisma.$EvaluacionPayload<ExtArgs>[]
       evaluacionesDocente: Prisma.$EvaluacionPayload<ExtArgs>[]
+      suscripciones: Prisma.$SuscripcionPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -3429,6 +3654,7 @@ export namespace Prisma {
     centro<T extends Usuario$centroArgs<ExtArgs> = {}>(args?: Subset<T, Usuario$centroArgs<ExtArgs>>): Prisma__CentroClient<$Result.GetResult<Prisma.$CentroPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     evaluacionesEstudiante<T extends Usuario$evaluacionesEstudianteArgs<ExtArgs> = {}>(args?: Subset<T, Usuario$evaluacionesEstudianteArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EvaluacionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     evaluacionesDocente<T extends Usuario$evaluacionesDocenteArgs<ExtArgs> = {}>(args?: Subset<T, Usuario$evaluacionesDocenteArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EvaluacionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    suscripciones<T extends Usuario$suscripcionesArgs<ExtArgs> = {}>(args?: Subset<T, Usuario$suscripcionesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SuscripcionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3940,6 +4166,30 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: EvaluacionScalarFieldEnum | EvaluacionScalarFieldEnum[]
+  }
+
+  /**
+   * Usuario.suscripciones
+   */
+  export type Usuario$suscripcionesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Suscripcion
+     */
+    select?: SuscripcionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Suscripcion
+     */
+    omit?: SuscripcionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SuscripcionInclude<ExtArgs> | null
+    where?: SuscripcionWhereInput
+    orderBy?: SuscripcionOrderByWithRelationInput | SuscripcionOrderByWithRelationInput[]
+    cursor?: SuscripcionWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: SuscripcionScalarFieldEnum | SuscripcionScalarFieldEnum[]
   }
 
   /**
@@ -8376,6 +8626,2313 @@ export namespace Prisma {
 
 
   /**
+   * Model Suscripcion
+   */
+
+  export type AggregateSuscripcion = {
+    _count: SuscripcionCountAggregateOutputType | null
+    _min: SuscripcionMinAggregateOutputType | null
+    _max: SuscripcionMaxAggregateOutputType | null
+  }
+
+  export type SuscripcionMinAggregateOutputType = {
+    id: string | null
+    usuarioId: string | null
+    plan: string | null
+    estado: string | null
+    lemonCustomerId: string | null
+    lemonSubscriptionId: string | null
+    lemonVariantId: string | null
+    fechaInicio: Date | null
+    fechaFin: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type SuscripcionMaxAggregateOutputType = {
+    id: string | null
+    usuarioId: string | null
+    plan: string | null
+    estado: string | null
+    lemonCustomerId: string | null
+    lemonSubscriptionId: string | null
+    lemonVariantId: string | null
+    fechaInicio: Date | null
+    fechaFin: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+  }
+
+  export type SuscripcionCountAggregateOutputType = {
+    id: number
+    usuarioId: number
+    plan: number
+    estado: number
+    lemonCustomerId: number
+    lemonSubscriptionId: number
+    lemonVariantId: number
+    fechaInicio: number
+    fechaFin: number
+    createdAt: number
+    updatedAt: number
+    _all: number
+  }
+
+
+  export type SuscripcionMinAggregateInputType = {
+    id?: true
+    usuarioId?: true
+    plan?: true
+    estado?: true
+    lemonCustomerId?: true
+    lemonSubscriptionId?: true
+    lemonVariantId?: true
+    fechaInicio?: true
+    fechaFin?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type SuscripcionMaxAggregateInputType = {
+    id?: true
+    usuarioId?: true
+    plan?: true
+    estado?: true
+    lemonCustomerId?: true
+    lemonSubscriptionId?: true
+    lemonVariantId?: true
+    fechaInicio?: true
+    fechaFin?: true
+    createdAt?: true
+    updatedAt?: true
+  }
+
+  export type SuscripcionCountAggregateInputType = {
+    id?: true
+    usuarioId?: true
+    plan?: true
+    estado?: true
+    lemonCustomerId?: true
+    lemonSubscriptionId?: true
+    lemonVariantId?: true
+    fechaInicio?: true
+    fechaFin?: true
+    createdAt?: true
+    updatedAt?: true
+    _all?: true
+  }
+
+  export type SuscripcionAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Suscripcion to aggregate.
+     */
+    where?: SuscripcionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Suscripcions to fetch.
+     */
+    orderBy?: SuscripcionOrderByWithRelationInput | SuscripcionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: SuscripcionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Suscripcions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Suscripcions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Suscripcions
+    **/
+    _count?: true | SuscripcionCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: SuscripcionMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: SuscripcionMaxAggregateInputType
+  }
+
+  export type GetSuscripcionAggregateType<T extends SuscripcionAggregateArgs> = {
+        [P in keyof T & keyof AggregateSuscripcion]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateSuscripcion[P]>
+      : GetScalarType<T[P], AggregateSuscripcion[P]>
+  }
+
+
+
+
+  export type SuscripcionGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SuscripcionWhereInput
+    orderBy?: SuscripcionOrderByWithAggregationInput | SuscripcionOrderByWithAggregationInput[]
+    by: SuscripcionScalarFieldEnum[] | SuscripcionScalarFieldEnum
+    having?: SuscripcionScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: SuscripcionCountAggregateInputType | true
+    _min?: SuscripcionMinAggregateInputType
+    _max?: SuscripcionMaxAggregateInputType
+  }
+
+  export type SuscripcionGroupByOutputType = {
+    id: string
+    usuarioId: string
+    plan: string
+    estado: string
+    lemonCustomerId: string | null
+    lemonSubscriptionId: string | null
+    lemonVariantId: string | null
+    fechaInicio: Date | null
+    fechaFin: Date | null
+    createdAt: Date
+    updatedAt: Date
+    _count: SuscripcionCountAggregateOutputType | null
+    _min: SuscripcionMinAggregateOutputType | null
+    _max: SuscripcionMaxAggregateOutputType | null
+  }
+
+  type GetSuscripcionGroupByPayload<T extends SuscripcionGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<SuscripcionGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof SuscripcionGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], SuscripcionGroupByOutputType[P]>
+            : GetScalarType<T[P], SuscripcionGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type SuscripcionSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    usuarioId?: boolean
+    plan?: boolean
+    estado?: boolean
+    lemonCustomerId?: boolean
+    lemonSubscriptionId?: boolean
+    lemonVariantId?: boolean
+    fechaInicio?: boolean
+    fechaFin?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    usuario?: boolean | UsuarioDefaultArgs<ExtArgs>
+    pagos?: boolean | Suscripcion$pagosArgs<ExtArgs>
+    _count?: boolean | SuscripcionCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["suscripcion"]>
+
+  export type SuscripcionSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    usuarioId?: boolean
+    plan?: boolean
+    estado?: boolean
+    lemonCustomerId?: boolean
+    lemonSubscriptionId?: boolean
+    lemonVariantId?: boolean
+    fechaInicio?: boolean
+    fechaFin?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    usuario?: boolean | UsuarioDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["suscripcion"]>
+
+  export type SuscripcionSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    usuarioId?: boolean
+    plan?: boolean
+    estado?: boolean
+    lemonCustomerId?: boolean
+    lemonSubscriptionId?: boolean
+    lemonVariantId?: boolean
+    fechaInicio?: boolean
+    fechaFin?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    usuario?: boolean | UsuarioDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["suscripcion"]>
+
+  export type SuscripcionSelectScalar = {
+    id?: boolean
+    usuarioId?: boolean
+    plan?: boolean
+    estado?: boolean
+    lemonCustomerId?: boolean
+    lemonSubscriptionId?: boolean
+    lemonVariantId?: boolean
+    fechaInicio?: boolean
+    fechaFin?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+  }
+
+  export type SuscripcionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "usuarioId" | "plan" | "estado" | "lemonCustomerId" | "lemonSubscriptionId" | "lemonVariantId" | "fechaInicio" | "fechaFin" | "createdAt" | "updatedAt", ExtArgs["result"]["suscripcion"]>
+  export type SuscripcionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    usuario?: boolean | UsuarioDefaultArgs<ExtArgs>
+    pagos?: boolean | Suscripcion$pagosArgs<ExtArgs>
+    _count?: boolean | SuscripcionCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type SuscripcionIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    usuario?: boolean | UsuarioDefaultArgs<ExtArgs>
+  }
+  export type SuscripcionIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    usuario?: boolean | UsuarioDefaultArgs<ExtArgs>
+  }
+
+  export type $SuscripcionPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Suscripcion"
+    objects: {
+      usuario: Prisma.$UsuarioPayload<ExtArgs>
+      pagos: Prisma.$PagoPayload<ExtArgs>[]
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      usuarioId: string
+      plan: string
+      estado: string
+      lemonCustomerId: string | null
+      lemonSubscriptionId: string | null
+      lemonVariantId: string | null
+      fechaInicio: Date | null
+      fechaFin: Date | null
+      createdAt: Date
+      updatedAt: Date
+    }, ExtArgs["result"]["suscripcion"]>
+    composites: {}
+  }
+
+  type SuscripcionGetPayload<S extends boolean | null | undefined | SuscripcionDefaultArgs> = $Result.GetResult<Prisma.$SuscripcionPayload, S>
+
+  type SuscripcionCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<SuscripcionFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: SuscripcionCountAggregateInputType | true
+    }
+
+  export interface SuscripcionDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Suscripcion'], meta: { name: 'Suscripcion' } }
+    /**
+     * Find zero or one Suscripcion that matches the filter.
+     * @param {SuscripcionFindUniqueArgs} args - Arguments to find a Suscripcion
+     * @example
+     * // Get one Suscripcion
+     * const suscripcion = await prisma.suscripcion.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends SuscripcionFindUniqueArgs>(args: SelectSubset<T, SuscripcionFindUniqueArgs<ExtArgs>>): Prisma__SuscripcionClient<$Result.GetResult<Prisma.$SuscripcionPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Suscripcion that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {SuscripcionFindUniqueOrThrowArgs} args - Arguments to find a Suscripcion
+     * @example
+     * // Get one Suscripcion
+     * const suscripcion = await prisma.suscripcion.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends SuscripcionFindUniqueOrThrowArgs>(args: SelectSubset<T, SuscripcionFindUniqueOrThrowArgs<ExtArgs>>): Prisma__SuscripcionClient<$Result.GetResult<Prisma.$SuscripcionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Suscripcion that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SuscripcionFindFirstArgs} args - Arguments to find a Suscripcion
+     * @example
+     * // Get one Suscripcion
+     * const suscripcion = await prisma.suscripcion.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends SuscripcionFindFirstArgs>(args?: SelectSubset<T, SuscripcionFindFirstArgs<ExtArgs>>): Prisma__SuscripcionClient<$Result.GetResult<Prisma.$SuscripcionPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Suscripcion that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SuscripcionFindFirstOrThrowArgs} args - Arguments to find a Suscripcion
+     * @example
+     * // Get one Suscripcion
+     * const suscripcion = await prisma.suscripcion.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends SuscripcionFindFirstOrThrowArgs>(args?: SelectSubset<T, SuscripcionFindFirstOrThrowArgs<ExtArgs>>): Prisma__SuscripcionClient<$Result.GetResult<Prisma.$SuscripcionPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Suscripcions that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SuscripcionFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Suscripcions
+     * const suscripcions = await prisma.suscripcion.findMany()
+     * 
+     * // Get first 10 Suscripcions
+     * const suscripcions = await prisma.suscripcion.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const suscripcionWithIdOnly = await prisma.suscripcion.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends SuscripcionFindManyArgs>(args?: SelectSubset<T, SuscripcionFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SuscripcionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Suscripcion.
+     * @param {SuscripcionCreateArgs} args - Arguments to create a Suscripcion.
+     * @example
+     * // Create one Suscripcion
+     * const Suscripcion = await prisma.suscripcion.create({
+     *   data: {
+     *     // ... data to create a Suscripcion
+     *   }
+     * })
+     * 
+     */
+    create<T extends SuscripcionCreateArgs>(args: SelectSubset<T, SuscripcionCreateArgs<ExtArgs>>): Prisma__SuscripcionClient<$Result.GetResult<Prisma.$SuscripcionPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Suscripcions.
+     * @param {SuscripcionCreateManyArgs} args - Arguments to create many Suscripcions.
+     * @example
+     * // Create many Suscripcions
+     * const suscripcion = await prisma.suscripcion.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends SuscripcionCreateManyArgs>(args?: SelectSubset<T, SuscripcionCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Suscripcions and returns the data saved in the database.
+     * @param {SuscripcionCreateManyAndReturnArgs} args - Arguments to create many Suscripcions.
+     * @example
+     * // Create many Suscripcions
+     * const suscripcion = await prisma.suscripcion.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Suscripcions and only return the `id`
+     * const suscripcionWithIdOnly = await prisma.suscripcion.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends SuscripcionCreateManyAndReturnArgs>(args?: SelectSubset<T, SuscripcionCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SuscripcionPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Suscripcion.
+     * @param {SuscripcionDeleteArgs} args - Arguments to delete one Suscripcion.
+     * @example
+     * // Delete one Suscripcion
+     * const Suscripcion = await prisma.suscripcion.delete({
+     *   where: {
+     *     // ... filter to delete one Suscripcion
+     *   }
+     * })
+     * 
+     */
+    delete<T extends SuscripcionDeleteArgs>(args: SelectSubset<T, SuscripcionDeleteArgs<ExtArgs>>): Prisma__SuscripcionClient<$Result.GetResult<Prisma.$SuscripcionPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Suscripcion.
+     * @param {SuscripcionUpdateArgs} args - Arguments to update one Suscripcion.
+     * @example
+     * // Update one Suscripcion
+     * const suscripcion = await prisma.suscripcion.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends SuscripcionUpdateArgs>(args: SelectSubset<T, SuscripcionUpdateArgs<ExtArgs>>): Prisma__SuscripcionClient<$Result.GetResult<Prisma.$SuscripcionPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Suscripcions.
+     * @param {SuscripcionDeleteManyArgs} args - Arguments to filter Suscripcions to delete.
+     * @example
+     * // Delete a few Suscripcions
+     * const { count } = await prisma.suscripcion.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends SuscripcionDeleteManyArgs>(args?: SelectSubset<T, SuscripcionDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Suscripcions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SuscripcionUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Suscripcions
+     * const suscripcion = await prisma.suscripcion.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends SuscripcionUpdateManyArgs>(args: SelectSubset<T, SuscripcionUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Suscripcions and returns the data updated in the database.
+     * @param {SuscripcionUpdateManyAndReturnArgs} args - Arguments to update many Suscripcions.
+     * @example
+     * // Update many Suscripcions
+     * const suscripcion = await prisma.suscripcion.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Suscripcions and only return the `id`
+     * const suscripcionWithIdOnly = await prisma.suscripcion.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends SuscripcionUpdateManyAndReturnArgs>(args: SelectSubset<T, SuscripcionUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SuscripcionPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Suscripcion.
+     * @param {SuscripcionUpsertArgs} args - Arguments to update or create a Suscripcion.
+     * @example
+     * // Update or create a Suscripcion
+     * const suscripcion = await prisma.suscripcion.upsert({
+     *   create: {
+     *     // ... data to create a Suscripcion
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Suscripcion we want to update
+     *   }
+     * })
+     */
+    upsert<T extends SuscripcionUpsertArgs>(args: SelectSubset<T, SuscripcionUpsertArgs<ExtArgs>>): Prisma__SuscripcionClient<$Result.GetResult<Prisma.$SuscripcionPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Suscripcions.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SuscripcionCountArgs} args - Arguments to filter Suscripcions to count.
+     * @example
+     * // Count the number of Suscripcions
+     * const count = await prisma.suscripcion.count({
+     *   where: {
+     *     // ... the filter for the Suscripcions we want to count
+     *   }
+     * })
+    **/
+    count<T extends SuscripcionCountArgs>(
+      args?: Subset<T, SuscripcionCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], SuscripcionCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Suscripcion.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SuscripcionAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends SuscripcionAggregateArgs>(args: Subset<T, SuscripcionAggregateArgs>): Prisma.PrismaPromise<GetSuscripcionAggregateType<T>>
+
+    /**
+     * Group by Suscripcion.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {SuscripcionGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends SuscripcionGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: SuscripcionGroupByArgs['orderBy'] }
+        : { orderBy?: SuscripcionGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, SuscripcionGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetSuscripcionGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Suscripcion model
+   */
+  readonly fields: SuscripcionFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Suscripcion.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__SuscripcionClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    usuario<T extends UsuarioDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UsuarioDefaultArgs<ExtArgs>>): Prisma__UsuarioClient<$Result.GetResult<Prisma.$UsuarioPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    pagos<T extends Suscripcion$pagosArgs<ExtArgs> = {}>(args?: Subset<T, Suscripcion$pagosArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PagoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Suscripcion model
+   */
+  interface SuscripcionFieldRefs {
+    readonly id: FieldRef<"Suscripcion", 'String'>
+    readonly usuarioId: FieldRef<"Suscripcion", 'String'>
+    readonly plan: FieldRef<"Suscripcion", 'String'>
+    readonly estado: FieldRef<"Suscripcion", 'String'>
+    readonly lemonCustomerId: FieldRef<"Suscripcion", 'String'>
+    readonly lemonSubscriptionId: FieldRef<"Suscripcion", 'String'>
+    readonly lemonVariantId: FieldRef<"Suscripcion", 'String'>
+    readonly fechaInicio: FieldRef<"Suscripcion", 'DateTime'>
+    readonly fechaFin: FieldRef<"Suscripcion", 'DateTime'>
+    readonly createdAt: FieldRef<"Suscripcion", 'DateTime'>
+    readonly updatedAt: FieldRef<"Suscripcion", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Suscripcion findUnique
+   */
+  export type SuscripcionFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Suscripcion
+     */
+    select?: SuscripcionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Suscripcion
+     */
+    omit?: SuscripcionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SuscripcionInclude<ExtArgs> | null
+    /**
+     * Filter, which Suscripcion to fetch.
+     */
+    where: SuscripcionWhereUniqueInput
+  }
+
+  /**
+   * Suscripcion findUniqueOrThrow
+   */
+  export type SuscripcionFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Suscripcion
+     */
+    select?: SuscripcionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Suscripcion
+     */
+    omit?: SuscripcionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SuscripcionInclude<ExtArgs> | null
+    /**
+     * Filter, which Suscripcion to fetch.
+     */
+    where: SuscripcionWhereUniqueInput
+  }
+
+  /**
+   * Suscripcion findFirst
+   */
+  export type SuscripcionFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Suscripcion
+     */
+    select?: SuscripcionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Suscripcion
+     */
+    omit?: SuscripcionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SuscripcionInclude<ExtArgs> | null
+    /**
+     * Filter, which Suscripcion to fetch.
+     */
+    where?: SuscripcionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Suscripcions to fetch.
+     */
+    orderBy?: SuscripcionOrderByWithRelationInput | SuscripcionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Suscripcions.
+     */
+    cursor?: SuscripcionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Suscripcions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Suscripcions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Suscripcions.
+     */
+    distinct?: SuscripcionScalarFieldEnum | SuscripcionScalarFieldEnum[]
+  }
+
+  /**
+   * Suscripcion findFirstOrThrow
+   */
+  export type SuscripcionFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Suscripcion
+     */
+    select?: SuscripcionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Suscripcion
+     */
+    omit?: SuscripcionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SuscripcionInclude<ExtArgs> | null
+    /**
+     * Filter, which Suscripcion to fetch.
+     */
+    where?: SuscripcionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Suscripcions to fetch.
+     */
+    orderBy?: SuscripcionOrderByWithRelationInput | SuscripcionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Suscripcions.
+     */
+    cursor?: SuscripcionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Suscripcions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Suscripcions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Suscripcions.
+     */
+    distinct?: SuscripcionScalarFieldEnum | SuscripcionScalarFieldEnum[]
+  }
+
+  /**
+   * Suscripcion findMany
+   */
+  export type SuscripcionFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Suscripcion
+     */
+    select?: SuscripcionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Suscripcion
+     */
+    omit?: SuscripcionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SuscripcionInclude<ExtArgs> | null
+    /**
+     * Filter, which Suscripcions to fetch.
+     */
+    where?: SuscripcionWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Suscripcions to fetch.
+     */
+    orderBy?: SuscripcionOrderByWithRelationInput | SuscripcionOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Suscripcions.
+     */
+    cursor?: SuscripcionWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Suscripcions from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Suscripcions.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Suscripcions.
+     */
+    distinct?: SuscripcionScalarFieldEnum | SuscripcionScalarFieldEnum[]
+  }
+
+  /**
+   * Suscripcion create
+   */
+  export type SuscripcionCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Suscripcion
+     */
+    select?: SuscripcionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Suscripcion
+     */
+    omit?: SuscripcionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SuscripcionInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Suscripcion.
+     */
+    data: XOR<SuscripcionCreateInput, SuscripcionUncheckedCreateInput>
+  }
+
+  /**
+   * Suscripcion createMany
+   */
+  export type SuscripcionCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Suscripcions.
+     */
+    data: SuscripcionCreateManyInput | SuscripcionCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Suscripcion createManyAndReturn
+   */
+  export type SuscripcionCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Suscripcion
+     */
+    select?: SuscripcionSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Suscripcion
+     */
+    omit?: SuscripcionOmit<ExtArgs> | null
+    /**
+     * The data used to create many Suscripcions.
+     */
+    data: SuscripcionCreateManyInput | SuscripcionCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SuscripcionIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Suscripcion update
+   */
+  export type SuscripcionUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Suscripcion
+     */
+    select?: SuscripcionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Suscripcion
+     */
+    omit?: SuscripcionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SuscripcionInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Suscripcion.
+     */
+    data: XOR<SuscripcionUpdateInput, SuscripcionUncheckedUpdateInput>
+    /**
+     * Choose, which Suscripcion to update.
+     */
+    where: SuscripcionWhereUniqueInput
+  }
+
+  /**
+   * Suscripcion updateMany
+   */
+  export type SuscripcionUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Suscripcions.
+     */
+    data: XOR<SuscripcionUpdateManyMutationInput, SuscripcionUncheckedUpdateManyInput>
+    /**
+     * Filter which Suscripcions to update
+     */
+    where?: SuscripcionWhereInput
+    /**
+     * Limit how many Suscripcions to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Suscripcion updateManyAndReturn
+   */
+  export type SuscripcionUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Suscripcion
+     */
+    select?: SuscripcionSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Suscripcion
+     */
+    omit?: SuscripcionOmit<ExtArgs> | null
+    /**
+     * The data used to update Suscripcions.
+     */
+    data: XOR<SuscripcionUpdateManyMutationInput, SuscripcionUncheckedUpdateManyInput>
+    /**
+     * Filter which Suscripcions to update
+     */
+    where?: SuscripcionWhereInput
+    /**
+     * Limit how many Suscripcions to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SuscripcionIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Suscripcion upsert
+   */
+  export type SuscripcionUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Suscripcion
+     */
+    select?: SuscripcionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Suscripcion
+     */
+    omit?: SuscripcionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SuscripcionInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Suscripcion to update in case it exists.
+     */
+    where: SuscripcionWhereUniqueInput
+    /**
+     * In case the Suscripcion found by the `where` argument doesn't exist, create a new Suscripcion with this data.
+     */
+    create: XOR<SuscripcionCreateInput, SuscripcionUncheckedCreateInput>
+    /**
+     * In case the Suscripcion was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<SuscripcionUpdateInput, SuscripcionUncheckedUpdateInput>
+  }
+
+  /**
+   * Suscripcion delete
+   */
+  export type SuscripcionDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Suscripcion
+     */
+    select?: SuscripcionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Suscripcion
+     */
+    omit?: SuscripcionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SuscripcionInclude<ExtArgs> | null
+    /**
+     * Filter which Suscripcion to delete.
+     */
+    where: SuscripcionWhereUniqueInput
+  }
+
+  /**
+   * Suscripcion deleteMany
+   */
+  export type SuscripcionDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Suscripcions to delete
+     */
+    where?: SuscripcionWhereInput
+    /**
+     * Limit how many Suscripcions to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Suscripcion.pagos
+   */
+  export type Suscripcion$pagosArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Pago
+     */
+    select?: PagoSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Pago
+     */
+    omit?: PagoOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PagoInclude<ExtArgs> | null
+    where?: PagoWhereInput
+    orderBy?: PagoOrderByWithRelationInput | PagoOrderByWithRelationInput[]
+    cursor?: PagoWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: PagoScalarFieldEnum | PagoScalarFieldEnum[]
+  }
+
+  /**
+   * Suscripcion without action
+   */
+  export type SuscripcionDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Suscripcion
+     */
+    select?: SuscripcionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Suscripcion
+     */
+    omit?: SuscripcionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SuscripcionInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model Pago
+   */
+
+  export type AggregatePago = {
+    _count: PagoCountAggregateOutputType | null
+    _avg: PagoAvgAggregateOutputType | null
+    _sum: PagoSumAggregateOutputType | null
+    _min: PagoMinAggregateOutputType | null
+    _max: PagoMaxAggregateOutputType | null
+  }
+
+  export type PagoAvgAggregateOutputType = {
+    monto: number | null
+  }
+
+  export type PagoSumAggregateOutputType = {
+    monto: number | null
+  }
+
+  export type PagoMinAggregateOutputType = {
+    id: string | null
+    suscripcionId: string | null
+    monto: number | null
+    moneda: string | null
+    estado: string | null
+    lemonOrderId: string | null
+    lemonPaymentId: string | null
+    createdAt: Date | null
+  }
+
+  export type PagoMaxAggregateOutputType = {
+    id: string | null
+    suscripcionId: string | null
+    monto: number | null
+    moneda: string | null
+    estado: string | null
+    lemonOrderId: string | null
+    lemonPaymentId: string | null
+    createdAt: Date | null
+  }
+
+  export type PagoCountAggregateOutputType = {
+    id: number
+    suscripcionId: number
+    monto: number
+    moneda: number
+    estado: number
+    lemonOrderId: number
+    lemonPaymentId: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type PagoAvgAggregateInputType = {
+    monto?: true
+  }
+
+  export type PagoSumAggregateInputType = {
+    monto?: true
+  }
+
+  export type PagoMinAggregateInputType = {
+    id?: true
+    suscripcionId?: true
+    monto?: true
+    moneda?: true
+    estado?: true
+    lemonOrderId?: true
+    lemonPaymentId?: true
+    createdAt?: true
+  }
+
+  export type PagoMaxAggregateInputType = {
+    id?: true
+    suscripcionId?: true
+    monto?: true
+    moneda?: true
+    estado?: true
+    lemonOrderId?: true
+    lemonPaymentId?: true
+    createdAt?: true
+  }
+
+  export type PagoCountAggregateInputType = {
+    id?: true
+    suscripcionId?: true
+    monto?: true
+    moneda?: true
+    estado?: true
+    lemonOrderId?: true
+    lemonPaymentId?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type PagoAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Pago to aggregate.
+     */
+    where?: PagoWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Pagos to fetch.
+     */
+    orderBy?: PagoOrderByWithRelationInput | PagoOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: PagoWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Pagos from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Pagos.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Pagos
+    **/
+    _count?: true | PagoCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: PagoAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: PagoSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: PagoMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: PagoMaxAggregateInputType
+  }
+
+  export type GetPagoAggregateType<T extends PagoAggregateArgs> = {
+        [P in keyof T & keyof AggregatePago]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregatePago[P]>
+      : GetScalarType<T[P], AggregatePago[P]>
+  }
+
+
+
+
+  export type PagoGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: PagoWhereInput
+    orderBy?: PagoOrderByWithAggregationInput | PagoOrderByWithAggregationInput[]
+    by: PagoScalarFieldEnum[] | PagoScalarFieldEnum
+    having?: PagoScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: PagoCountAggregateInputType | true
+    _avg?: PagoAvgAggregateInputType
+    _sum?: PagoSumAggregateInputType
+    _min?: PagoMinAggregateInputType
+    _max?: PagoMaxAggregateInputType
+  }
+
+  export type PagoGroupByOutputType = {
+    id: string
+    suscripcionId: string
+    monto: number
+    moneda: string
+    estado: string
+    lemonOrderId: string | null
+    lemonPaymentId: string | null
+    createdAt: Date
+    _count: PagoCountAggregateOutputType | null
+    _avg: PagoAvgAggregateOutputType | null
+    _sum: PagoSumAggregateOutputType | null
+    _min: PagoMinAggregateOutputType | null
+    _max: PagoMaxAggregateOutputType | null
+  }
+
+  type GetPagoGroupByPayload<T extends PagoGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<PagoGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof PagoGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], PagoGroupByOutputType[P]>
+            : GetScalarType<T[P], PagoGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type PagoSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    suscripcionId?: boolean
+    monto?: boolean
+    moneda?: boolean
+    estado?: boolean
+    lemonOrderId?: boolean
+    lemonPaymentId?: boolean
+    createdAt?: boolean
+    suscripcion?: boolean | SuscripcionDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["pago"]>
+
+  export type PagoSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    suscripcionId?: boolean
+    monto?: boolean
+    moneda?: boolean
+    estado?: boolean
+    lemonOrderId?: boolean
+    lemonPaymentId?: boolean
+    createdAt?: boolean
+    suscripcion?: boolean | SuscripcionDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["pago"]>
+
+  export type PagoSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    suscripcionId?: boolean
+    monto?: boolean
+    moneda?: boolean
+    estado?: boolean
+    lemonOrderId?: boolean
+    lemonPaymentId?: boolean
+    createdAt?: boolean
+    suscripcion?: boolean | SuscripcionDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["pago"]>
+
+  export type PagoSelectScalar = {
+    id?: boolean
+    suscripcionId?: boolean
+    monto?: boolean
+    moneda?: boolean
+    estado?: boolean
+    lemonOrderId?: boolean
+    lemonPaymentId?: boolean
+    createdAt?: boolean
+  }
+
+  export type PagoOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "suscripcionId" | "monto" | "moneda" | "estado" | "lemonOrderId" | "lemonPaymentId" | "createdAt", ExtArgs["result"]["pago"]>
+  export type PagoInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    suscripcion?: boolean | SuscripcionDefaultArgs<ExtArgs>
+  }
+  export type PagoIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    suscripcion?: boolean | SuscripcionDefaultArgs<ExtArgs>
+  }
+  export type PagoIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    suscripcion?: boolean | SuscripcionDefaultArgs<ExtArgs>
+  }
+
+  export type $PagoPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Pago"
+    objects: {
+      suscripcion: Prisma.$SuscripcionPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      suscripcionId: string
+      monto: number
+      moneda: string
+      estado: string
+      lemonOrderId: string | null
+      lemonPaymentId: string | null
+      createdAt: Date
+    }, ExtArgs["result"]["pago"]>
+    composites: {}
+  }
+
+  type PagoGetPayload<S extends boolean | null | undefined | PagoDefaultArgs> = $Result.GetResult<Prisma.$PagoPayload, S>
+
+  type PagoCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<PagoFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: PagoCountAggregateInputType | true
+    }
+
+  export interface PagoDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Pago'], meta: { name: 'Pago' } }
+    /**
+     * Find zero or one Pago that matches the filter.
+     * @param {PagoFindUniqueArgs} args - Arguments to find a Pago
+     * @example
+     * // Get one Pago
+     * const pago = await prisma.pago.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends PagoFindUniqueArgs>(args: SelectSubset<T, PagoFindUniqueArgs<ExtArgs>>): Prisma__PagoClient<$Result.GetResult<Prisma.$PagoPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Pago that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {PagoFindUniqueOrThrowArgs} args - Arguments to find a Pago
+     * @example
+     * // Get one Pago
+     * const pago = await prisma.pago.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends PagoFindUniqueOrThrowArgs>(args: SelectSubset<T, PagoFindUniqueOrThrowArgs<ExtArgs>>): Prisma__PagoClient<$Result.GetResult<Prisma.$PagoPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Pago that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PagoFindFirstArgs} args - Arguments to find a Pago
+     * @example
+     * // Get one Pago
+     * const pago = await prisma.pago.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends PagoFindFirstArgs>(args?: SelectSubset<T, PagoFindFirstArgs<ExtArgs>>): Prisma__PagoClient<$Result.GetResult<Prisma.$PagoPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Pago that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PagoFindFirstOrThrowArgs} args - Arguments to find a Pago
+     * @example
+     * // Get one Pago
+     * const pago = await prisma.pago.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends PagoFindFirstOrThrowArgs>(args?: SelectSubset<T, PagoFindFirstOrThrowArgs<ExtArgs>>): Prisma__PagoClient<$Result.GetResult<Prisma.$PagoPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Pagos that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PagoFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Pagos
+     * const pagos = await prisma.pago.findMany()
+     * 
+     * // Get first 10 Pagos
+     * const pagos = await prisma.pago.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const pagoWithIdOnly = await prisma.pago.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends PagoFindManyArgs>(args?: SelectSubset<T, PagoFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PagoPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Pago.
+     * @param {PagoCreateArgs} args - Arguments to create a Pago.
+     * @example
+     * // Create one Pago
+     * const Pago = await prisma.pago.create({
+     *   data: {
+     *     // ... data to create a Pago
+     *   }
+     * })
+     * 
+     */
+    create<T extends PagoCreateArgs>(args: SelectSubset<T, PagoCreateArgs<ExtArgs>>): Prisma__PagoClient<$Result.GetResult<Prisma.$PagoPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Pagos.
+     * @param {PagoCreateManyArgs} args - Arguments to create many Pagos.
+     * @example
+     * // Create many Pagos
+     * const pago = await prisma.pago.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends PagoCreateManyArgs>(args?: SelectSubset<T, PagoCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Pagos and returns the data saved in the database.
+     * @param {PagoCreateManyAndReturnArgs} args - Arguments to create many Pagos.
+     * @example
+     * // Create many Pagos
+     * const pago = await prisma.pago.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Pagos and only return the `id`
+     * const pagoWithIdOnly = await prisma.pago.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends PagoCreateManyAndReturnArgs>(args?: SelectSubset<T, PagoCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PagoPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Pago.
+     * @param {PagoDeleteArgs} args - Arguments to delete one Pago.
+     * @example
+     * // Delete one Pago
+     * const Pago = await prisma.pago.delete({
+     *   where: {
+     *     // ... filter to delete one Pago
+     *   }
+     * })
+     * 
+     */
+    delete<T extends PagoDeleteArgs>(args: SelectSubset<T, PagoDeleteArgs<ExtArgs>>): Prisma__PagoClient<$Result.GetResult<Prisma.$PagoPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Pago.
+     * @param {PagoUpdateArgs} args - Arguments to update one Pago.
+     * @example
+     * // Update one Pago
+     * const pago = await prisma.pago.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends PagoUpdateArgs>(args: SelectSubset<T, PagoUpdateArgs<ExtArgs>>): Prisma__PagoClient<$Result.GetResult<Prisma.$PagoPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Pagos.
+     * @param {PagoDeleteManyArgs} args - Arguments to filter Pagos to delete.
+     * @example
+     * // Delete a few Pagos
+     * const { count } = await prisma.pago.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends PagoDeleteManyArgs>(args?: SelectSubset<T, PagoDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Pagos.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PagoUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Pagos
+     * const pago = await prisma.pago.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends PagoUpdateManyArgs>(args: SelectSubset<T, PagoUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Pagos and returns the data updated in the database.
+     * @param {PagoUpdateManyAndReturnArgs} args - Arguments to update many Pagos.
+     * @example
+     * // Update many Pagos
+     * const pago = await prisma.pago.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Pagos and only return the `id`
+     * const pagoWithIdOnly = await prisma.pago.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends PagoUpdateManyAndReturnArgs>(args: SelectSubset<T, PagoUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PagoPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Pago.
+     * @param {PagoUpsertArgs} args - Arguments to update or create a Pago.
+     * @example
+     * // Update or create a Pago
+     * const pago = await prisma.pago.upsert({
+     *   create: {
+     *     // ... data to create a Pago
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Pago we want to update
+     *   }
+     * })
+     */
+    upsert<T extends PagoUpsertArgs>(args: SelectSubset<T, PagoUpsertArgs<ExtArgs>>): Prisma__PagoClient<$Result.GetResult<Prisma.$PagoPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Pagos.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PagoCountArgs} args - Arguments to filter Pagos to count.
+     * @example
+     * // Count the number of Pagos
+     * const count = await prisma.pago.count({
+     *   where: {
+     *     // ... the filter for the Pagos we want to count
+     *   }
+     * })
+    **/
+    count<T extends PagoCountArgs>(
+      args?: Subset<T, PagoCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], PagoCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Pago.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PagoAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends PagoAggregateArgs>(args: Subset<T, PagoAggregateArgs>): Prisma.PrismaPromise<GetPagoAggregateType<T>>
+
+    /**
+     * Group by Pago.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {PagoGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends PagoGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: PagoGroupByArgs['orderBy'] }
+        : { orderBy?: PagoGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, PagoGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetPagoGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Pago model
+   */
+  readonly fields: PagoFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Pago.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__PagoClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    suscripcion<T extends SuscripcionDefaultArgs<ExtArgs> = {}>(args?: Subset<T, SuscripcionDefaultArgs<ExtArgs>>): Prisma__SuscripcionClient<$Result.GetResult<Prisma.$SuscripcionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Pago model
+   */
+  interface PagoFieldRefs {
+    readonly id: FieldRef<"Pago", 'String'>
+    readonly suscripcionId: FieldRef<"Pago", 'String'>
+    readonly monto: FieldRef<"Pago", 'Float'>
+    readonly moneda: FieldRef<"Pago", 'String'>
+    readonly estado: FieldRef<"Pago", 'String'>
+    readonly lemonOrderId: FieldRef<"Pago", 'String'>
+    readonly lemonPaymentId: FieldRef<"Pago", 'String'>
+    readonly createdAt: FieldRef<"Pago", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Pago findUnique
+   */
+  export type PagoFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Pago
+     */
+    select?: PagoSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Pago
+     */
+    omit?: PagoOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PagoInclude<ExtArgs> | null
+    /**
+     * Filter, which Pago to fetch.
+     */
+    where: PagoWhereUniqueInput
+  }
+
+  /**
+   * Pago findUniqueOrThrow
+   */
+  export type PagoFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Pago
+     */
+    select?: PagoSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Pago
+     */
+    omit?: PagoOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PagoInclude<ExtArgs> | null
+    /**
+     * Filter, which Pago to fetch.
+     */
+    where: PagoWhereUniqueInput
+  }
+
+  /**
+   * Pago findFirst
+   */
+  export type PagoFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Pago
+     */
+    select?: PagoSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Pago
+     */
+    omit?: PagoOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PagoInclude<ExtArgs> | null
+    /**
+     * Filter, which Pago to fetch.
+     */
+    where?: PagoWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Pagos to fetch.
+     */
+    orderBy?: PagoOrderByWithRelationInput | PagoOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Pagos.
+     */
+    cursor?: PagoWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Pagos from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Pagos.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Pagos.
+     */
+    distinct?: PagoScalarFieldEnum | PagoScalarFieldEnum[]
+  }
+
+  /**
+   * Pago findFirstOrThrow
+   */
+  export type PagoFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Pago
+     */
+    select?: PagoSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Pago
+     */
+    omit?: PagoOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PagoInclude<ExtArgs> | null
+    /**
+     * Filter, which Pago to fetch.
+     */
+    where?: PagoWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Pagos to fetch.
+     */
+    orderBy?: PagoOrderByWithRelationInput | PagoOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Pagos.
+     */
+    cursor?: PagoWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Pagos from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Pagos.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Pagos.
+     */
+    distinct?: PagoScalarFieldEnum | PagoScalarFieldEnum[]
+  }
+
+  /**
+   * Pago findMany
+   */
+  export type PagoFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Pago
+     */
+    select?: PagoSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Pago
+     */
+    omit?: PagoOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PagoInclude<ExtArgs> | null
+    /**
+     * Filter, which Pagos to fetch.
+     */
+    where?: PagoWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Pagos to fetch.
+     */
+    orderBy?: PagoOrderByWithRelationInput | PagoOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Pagos.
+     */
+    cursor?: PagoWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Pagos from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Pagos.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Pagos.
+     */
+    distinct?: PagoScalarFieldEnum | PagoScalarFieldEnum[]
+  }
+
+  /**
+   * Pago create
+   */
+  export type PagoCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Pago
+     */
+    select?: PagoSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Pago
+     */
+    omit?: PagoOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PagoInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Pago.
+     */
+    data: XOR<PagoCreateInput, PagoUncheckedCreateInput>
+  }
+
+  /**
+   * Pago createMany
+   */
+  export type PagoCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Pagos.
+     */
+    data: PagoCreateManyInput | PagoCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Pago createManyAndReturn
+   */
+  export type PagoCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Pago
+     */
+    select?: PagoSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Pago
+     */
+    omit?: PagoOmit<ExtArgs> | null
+    /**
+     * The data used to create many Pagos.
+     */
+    data: PagoCreateManyInput | PagoCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PagoIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Pago update
+   */
+  export type PagoUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Pago
+     */
+    select?: PagoSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Pago
+     */
+    omit?: PagoOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PagoInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Pago.
+     */
+    data: XOR<PagoUpdateInput, PagoUncheckedUpdateInput>
+    /**
+     * Choose, which Pago to update.
+     */
+    where: PagoWhereUniqueInput
+  }
+
+  /**
+   * Pago updateMany
+   */
+  export type PagoUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Pagos.
+     */
+    data: XOR<PagoUpdateManyMutationInput, PagoUncheckedUpdateManyInput>
+    /**
+     * Filter which Pagos to update
+     */
+    where?: PagoWhereInput
+    /**
+     * Limit how many Pagos to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Pago updateManyAndReturn
+   */
+  export type PagoUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Pago
+     */
+    select?: PagoSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Pago
+     */
+    omit?: PagoOmit<ExtArgs> | null
+    /**
+     * The data used to update Pagos.
+     */
+    data: XOR<PagoUpdateManyMutationInput, PagoUncheckedUpdateManyInput>
+    /**
+     * Filter which Pagos to update
+     */
+    where?: PagoWhereInput
+    /**
+     * Limit how many Pagos to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PagoIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Pago upsert
+   */
+  export type PagoUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Pago
+     */
+    select?: PagoSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Pago
+     */
+    omit?: PagoOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PagoInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Pago to update in case it exists.
+     */
+    where: PagoWhereUniqueInput
+    /**
+     * In case the Pago found by the `where` argument doesn't exist, create a new Pago with this data.
+     */
+    create: XOR<PagoCreateInput, PagoUncheckedCreateInput>
+    /**
+     * In case the Pago was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<PagoUpdateInput, PagoUncheckedUpdateInput>
+  }
+
+  /**
+   * Pago delete
+   */
+  export type PagoDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Pago
+     */
+    select?: PagoSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Pago
+     */
+    omit?: PagoOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PagoInclude<ExtArgs> | null
+    /**
+     * Filter which Pago to delete.
+     */
+    where: PagoWhereUniqueInput
+  }
+
+  /**
+   * Pago deleteMany
+   */
+  export type PagoDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Pagos to delete
+     */
+    where?: PagoWhereInput
+    /**
+     * Limit how many Pagos to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Pago without action
+   */
+  export type PagoDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Pago
+     */
+    select?: PagoSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Pago
+     */
+    omit?: PagoOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: PagoInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -8478,6 +11035,37 @@ export namespace Prisma {
   };
 
   export type EvaluacionScalarFieldEnum = (typeof EvaluacionScalarFieldEnum)[keyof typeof EvaluacionScalarFieldEnum]
+
+
+  export const SuscripcionScalarFieldEnum: {
+    id: 'id',
+    usuarioId: 'usuarioId',
+    plan: 'plan',
+    estado: 'estado',
+    lemonCustomerId: 'lemonCustomerId',
+    lemonSubscriptionId: 'lemonSubscriptionId',
+    lemonVariantId: 'lemonVariantId',
+    fechaInicio: 'fechaInicio',
+    fechaFin: 'fechaFin',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt'
+  };
+
+  export type SuscripcionScalarFieldEnum = (typeof SuscripcionScalarFieldEnum)[keyof typeof SuscripcionScalarFieldEnum]
+
+
+  export const PagoScalarFieldEnum: {
+    id: 'id',
+    suscripcionId: 'suscripcionId',
+    monto: 'monto',
+    moneda: 'moneda',
+    estado: 'estado',
+    lemonOrderId: 'lemonOrderId',
+    lemonPaymentId: 'lemonPaymentId',
+    createdAt: 'createdAt'
+  };
+
+  export type PagoScalarFieldEnum = (typeof PagoScalarFieldEnum)[keyof typeof PagoScalarFieldEnum]
 
 
   export const SortOrder: {
@@ -8689,6 +11277,7 @@ export namespace Prisma {
     centro?: XOR<CentroNullableScalarRelationFilter, CentroWhereInput> | null
     evaluacionesEstudiante?: EvaluacionListRelationFilter
     evaluacionesDocente?: EvaluacionListRelationFilter
+    suscripciones?: SuscripcionListRelationFilter
   }
 
   export type UsuarioOrderByWithRelationInput = {
@@ -8712,6 +11301,7 @@ export namespace Prisma {
     centro?: CentroOrderByWithRelationInput
     evaluacionesEstudiante?: EvaluacionOrderByRelationAggregateInput
     evaluacionesDocente?: EvaluacionOrderByRelationAggregateInput
+    suscripciones?: SuscripcionOrderByRelationAggregateInput
   }
 
   export type UsuarioWhereUniqueInput = Prisma.AtLeast<{
@@ -8738,6 +11328,7 @@ export namespace Prisma {
     centro?: XOR<CentroNullableScalarRelationFilter, CentroWhereInput> | null
     evaluacionesEstudiante?: EvaluacionListRelationFilter
     evaluacionesDocente?: EvaluacionListRelationFilter
+    suscripciones?: SuscripcionListRelationFilter
   }, "id" | "email" | "rne">
 
   export type UsuarioOrderByWithAggregationInput = {
@@ -9055,6 +11646,166 @@ export namespace Prisma {
     docenteId?: StringWithAggregatesFilter<"Evaluacion"> | string
   }
 
+  export type SuscripcionWhereInput = {
+    AND?: SuscripcionWhereInput | SuscripcionWhereInput[]
+    OR?: SuscripcionWhereInput[]
+    NOT?: SuscripcionWhereInput | SuscripcionWhereInput[]
+    id?: StringFilter<"Suscripcion"> | string
+    usuarioId?: StringFilter<"Suscripcion"> | string
+    plan?: StringFilter<"Suscripcion"> | string
+    estado?: StringFilter<"Suscripcion"> | string
+    lemonCustomerId?: StringNullableFilter<"Suscripcion"> | string | null
+    lemonSubscriptionId?: StringNullableFilter<"Suscripcion"> | string | null
+    lemonVariantId?: StringNullableFilter<"Suscripcion"> | string | null
+    fechaInicio?: DateTimeNullableFilter<"Suscripcion"> | Date | string | null
+    fechaFin?: DateTimeNullableFilter<"Suscripcion"> | Date | string | null
+    createdAt?: DateTimeFilter<"Suscripcion"> | Date | string
+    updatedAt?: DateTimeFilter<"Suscripcion"> | Date | string
+    usuario?: XOR<UsuarioScalarRelationFilter, UsuarioWhereInput>
+    pagos?: PagoListRelationFilter
+  }
+
+  export type SuscripcionOrderByWithRelationInput = {
+    id?: SortOrder
+    usuarioId?: SortOrder
+    plan?: SortOrder
+    estado?: SortOrder
+    lemonCustomerId?: SortOrderInput | SortOrder
+    lemonSubscriptionId?: SortOrderInput | SortOrder
+    lemonVariantId?: SortOrderInput | SortOrder
+    fechaInicio?: SortOrderInput | SortOrder
+    fechaFin?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    usuario?: UsuarioOrderByWithRelationInput
+    pagos?: PagoOrderByRelationAggregateInput
+  }
+
+  export type SuscripcionWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: SuscripcionWhereInput | SuscripcionWhereInput[]
+    OR?: SuscripcionWhereInput[]
+    NOT?: SuscripcionWhereInput | SuscripcionWhereInput[]
+    usuarioId?: StringFilter<"Suscripcion"> | string
+    plan?: StringFilter<"Suscripcion"> | string
+    estado?: StringFilter<"Suscripcion"> | string
+    lemonCustomerId?: StringNullableFilter<"Suscripcion"> | string | null
+    lemonSubscriptionId?: StringNullableFilter<"Suscripcion"> | string | null
+    lemonVariantId?: StringNullableFilter<"Suscripcion"> | string | null
+    fechaInicio?: DateTimeNullableFilter<"Suscripcion"> | Date | string | null
+    fechaFin?: DateTimeNullableFilter<"Suscripcion"> | Date | string | null
+    createdAt?: DateTimeFilter<"Suscripcion"> | Date | string
+    updatedAt?: DateTimeFilter<"Suscripcion"> | Date | string
+    usuario?: XOR<UsuarioScalarRelationFilter, UsuarioWhereInput>
+    pagos?: PagoListRelationFilter
+  }, "id">
+
+  export type SuscripcionOrderByWithAggregationInput = {
+    id?: SortOrder
+    usuarioId?: SortOrder
+    plan?: SortOrder
+    estado?: SortOrder
+    lemonCustomerId?: SortOrderInput | SortOrder
+    lemonSubscriptionId?: SortOrderInput | SortOrder
+    lemonVariantId?: SortOrderInput | SortOrder
+    fechaInicio?: SortOrderInput | SortOrder
+    fechaFin?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    _count?: SuscripcionCountOrderByAggregateInput
+    _max?: SuscripcionMaxOrderByAggregateInput
+    _min?: SuscripcionMinOrderByAggregateInput
+  }
+
+  export type SuscripcionScalarWhereWithAggregatesInput = {
+    AND?: SuscripcionScalarWhereWithAggregatesInput | SuscripcionScalarWhereWithAggregatesInput[]
+    OR?: SuscripcionScalarWhereWithAggregatesInput[]
+    NOT?: SuscripcionScalarWhereWithAggregatesInput | SuscripcionScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Suscripcion"> | string
+    usuarioId?: StringWithAggregatesFilter<"Suscripcion"> | string
+    plan?: StringWithAggregatesFilter<"Suscripcion"> | string
+    estado?: StringWithAggregatesFilter<"Suscripcion"> | string
+    lemonCustomerId?: StringNullableWithAggregatesFilter<"Suscripcion"> | string | null
+    lemonSubscriptionId?: StringNullableWithAggregatesFilter<"Suscripcion"> | string | null
+    lemonVariantId?: StringNullableWithAggregatesFilter<"Suscripcion"> | string | null
+    fechaInicio?: DateTimeNullableWithAggregatesFilter<"Suscripcion"> | Date | string | null
+    fechaFin?: DateTimeNullableWithAggregatesFilter<"Suscripcion"> | Date | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"Suscripcion"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Suscripcion"> | Date | string
+  }
+
+  export type PagoWhereInput = {
+    AND?: PagoWhereInput | PagoWhereInput[]
+    OR?: PagoWhereInput[]
+    NOT?: PagoWhereInput | PagoWhereInput[]
+    id?: StringFilter<"Pago"> | string
+    suscripcionId?: StringFilter<"Pago"> | string
+    monto?: FloatFilter<"Pago"> | number
+    moneda?: StringFilter<"Pago"> | string
+    estado?: StringFilter<"Pago"> | string
+    lemonOrderId?: StringNullableFilter<"Pago"> | string | null
+    lemonPaymentId?: StringNullableFilter<"Pago"> | string | null
+    createdAt?: DateTimeFilter<"Pago"> | Date | string
+    suscripcion?: XOR<SuscripcionScalarRelationFilter, SuscripcionWhereInput>
+  }
+
+  export type PagoOrderByWithRelationInput = {
+    id?: SortOrder
+    suscripcionId?: SortOrder
+    monto?: SortOrder
+    moneda?: SortOrder
+    estado?: SortOrder
+    lemonOrderId?: SortOrderInput | SortOrder
+    lemonPaymentId?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    suscripcion?: SuscripcionOrderByWithRelationInput
+  }
+
+  export type PagoWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: PagoWhereInput | PagoWhereInput[]
+    OR?: PagoWhereInput[]
+    NOT?: PagoWhereInput | PagoWhereInput[]
+    suscripcionId?: StringFilter<"Pago"> | string
+    monto?: FloatFilter<"Pago"> | number
+    moneda?: StringFilter<"Pago"> | string
+    estado?: StringFilter<"Pago"> | string
+    lemonOrderId?: StringNullableFilter<"Pago"> | string | null
+    lemonPaymentId?: StringNullableFilter<"Pago"> | string | null
+    createdAt?: DateTimeFilter<"Pago"> | Date | string
+    suscripcion?: XOR<SuscripcionScalarRelationFilter, SuscripcionWhereInput>
+  }, "id">
+
+  export type PagoOrderByWithAggregationInput = {
+    id?: SortOrder
+    suscripcionId?: SortOrder
+    monto?: SortOrder
+    moneda?: SortOrder
+    estado?: SortOrder
+    lemonOrderId?: SortOrderInput | SortOrder
+    lemonPaymentId?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: PagoCountOrderByAggregateInput
+    _avg?: PagoAvgOrderByAggregateInput
+    _max?: PagoMaxOrderByAggregateInput
+    _min?: PagoMinOrderByAggregateInput
+    _sum?: PagoSumOrderByAggregateInput
+  }
+
+  export type PagoScalarWhereWithAggregatesInput = {
+    AND?: PagoScalarWhereWithAggregatesInput | PagoScalarWhereWithAggregatesInput[]
+    OR?: PagoScalarWhereWithAggregatesInput[]
+    NOT?: PagoScalarWhereWithAggregatesInput | PagoScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Pago"> | string
+    suscripcionId?: StringWithAggregatesFilter<"Pago"> | string
+    monto?: FloatWithAggregatesFilter<"Pago"> | number
+    moneda?: StringWithAggregatesFilter<"Pago"> | string
+    estado?: StringWithAggregatesFilter<"Pago"> | string
+    lemonOrderId?: StringNullableWithAggregatesFilter<"Pago"> | string | null
+    lemonPaymentId?: StringNullableWithAggregatesFilter<"Pago"> | string | null
+    createdAt?: DateTimeWithAggregatesFilter<"Pago"> | Date | string
+  }
+
   export type CentroCreateInput = {
     id?: string
     nombre: string
@@ -9181,6 +11932,7 @@ export namespace Prisma {
     centro?: CentroCreateNestedOneWithoutUsuariosInput
     evaluacionesEstudiante?: EvaluacionCreateNestedManyWithoutEstudianteInput
     evaluacionesDocente?: EvaluacionCreateNestedManyWithoutDocenteInput
+    suscripciones?: SuscripcionCreateNestedManyWithoutUsuarioInput
   }
 
   export type UsuarioUncheckedCreateInput = {
@@ -9203,6 +11955,7 @@ export namespace Prisma {
     centroId?: string | null
     evaluacionesEstudiante?: EvaluacionUncheckedCreateNestedManyWithoutEstudianteInput
     evaluacionesDocente?: EvaluacionUncheckedCreateNestedManyWithoutDocenteInput
+    suscripciones?: SuscripcionUncheckedCreateNestedManyWithoutUsuarioInput
   }
 
   export type UsuarioUpdateInput = {
@@ -9225,6 +11978,7 @@ export namespace Prisma {
     centro?: CentroUpdateOneWithoutUsuariosNestedInput
     evaluacionesEstudiante?: EvaluacionUpdateManyWithoutEstudianteNestedInput
     evaluacionesDocente?: EvaluacionUpdateManyWithoutDocenteNestedInput
+    suscripciones?: SuscripcionUpdateManyWithoutUsuarioNestedInput
   }
 
   export type UsuarioUncheckedUpdateInput = {
@@ -9247,6 +12001,7 @@ export namespace Prisma {
     centroId?: NullableStringFieldUpdateOperationsInput | string | null
     evaluacionesEstudiante?: EvaluacionUncheckedUpdateManyWithoutEstudianteNestedInput
     evaluacionesDocente?: EvaluacionUncheckedUpdateManyWithoutDocenteNestedInput
+    suscripciones?: SuscripcionUncheckedUpdateManyWithoutUsuarioNestedInput
   }
 
   export type UsuarioCreateManyInput = {
@@ -9584,6 +12339,183 @@ export namespace Prisma {
     docenteId?: StringFieldUpdateOperationsInput | string
   }
 
+  export type SuscripcionCreateInput = {
+    id?: string
+    plan?: string
+    estado?: string
+    lemonCustomerId?: string | null
+    lemonSubscriptionId?: string | null
+    lemonVariantId?: string | null
+    fechaInicio?: Date | string | null
+    fechaFin?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    usuario: UsuarioCreateNestedOneWithoutSuscripcionesInput
+    pagos?: PagoCreateNestedManyWithoutSuscripcionInput
+  }
+
+  export type SuscripcionUncheckedCreateInput = {
+    id?: string
+    usuarioId: string
+    plan?: string
+    estado?: string
+    lemonCustomerId?: string | null
+    lemonSubscriptionId?: string | null
+    lemonVariantId?: string | null
+    fechaInicio?: Date | string | null
+    fechaFin?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    pagos?: PagoUncheckedCreateNestedManyWithoutSuscripcionInput
+  }
+
+  export type SuscripcionUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    plan?: StringFieldUpdateOperationsInput | string
+    estado?: StringFieldUpdateOperationsInput | string
+    lemonCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonVariantId?: NullableStringFieldUpdateOperationsInput | string | null
+    fechaInicio?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fechaFin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    usuario?: UsuarioUpdateOneRequiredWithoutSuscripcionesNestedInput
+    pagos?: PagoUpdateManyWithoutSuscripcionNestedInput
+  }
+
+  export type SuscripcionUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    usuarioId?: StringFieldUpdateOperationsInput | string
+    plan?: StringFieldUpdateOperationsInput | string
+    estado?: StringFieldUpdateOperationsInput | string
+    lemonCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonVariantId?: NullableStringFieldUpdateOperationsInput | string | null
+    fechaInicio?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fechaFin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    pagos?: PagoUncheckedUpdateManyWithoutSuscripcionNestedInput
+  }
+
+  export type SuscripcionCreateManyInput = {
+    id?: string
+    usuarioId: string
+    plan?: string
+    estado?: string
+    lemonCustomerId?: string | null
+    lemonSubscriptionId?: string | null
+    lemonVariantId?: string | null
+    fechaInicio?: Date | string | null
+    fechaFin?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SuscripcionUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    plan?: StringFieldUpdateOperationsInput | string
+    estado?: StringFieldUpdateOperationsInput | string
+    lemonCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonVariantId?: NullableStringFieldUpdateOperationsInput | string | null
+    fechaInicio?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fechaFin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SuscripcionUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    usuarioId?: StringFieldUpdateOperationsInput | string
+    plan?: StringFieldUpdateOperationsInput | string
+    estado?: StringFieldUpdateOperationsInput | string
+    lemonCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonVariantId?: NullableStringFieldUpdateOperationsInput | string | null
+    fechaInicio?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fechaFin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PagoCreateInput = {
+    id?: string
+    monto: number
+    moneda?: string
+    estado?: string
+    lemonOrderId?: string | null
+    lemonPaymentId?: string | null
+    createdAt?: Date | string
+    suscripcion: SuscripcionCreateNestedOneWithoutPagosInput
+  }
+
+  export type PagoUncheckedCreateInput = {
+    id?: string
+    suscripcionId: string
+    monto: number
+    moneda?: string
+    estado?: string
+    lemonOrderId?: string | null
+    lemonPaymentId?: string | null
+    createdAt?: Date | string
+  }
+
+  export type PagoUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    monto?: FloatFieldUpdateOperationsInput | number
+    moneda?: StringFieldUpdateOperationsInput | string
+    estado?: StringFieldUpdateOperationsInput | string
+    lemonOrderId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    suscripcion?: SuscripcionUpdateOneRequiredWithoutPagosNestedInput
+  }
+
+  export type PagoUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    suscripcionId?: StringFieldUpdateOperationsInput | string
+    monto?: FloatFieldUpdateOperationsInput | number
+    moneda?: StringFieldUpdateOperationsInput | string
+    estado?: StringFieldUpdateOperationsInput | string
+    lemonOrderId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PagoCreateManyInput = {
+    id?: string
+    suscripcionId: string
+    monto: number
+    moneda?: string
+    estado?: string
+    lemonOrderId?: string | null
+    lemonPaymentId?: string | null
+    createdAt?: Date | string
+  }
+
+  export type PagoUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    monto?: FloatFieldUpdateOperationsInput | number
+    moneda?: StringFieldUpdateOperationsInput | string
+    estado?: StringFieldUpdateOperationsInput | string
+    lemonOrderId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PagoUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    suscripcionId?: StringFieldUpdateOperationsInput | string
+    monto?: FloatFieldUpdateOperationsInput | number
+    moneda?: StringFieldUpdateOperationsInput | string
+    estado?: StringFieldUpdateOperationsInput | string
+    lemonOrderId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -9811,7 +12743,17 @@ export namespace Prisma {
     none?: EvaluacionWhereInput
   }
 
+  export type SuscripcionListRelationFilter = {
+    every?: SuscripcionWhereInput
+    some?: SuscripcionWhereInput
+    none?: SuscripcionWhereInput
+  }
+
   export type EvaluacionOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type SuscripcionOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -10053,6 +12995,129 @@ export namespace Prisma {
     _max?: NestedFloatFilter<$PrismaModel>
   }
 
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type PagoListRelationFilter = {
+    every?: PagoWhereInput
+    some?: PagoWhereInput
+    none?: PagoWhereInput
+  }
+
+  export type PagoOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type SuscripcionCountOrderByAggregateInput = {
+    id?: SortOrder
+    usuarioId?: SortOrder
+    plan?: SortOrder
+    estado?: SortOrder
+    lemonCustomerId?: SortOrder
+    lemonSubscriptionId?: SortOrder
+    lemonVariantId?: SortOrder
+    fechaInicio?: SortOrder
+    fechaFin?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SuscripcionMaxOrderByAggregateInput = {
+    id?: SortOrder
+    usuarioId?: SortOrder
+    plan?: SortOrder
+    estado?: SortOrder
+    lemonCustomerId?: SortOrder
+    lemonSubscriptionId?: SortOrder
+    lemonVariantId?: SortOrder
+    fechaInicio?: SortOrder
+    fechaFin?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type SuscripcionMinOrderByAggregateInput = {
+    id?: SortOrder
+    usuarioId?: SortOrder
+    plan?: SortOrder
+    estado?: SortOrder
+    lemonCustomerId?: SortOrder
+    lemonSubscriptionId?: SortOrder
+    lemonVariantId?: SortOrder
+    fechaInicio?: SortOrder
+    fechaFin?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+  }
+
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type SuscripcionScalarRelationFilter = {
+    is?: SuscripcionWhereInput
+    isNot?: SuscripcionWhereInput
+  }
+
+  export type PagoCountOrderByAggregateInput = {
+    id?: SortOrder
+    suscripcionId?: SortOrder
+    monto?: SortOrder
+    moneda?: SortOrder
+    estado?: SortOrder
+    lemonOrderId?: SortOrder
+    lemonPaymentId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type PagoAvgOrderByAggregateInput = {
+    monto?: SortOrder
+  }
+
+  export type PagoMaxOrderByAggregateInput = {
+    id?: SortOrder
+    suscripcionId?: SortOrder
+    monto?: SortOrder
+    moneda?: SortOrder
+    estado?: SortOrder
+    lemonOrderId?: SortOrder
+    lemonPaymentId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type PagoMinOrderByAggregateInput = {
+    id?: SortOrder
+    suscripcionId?: SortOrder
+    monto?: SortOrder
+    moneda?: SortOrder
+    estado?: SortOrder
+    lemonOrderId?: SortOrder
+    lemonPaymentId?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type PagoSumOrderByAggregateInput = {
+    monto?: SortOrder
+  }
+
   export type UsuarioCreateNestedManyWithoutCentroInput = {
     create?: XOR<UsuarioCreateWithoutCentroInput, UsuarioUncheckedCreateWithoutCentroInput> | UsuarioCreateWithoutCentroInput[] | UsuarioUncheckedCreateWithoutCentroInput[]
     connectOrCreate?: UsuarioCreateOrConnectWithoutCentroInput | UsuarioCreateOrConnectWithoutCentroInput[]
@@ -10197,6 +13262,13 @@ export namespace Prisma {
     connect?: EvaluacionWhereUniqueInput | EvaluacionWhereUniqueInput[]
   }
 
+  export type SuscripcionCreateNestedManyWithoutUsuarioInput = {
+    create?: XOR<SuscripcionCreateWithoutUsuarioInput, SuscripcionUncheckedCreateWithoutUsuarioInput> | SuscripcionCreateWithoutUsuarioInput[] | SuscripcionUncheckedCreateWithoutUsuarioInput[]
+    connectOrCreate?: SuscripcionCreateOrConnectWithoutUsuarioInput | SuscripcionCreateOrConnectWithoutUsuarioInput[]
+    createMany?: SuscripcionCreateManyUsuarioInputEnvelope
+    connect?: SuscripcionWhereUniqueInput | SuscripcionWhereUniqueInput[]
+  }
+
   export type EvaluacionUncheckedCreateNestedManyWithoutEstudianteInput = {
     create?: XOR<EvaluacionCreateWithoutEstudianteInput, EvaluacionUncheckedCreateWithoutEstudianteInput> | EvaluacionCreateWithoutEstudianteInput[] | EvaluacionUncheckedCreateWithoutEstudianteInput[]
     connectOrCreate?: EvaluacionCreateOrConnectWithoutEstudianteInput | EvaluacionCreateOrConnectWithoutEstudianteInput[]
@@ -10209,6 +13281,13 @@ export namespace Prisma {
     connectOrCreate?: EvaluacionCreateOrConnectWithoutDocenteInput | EvaluacionCreateOrConnectWithoutDocenteInput[]
     createMany?: EvaluacionCreateManyDocenteInputEnvelope
     connect?: EvaluacionWhereUniqueInput | EvaluacionWhereUniqueInput[]
+  }
+
+  export type SuscripcionUncheckedCreateNestedManyWithoutUsuarioInput = {
+    create?: XOR<SuscripcionCreateWithoutUsuarioInput, SuscripcionUncheckedCreateWithoutUsuarioInput> | SuscripcionCreateWithoutUsuarioInput[] | SuscripcionUncheckedCreateWithoutUsuarioInput[]
+    connectOrCreate?: SuscripcionCreateOrConnectWithoutUsuarioInput | SuscripcionCreateOrConnectWithoutUsuarioInput[]
+    createMany?: SuscripcionCreateManyUsuarioInputEnvelope
+    connect?: SuscripcionWhereUniqueInput | SuscripcionWhereUniqueInput[]
   }
 
   export type UsuarioUpdategradosInput = {
@@ -10269,6 +13348,20 @@ export namespace Prisma {
     deleteMany?: EvaluacionScalarWhereInput | EvaluacionScalarWhereInput[]
   }
 
+  export type SuscripcionUpdateManyWithoutUsuarioNestedInput = {
+    create?: XOR<SuscripcionCreateWithoutUsuarioInput, SuscripcionUncheckedCreateWithoutUsuarioInput> | SuscripcionCreateWithoutUsuarioInput[] | SuscripcionUncheckedCreateWithoutUsuarioInput[]
+    connectOrCreate?: SuscripcionCreateOrConnectWithoutUsuarioInput | SuscripcionCreateOrConnectWithoutUsuarioInput[]
+    upsert?: SuscripcionUpsertWithWhereUniqueWithoutUsuarioInput | SuscripcionUpsertWithWhereUniqueWithoutUsuarioInput[]
+    createMany?: SuscripcionCreateManyUsuarioInputEnvelope
+    set?: SuscripcionWhereUniqueInput | SuscripcionWhereUniqueInput[]
+    disconnect?: SuscripcionWhereUniqueInput | SuscripcionWhereUniqueInput[]
+    delete?: SuscripcionWhereUniqueInput | SuscripcionWhereUniqueInput[]
+    connect?: SuscripcionWhereUniqueInput | SuscripcionWhereUniqueInput[]
+    update?: SuscripcionUpdateWithWhereUniqueWithoutUsuarioInput | SuscripcionUpdateWithWhereUniqueWithoutUsuarioInput[]
+    updateMany?: SuscripcionUpdateManyWithWhereWithoutUsuarioInput | SuscripcionUpdateManyWithWhereWithoutUsuarioInput[]
+    deleteMany?: SuscripcionScalarWhereInput | SuscripcionScalarWhereInput[]
+  }
+
   export type EvaluacionUncheckedUpdateManyWithoutEstudianteNestedInput = {
     create?: XOR<EvaluacionCreateWithoutEstudianteInput, EvaluacionUncheckedCreateWithoutEstudianteInput> | EvaluacionCreateWithoutEstudianteInput[] | EvaluacionUncheckedCreateWithoutEstudianteInput[]
     connectOrCreate?: EvaluacionCreateOrConnectWithoutEstudianteInput | EvaluacionCreateOrConnectWithoutEstudianteInput[]
@@ -10295,6 +13388,20 @@ export namespace Prisma {
     update?: EvaluacionUpdateWithWhereUniqueWithoutDocenteInput | EvaluacionUpdateWithWhereUniqueWithoutDocenteInput[]
     updateMany?: EvaluacionUpdateManyWithWhereWithoutDocenteInput | EvaluacionUpdateManyWithWhereWithoutDocenteInput[]
     deleteMany?: EvaluacionScalarWhereInput | EvaluacionScalarWhereInput[]
+  }
+
+  export type SuscripcionUncheckedUpdateManyWithoutUsuarioNestedInput = {
+    create?: XOR<SuscripcionCreateWithoutUsuarioInput, SuscripcionUncheckedCreateWithoutUsuarioInput> | SuscripcionCreateWithoutUsuarioInput[] | SuscripcionUncheckedCreateWithoutUsuarioInput[]
+    connectOrCreate?: SuscripcionCreateOrConnectWithoutUsuarioInput | SuscripcionCreateOrConnectWithoutUsuarioInput[]
+    upsert?: SuscripcionUpsertWithWhereUniqueWithoutUsuarioInput | SuscripcionUpsertWithWhereUniqueWithoutUsuarioInput[]
+    createMany?: SuscripcionCreateManyUsuarioInputEnvelope
+    set?: SuscripcionWhereUniqueInput | SuscripcionWhereUniqueInput[]
+    disconnect?: SuscripcionWhereUniqueInput | SuscripcionWhereUniqueInput[]
+    delete?: SuscripcionWhereUniqueInput | SuscripcionWhereUniqueInput[]
+    connect?: SuscripcionWhereUniqueInput | SuscripcionWhereUniqueInput[]
+    update?: SuscripcionUpdateWithWhereUniqueWithoutUsuarioInput | SuscripcionUpdateWithWhereUniqueWithoutUsuarioInput[]
+    updateMany?: SuscripcionUpdateManyWithWhereWithoutUsuarioInput | SuscripcionUpdateManyWithWhereWithoutUsuarioInput[]
+    deleteMany?: SuscripcionScalarWhereInput | SuscripcionScalarWhereInput[]
   }
 
   export type EvaluacionCreateNestedManyWithoutCompetenciaInput = {
@@ -10457,6 +13564,80 @@ export namespace Prisma {
     upsert?: UsuarioUpsertWithoutEvaluacionesDocenteInput
     connect?: UsuarioWhereUniqueInput
     update?: XOR<XOR<UsuarioUpdateToOneWithWhereWithoutEvaluacionesDocenteInput, UsuarioUpdateWithoutEvaluacionesDocenteInput>, UsuarioUncheckedUpdateWithoutEvaluacionesDocenteInput>
+  }
+
+  export type UsuarioCreateNestedOneWithoutSuscripcionesInput = {
+    create?: XOR<UsuarioCreateWithoutSuscripcionesInput, UsuarioUncheckedCreateWithoutSuscripcionesInput>
+    connectOrCreate?: UsuarioCreateOrConnectWithoutSuscripcionesInput
+    connect?: UsuarioWhereUniqueInput
+  }
+
+  export type PagoCreateNestedManyWithoutSuscripcionInput = {
+    create?: XOR<PagoCreateWithoutSuscripcionInput, PagoUncheckedCreateWithoutSuscripcionInput> | PagoCreateWithoutSuscripcionInput[] | PagoUncheckedCreateWithoutSuscripcionInput[]
+    connectOrCreate?: PagoCreateOrConnectWithoutSuscripcionInput | PagoCreateOrConnectWithoutSuscripcionInput[]
+    createMany?: PagoCreateManySuscripcionInputEnvelope
+    connect?: PagoWhereUniqueInput | PagoWhereUniqueInput[]
+  }
+
+  export type PagoUncheckedCreateNestedManyWithoutSuscripcionInput = {
+    create?: XOR<PagoCreateWithoutSuscripcionInput, PagoUncheckedCreateWithoutSuscripcionInput> | PagoCreateWithoutSuscripcionInput[] | PagoUncheckedCreateWithoutSuscripcionInput[]
+    connectOrCreate?: PagoCreateOrConnectWithoutSuscripcionInput | PagoCreateOrConnectWithoutSuscripcionInput[]
+    createMany?: PagoCreateManySuscripcionInputEnvelope
+    connect?: PagoWhereUniqueInput | PagoWhereUniqueInput[]
+  }
+
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
+  }
+
+  export type UsuarioUpdateOneRequiredWithoutSuscripcionesNestedInput = {
+    create?: XOR<UsuarioCreateWithoutSuscripcionesInput, UsuarioUncheckedCreateWithoutSuscripcionesInput>
+    connectOrCreate?: UsuarioCreateOrConnectWithoutSuscripcionesInput
+    upsert?: UsuarioUpsertWithoutSuscripcionesInput
+    connect?: UsuarioWhereUniqueInput
+    update?: XOR<XOR<UsuarioUpdateToOneWithWhereWithoutSuscripcionesInput, UsuarioUpdateWithoutSuscripcionesInput>, UsuarioUncheckedUpdateWithoutSuscripcionesInput>
+  }
+
+  export type PagoUpdateManyWithoutSuscripcionNestedInput = {
+    create?: XOR<PagoCreateWithoutSuscripcionInput, PagoUncheckedCreateWithoutSuscripcionInput> | PagoCreateWithoutSuscripcionInput[] | PagoUncheckedCreateWithoutSuscripcionInput[]
+    connectOrCreate?: PagoCreateOrConnectWithoutSuscripcionInput | PagoCreateOrConnectWithoutSuscripcionInput[]
+    upsert?: PagoUpsertWithWhereUniqueWithoutSuscripcionInput | PagoUpsertWithWhereUniqueWithoutSuscripcionInput[]
+    createMany?: PagoCreateManySuscripcionInputEnvelope
+    set?: PagoWhereUniqueInput | PagoWhereUniqueInput[]
+    disconnect?: PagoWhereUniqueInput | PagoWhereUniqueInput[]
+    delete?: PagoWhereUniqueInput | PagoWhereUniqueInput[]
+    connect?: PagoWhereUniqueInput | PagoWhereUniqueInput[]
+    update?: PagoUpdateWithWhereUniqueWithoutSuscripcionInput | PagoUpdateWithWhereUniqueWithoutSuscripcionInput[]
+    updateMany?: PagoUpdateManyWithWhereWithoutSuscripcionInput | PagoUpdateManyWithWhereWithoutSuscripcionInput[]
+    deleteMany?: PagoScalarWhereInput | PagoScalarWhereInput[]
+  }
+
+  export type PagoUncheckedUpdateManyWithoutSuscripcionNestedInput = {
+    create?: XOR<PagoCreateWithoutSuscripcionInput, PagoUncheckedCreateWithoutSuscripcionInput> | PagoCreateWithoutSuscripcionInput[] | PagoUncheckedCreateWithoutSuscripcionInput[]
+    connectOrCreate?: PagoCreateOrConnectWithoutSuscripcionInput | PagoCreateOrConnectWithoutSuscripcionInput[]
+    upsert?: PagoUpsertWithWhereUniqueWithoutSuscripcionInput | PagoUpsertWithWhereUniqueWithoutSuscripcionInput[]
+    createMany?: PagoCreateManySuscripcionInputEnvelope
+    set?: PagoWhereUniqueInput | PagoWhereUniqueInput[]
+    disconnect?: PagoWhereUniqueInput | PagoWhereUniqueInput[]
+    delete?: PagoWhereUniqueInput | PagoWhereUniqueInput[]
+    connect?: PagoWhereUniqueInput | PagoWhereUniqueInput[]
+    update?: PagoUpdateWithWhereUniqueWithoutSuscripcionInput | PagoUpdateWithWhereUniqueWithoutSuscripcionInput[]
+    updateMany?: PagoUpdateManyWithWhereWithoutSuscripcionInput | PagoUpdateManyWithWhereWithoutSuscripcionInput[]
+    deleteMany?: PagoScalarWhereInput | PagoScalarWhereInput[]
+  }
+
+  export type SuscripcionCreateNestedOneWithoutPagosInput = {
+    create?: XOR<SuscripcionCreateWithoutPagosInput, SuscripcionUncheckedCreateWithoutPagosInput>
+    connectOrCreate?: SuscripcionCreateOrConnectWithoutPagosInput
+    connect?: SuscripcionWhereUniqueInput
+  }
+
+  export type SuscripcionUpdateOneRequiredWithoutPagosNestedInput = {
+    create?: XOR<SuscripcionCreateWithoutPagosInput, SuscripcionUncheckedCreateWithoutPagosInput>
+    connectOrCreate?: SuscripcionCreateOrConnectWithoutPagosInput
+    upsert?: SuscripcionUpsertWithoutPagosInput
+    connect?: SuscripcionWhereUniqueInput
+    update?: XOR<XOR<SuscripcionUpdateToOneWithWhereWithoutPagosInput, SuscripcionUpdateWithoutPagosInput>, SuscripcionUncheckedUpdateWithoutPagosInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -10624,6 +13805,31 @@ export namespace Prisma {
     _max?: NestedFloatFilter<$PrismaModel>
   }
 
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
   export type UsuarioCreateWithoutCentroInput = {
     id?: string
     nombre: string
@@ -10643,6 +13849,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     evaluacionesEstudiante?: EvaluacionCreateNestedManyWithoutEstudianteInput
     evaluacionesDocente?: EvaluacionCreateNestedManyWithoutDocenteInput
+    suscripciones?: SuscripcionCreateNestedManyWithoutUsuarioInput
   }
 
   export type UsuarioUncheckedCreateWithoutCentroInput = {
@@ -10664,6 +13871,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     evaluacionesEstudiante?: EvaluacionUncheckedCreateNestedManyWithoutEstudianteInput
     evaluacionesDocente?: EvaluacionUncheckedCreateNestedManyWithoutDocenteInput
+    suscripciones?: SuscripcionUncheckedCreateNestedManyWithoutUsuarioInput
   }
 
   export type UsuarioCreateOrConnectWithoutCentroInput = {
@@ -10877,6 +14085,44 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type SuscripcionCreateWithoutUsuarioInput = {
+    id?: string
+    plan?: string
+    estado?: string
+    lemonCustomerId?: string | null
+    lemonSubscriptionId?: string | null
+    lemonVariantId?: string | null
+    fechaInicio?: Date | string | null
+    fechaFin?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    pagos?: PagoCreateNestedManyWithoutSuscripcionInput
+  }
+
+  export type SuscripcionUncheckedCreateWithoutUsuarioInput = {
+    id?: string
+    plan?: string
+    estado?: string
+    lemonCustomerId?: string | null
+    lemonSubscriptionId?: string | null
+    lemonVariantId?: string | null
+    fechaInicio?: Date | string | null
+    fechaFin?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    pagos?: PagoUncheckedCreateNestedManyWithoutSuscripcionInput
+  }
+
+  export type SuscripcionCreateOrConnectWithoutUsuarioInput = {
+    where: SuscripcionWhereUniqueInput
+    create: XOR<SuscripcionCreateWithoutUsuarioInput, SuscripcionUncheckedCreateWithoutUsuarioInput>
+  }
+
+  export type SuscripcionCreateManyUsuarioInputEnvelope = {
+    data: SuscripcionCreateManyUsuarioInput | SuscripcionCreateManyUsuarioInput[]
+    skipDuplicates?: boolean
+  }
+
   export type CentroUpsertWithoutUsuariosInput = {
     update: XOR<CentroUpdateWithoutUsuariosInput, CentroUncheckedUpdateWithoutUsuariosInput>
     create: XOR<CentroCreateWithoutUsuariosInput, CentroUncheckedCreateWithoutUsuariosInput>
@@ -10964,6 +14210,39 @@ export namespace Prisma {
   export type EvaluacionUpdateManyWithWhereWithoutDocenteInput = {
     where: EvaluacionScalarWhereInput
     data: XOR<EvaluacionUpdateManyMutationInput, EvaluacionUncheckedUpdateManyWithoutDocenteInput>
+  }
+
+  export type SuscripcionUpsertWithWhereUniqueWithoutUsuarioInput = {
+    where: SuscripcionWhereUniqueInput
+    update: XOR<SuscripcionUpdateWithoutUsuarioInput, SuscripcionUncheckedUpdateWithoutUsuarioInput>
+    create: XOR<SuscripcionCreateWithoutUsuarioInput, SuscripcionUncheckedCreateWithoutUsuarioInput>
+  }
+
+  export type SuscripcionUpdateWithWhereUniqueWithoutUsuarioInput = {
+    where: SuscripcionWhereUniqueInput
+    data: XOR<SuscripcionUpdateWithoutUsuarioInput, SuscripcionUncheckedUpdateWithoutUsuarioInput>
+  }
+
+  export type SuscripcionUpdateManyWithWhereWithoutUsuarioInput = {
+    where: SuscripcionScalarWhereInput
+    data: XOR<SuscripcionUpdateManyMutationInput, SuscripcionUncheckedUpdateManyWithoutUsuarioInput>
+  }
+
+  export type SuscripcionScalarWhereInput = {
+    AND?: SuscripcionScalarWhereInput | SuscripcionScalarWhereInput[]
+    OR?: SuscripcionScalarWhereInput[]
+    NOT?: SuscripcionScalarWhereInput | SuscripcionScalarWhereInput[]
+    id?: StringFilter<"Suscripcion"> | string
+    usuarioId?: StringFilter<"Suscripcion"> | string
+    plan?: StringFilter<"Suscripcion"> | string
+    estado?: StringFilter<"Suscripcion"> | string
+    lemonCustomerId?: StringNullableFilter<"Suscripcion"> | string | null
+    lemonSubscriptionId?: StringNullableFilter<"Suscripcion"> | string | null
+    lemonVariantId?: StringNullableFilter<"Suscripcion"> | string | null
+    fechaInicio?: DateTimeNullableFilter<"Suscripcion"> | Date | string | null
+    fechaFin?: DateTimeNullableFilter<"Suscripcion"> | Date | string | null
+    createdAt?: DateTimeFilter<"Suscripcion"> | Date | string
+    updatedAt?: DateTimeFilter<"Suscripcion"> | Date | string
   }
 
   export type EvaluacionCreateWithoutCompetenciaInput = {
@@ -11161,6 +14440,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     centro?: CentroCreateNestedOneWithoutUsuariosInput
     evaluacionesDocente?: EvaluacionCreateNestedManyWithoutDocenteInput
+    suscripciones?: SuscripcionCreateNestedManyWithoutUsuarioInput
   }
 
   export type UsuarioUncheckedCreateWithoutEvaluacionesEstudianteInput = {
@@ -11182,6 +14462,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     centroId?: string | null
     evaluacionesDocente?: EvaluacionUncheckedCreateNestedManyWithoutDocenteInput
+    suscripciones?: SuscripcionUncheckedCreateNestedManyWithoutUsuarioInput
   }
 
   export type UsuarioCreateOrConnectWithoutEvaluacionesEstudianteInput = {
@@ -11252,6 +14533,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     centro?: CentroCreateNestedOneWithoutUsuariosInput
     evaluacionesEstudiante?: EvaluacionCreateNestedManyWithoutEstudianteInput
+    suscripciones?: SuscripcionCreateNestedManyWithoutUsuarioInput
   }
 
   export type UsuarioUncheckedCreateWithoutEvaluacionesDocenteInput = {
@@ -11273,6 +14555,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     centroId?: string | null
     evaluacionesEstudiante?: EvaluacionUncheckedCreateNestedManyWithoutEstudianteInput
+    suscripciones?: SuscripcionUncheckedCreateNestedManyWithoutUsuarioInput
   }
 
   export type UsuarioCreateOrConnectWithoutEvaluacionesDocenteInput = {
@@ -11310,6 +14593,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     centro?: CentroUpdateOneWithoutUsuariosNestedInput
     evaluacionesDocente?: EvaluacionUpdateManyWithoutDocenteNestedInput
+    suscripciones?: SuscripcionUpdateManyWithoutUsuarioNestedInput
   }
 
   export type UsuarioUncheckedUpdateWithoutEvaluacionesEstudianteInput = {
@@ -11331,6 +14615,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     centroId?: NullableStringFieldUpdateOperationsInput | string | null
     evaluacionesDocente?: EvaluacionUncheckedUpdateManyWithoutDocenteNestedInput
+    suscripciones?: SuscripcionUncheckedUpdateManyWithoutUsuarioNestedInput
   }
 
   export type CompetenciaUpsertWithoutEvaluacionesInput = {
@@ -11419,6 +14704,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     centro?: CentroUpdateOneWithoutUsuariosNestedInput
     evaluacionesEstudiante?: EvaluacionUpdateManyWithoutEstudianteNestedInput
+    suscripciones?: SuscripcionUpdateManyWithoutUsuarioNestedInput
   }
 
   export type UsuarioUncheckedUpdateWithoutEvaluacionesDocenteInput = {
@@ -11440,6 +14726,243 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     centroId?: NullableStringFieldUpdateOperationsInput | string | null
     evaluacionesEstudiante?: EvaluacionUncheckedUpdateManyWithoutEstudianteNestedInput
+    suscripciones?: SuscripcionUncheckedUpdateManyWithoutUsuarioNestedInput
+  }
+
+  export type UsuarioCreateWithoutSuscripcionesInput = {
+    id?: string
+    nombre: string
+    email: string
+    password: string
+    rol?: string
+    genero?: string | null
+    grado?: string | null
+    grados?: UsuarioCreategradosInput | string[]
+    niveles?: UsuarioCreatenivelesInput | string[]
+    ciclos?: UsuarioCreateciclosInput | string[]
+    materias?: UsuarioCreatemateriasInput | string[]
+    categoriaDocente?: string | null
+    rne?: string | null
+    activo?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    centro?: CentroCreateNestedOneWithoutUsuariosInput
+    evaluacionesEstudiante?: EvaluacionCreateNestedManyWithoutEstudianteInput
+    evaluacionesDocente?: EvaluacionCreateNestedManyWithoutDocenteInput
+  }
+
+  export type UsuarioUncheckedCreateWithoutSuscripcionesInput = {
+    id?: string
+    nombre: string
+    email: string
+    password: string
+    rol?: string
+    genero?: string | null
+    grado?: string | null
+    grados?: UsuarioCreategradosInput | string[]
+    niveles?: UsuarioCreatenivelesInput | string[]
+    ciclos?: UsuarioCreateciclosInput | string[]
+    materias?: UsuarioCreatemateriasInput | string[]
+    categoriaDocente?: string | null
+    rne?: string | null
+    activo?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    centroId?: string | null
+    evaluacionesEstudiante?: EvaluacionUncheckedCreateNestedManyWithoutEstudianteInput
+    evaluacionesDocente?: EvaluacionUncheckedCreateNestedManyWithoutDocenteInput
+  }
+
+  export type UsuarioCreateOrConnectWithoutSuscripcionesInput = {
+    where: UsuarioWhereUniqueInput
+    create: XOR<UsuarioCreateWithoutSuscripcionesInput, UsuarioUncheckedCreateWithoutSuscripcionesInput>
+  }
+
+  export type PagoCreateWithoutSuscripcionInput = {
+    id?: string
+    monto: number
+    moneda?: string
+    estado?: string
+    lemonOrderId?: string | null
+    lemonPaymentId?: string | null
+    createdAt?: Date | string
+  }
+
+  export type PagoUncheckedCreateWithoutSuscripcionInput = {
+    id?: string
+    monto: number
+    moneda?: string
+    estado?: string
+    lemonOrderId?: string | null
+    lemonPaymentId?: string | null
+    createdAt?: Date | string
+  }
+
+  export type PagoCreateOrConnectWithoutSuscripcionInput = {
+    where: PagoWhereUniqueInput
+    create: XOR<PagoCreateWithoutSuscripcionInput, PagoUncheckedCreateWithoutSuscripcionInput>
+  }
+
+  export type PagoCreateManySuscripcionInputEnvelope = {
+    data: PagoCreateManySuscripcionInput | PagoCreateManySuscripcionInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type UsuarioUpsertWithoutSuscripcionesInput = {
+    update: XOR<UsuarioUpdateWithoutSuscripcionesInput, UsuarioUncheckedUpdateWithoutSuscripcionesInput>
+    create: XOR<UsuarioCreateWithoutSuscripcionesInput, UsuarioUncheckedCreateWithoutSuscripcionesInput>
+    where?: UsuarioWhereInput
+  }
+
+  export type UsuarioUpdateToOneWithWhereWithoutSuscripcionesInput = {
+    where?: UsuarioWhereInput
+    data: XOR<UsuarioUpdateWithoutSuscripcionesInput, UsuarioUncheckedUpdateWithoutSuscripcionesInput>
+  }
+
+  export type UsuarioUpdateWithoutSuscripcionesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    nombre?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    rol?: StringFieldUpdateOperationsInput | string
+    genero?: NullableStringFieldUpdateOperationsInput | string | null
+    grado?: NullableStringFieldUpdateOperationsInput | string | null
+    grados?: UsuarioUpdategradosInput | string[]
+    niveles?: UsuarioUpdatenivelesInput | string[]
+    ciclos?: UsuarioUpdateciclosInput | string[]
+    materias?: UsuarioUpdatemateriasInput | string[]
+    categoriaDocente?: NullableStringFieldUpdateOperationsInput | string | null
+    rne?: NullableStringFieldUpdateOperationsInput | string | null
+    activo?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    centro?: CentroUpdateOneWithoutUsuariosNestedInput
+    evaluacionesEstudiante?: EvaluacionUpdateManyWithoutEstudianteNestedInput
+    evaluacionesDocente?: EvaluacionUpdateManyWithoutDocenteNestedInput
+  }
+
+  export type UsuarioUncheckedUpdateWithoutSuscripcionesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    nombre?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    password?: StringFieldUpdateOperationsInput | string
+    rol?: StringFieldUpdateOperationsInput | string
+    genero?: NullableStringFieldUpdateOperationsInput | string | null
+    grado?: NullableStringFieldUpdateOperationsInput | string | null
+    grados?: UsuarioUpdategradosInput | string[]
+    niveles?: UsuarioUpdatenivelesInput | string[]
+    ciclos?: UsuarioUpdateciclosInput | string[]
+    materias?: UsuarioUpdatemateriasInput | string[]
+    categoriaDocente?: NullableStringFieldUpdateOperationsInput | string | null
+    rne?: NullableStringFieldUpdateOperationsInput | string | null
+    activo?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    centroId?: NullableStringFieldUpdateOperationsInput | string | null
+    evaluacionesEstudiante?: EvaluacionUncheckedUpdateManyWithoutEstudianteNestedInput
+    evaluacionesDocente?: EvaluacionUncheckedUpdateManyWithoutDocenteNestedInput
+  }
+
+  export type PagoUpsertWithWhereUniqueWithoutSuscripcionInput = {
+    where: PagoWhereUniqueInput
+    update: XOR<PagoUpdateWithoutSuscripcionInput, PagoUncheckedUpdateWithoutSuscripcionInput>
+    create: XOR<PagoCreateWithoutSuscripcionInput, PagoUncheckedCreateWithoutSuscripcionInput>
+  }
+
+  export type PagoUpdateWithWhereUniqueWithoutSuscripcionInput = {
+    where: PagoWhereUniqueInput
+    data: XOR<PagoUpdateWithoutSuscripcionInput, PagoUncheckedUpdateWithoutSuscripcionInput>
+  }
+
+  export type PagoUpdateManyWithWhereWithoutSuscripcionInput = {
+    where: PagoScalarWhereInput
+    data: XOR<PagoUpdateManyMutationInput, PagoUncheckedUpdateManyWithoutSuscripcionInput>
+  }
+
+  export type PagoScalarWhereInput = {
+    AND?: PagoScalarWhereInput | PagoScalarWhereInput[]
+    OR?: PagoScalarWhereInput[]
+    NOT?: PagoScalarWhereInput | PagoScalarWhereInput[]
+    id?: StringFilter<"Pago"> | string
+    suscripcionId?: StringFilter<"Pago"> | string
+    monto?: FloatFilter<"Pago"> | number
+    moneda?: StringFilter<"Pago"> | string
+    estado?: StringFilter<"Pago"> | string
+    lemonOrderId?: StringNullableFilter<"Pago"> | string | null
+    lemonPaymentId?: StringNullableFilter<"Pago"> | string | null
+    createdAt?: DateTimeFilter<"Pago"> | Date | string
+  }
+
+  export type SuscripcionCreateWithoutPagosInput = {
+    id?: string
+    plan?: string
+    estado?: string
+    lemonCustomerId?: string | null
+    lemonSubscriptionId?: string | null
+    lemonVariantId?: string | null
+    fechaInicio?: Date | string | null
+    fechaFin?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    usuario: UsuarioCreateNestedOneWithoutSuscripcionesInput
+  }
+
+  export type SuscripcionUncheckedCreateWithoutPagosInput = {
+    id?: string
+    usuarioId: string
+    plan?: string
+    estado?: string
+    lemonCustomerId?: string | null
+    lemonSubscriptionId?: string | null
+    lemonVariantId?: string | null
+    fechaInicio?: Date | string | null
+    fechaFin?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SuscripcionCreateOrConnectWithoutPagosInput = {
+    where: SuscripcionWhereUniqueInput
+    create: XOR<SuscripcionCreateWithoutPagosInput, SuscripcionUncheckedCreateWithoutPagosInput>
+  }
+
+  export type SuscripcionUpsertWithoutPagosInput = {
+    update: XOR<SuscripcionUpdateWithoutPagosInput, SuscripcionUncheckedUpdateWithoutPagosInput>
+    create: XOR<SuscripcionCreateWithoutPagosInput, SuscripcionUncheckedCreateWithoutPagosInput>
+    where?: SuscripcionWhereInput
+  }
+
+  export type SuscripcionUpdateToOneWithWhereWithoutPagosInput = {
+    where?: SuscripcionWhereInput
+    data: XOR<SuscripcionUpdateWithoutPagosInput, SuscripcionUncheckedUpdateWithoutPagosInput>
+  }
+
+  export type SuscripcionUpdateWithoutPagosInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    plan?: StringFieldUpdateOperationsInput | string
+    estado?: StringFieldUpdateOperationsInput | string
+    lemonCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonVariantId?: NullableStringFieldUpdateOperationsInput | string | null
+    fechaInicio?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fechaFin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    usuario?: UsuarioUpdateOneRequiredWithoutSuscripcionesNestedInput
+  }
+
+  export type SuscripcionUncheckedUpdateWithoutPagosInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    usuarioId?: StringFieldUpdateOperationsInput | string
+    plan?: StringFieldUpdateOperationsInput | string
+    estado?: StringFieldUpdateOperationsInput | string
+    lemonCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonVariantId?: NullableStringFieldUpdateOperationsInput | string | null
+    fechaInicio?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fechaFin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type UsuarioCreateManyCentroInput = {
@@ -11489,6 +15012,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     evaluacionesEstudiante?: EvaluacionUpdateManyWithoutEstudianteNestedInput
     evaluacionesDocente?: EvaluacionUpdateManyWithoutDocenteNestedInput
+    suscripciones?: SuscripcionUpdateManyWithoutUsuarioNestedInput
   }
 
   export type UsuarioUncheckedUpdateWithoutCentroInput = {
@@ -11510,6 +15034,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     evaluacionesEstudiante?: EvaluacionUncheckedUpdateManyWithoutEstudianteNestedInput
     evaluacionesDocente?: EvaluacionUncheckedUpdateManyWithoutDocenteNestedInput
+    suscripciones?: SuscripcionUncheckedUpdateManyWithoutUsuarioNestedInput
   }
 
   export type UsuarioUncheckedUpdateManyWithoutCentroInput = {
@@ -11584,6 +15109,19 @@ export namespace Prisma {
     periodoId: string
   }
 
+  export type SuscripcionCreateManyUsuarioInput = {
+    id?: string
+    plan?: string
+    estado?: string
+    lemonCustomerId?: string | null
+    lemonSubscriptionId?: string | null
+    lemonVariantId?: string | null
+    fechaInicio?: Date | string | null
+    fechaFin?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type EvaluacionUpdateWithoutEstudianteInput = {
     id?: StringFieldUpdateOperationsInput | string
     nota?: FloatFieldUpdateOperationsInput | number
@@ -11654,6 +15192,47 @@ export namespace Prisma {
     estudianteId?: StringFieldUpdateOperationsInput | string
     competenciaId?: StringFieldUpdateOperationsInput | string
     periodoId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type SuscripcionUpdateWithoutUsuarioInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    plan?: StringFieldUpdateOperationsInput | string
+    estado?: StringFieldUpdateOperationsInput | string
+    lemonCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonVariantId?: NullableStringFieldUpdateOperationsInput | string | null
+    fechaInicio?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fechaFin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    pagos?: PagoUpdateManyWithoutSuscripcionNestedInput
+  }
+
+  export type SuscripcionUncheckedUpdateWithoutUsuarioInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    plan?: StringFieldUpdateOperationsInput | string
+    estado?: StringFieldUpdateOperationsInput | string
+    lemonCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonVariantId?: NullableStringFieldUpdateOperationsInput | string | null
+    fechaInicio?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fechaFin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    pagos?: PagoUncheckedUpdateManyWithoutSuscripcionNestedInput
+  }
+
+  export type SuscripcionUncheckedUpdateManyWithoutUsuarioInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    plan?: StringFieldUpdateOperationsInput | string
+    estado?: StringFieldUpdateOperationsInput | string
+    lemonCustomerId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonSubscriptionId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonVariantId?: NullableStringFieldUpdateOperationsInput | string | null
+    fechaInicio?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    fechaFin?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type EvaluacionCreateManyCompetenciaInput = {
@@ -11750,6 +15329,46 @@ export namespace Prisma {
     estudianteId?: StringFieldUpdateOperationsInput | string
     competenciaId?: StringFieldUpdateOperationsInput | string
     docenteId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type PagoCreateManySuscripcionInput = {
+    id?: string
+    monto: number
+    moneda?: string
+    estado?: string
+    lemonOrderId?: string | null
+    lemonPaymentId?: string | null
+    createdAt?: Date | string
+  }
+
+  export type PagoUpdateWithoutSuscripcionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    monto?: FloatFieldUpdateOperationsInput | number
+    moneda?: StringFieldUpdateOperationsInput | string
+    estado?: StringFieldUpdateOperationsInput | string
+    lemonOrderId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PagoUncheckedUpdateWithoutSuscripcionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    monto?: FloatFieldUpdateOperationsInput | number
+    moneda?: StringFieldUpdateOperationsInput | string
+    estado?: StringFieldUpdateOperationsInput | string
+    lemonOrderId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type PagoUncheckedUpdateManyWithoutSuscripcionInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    monto?: FloatFieldUpdateOperationsInput | number
+    moneda?: StringFieldUpdateOperationsInput | string
+    estado?: StringFieldUpdateOperationsInput | string
+    lemonOrderId?: NullableStringFieldUpdateOperationsInput | string | null
+    lemonPaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
 

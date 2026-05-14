@@ -1,9 +1,8 @@
 // prisma/schema.prisma
 
 generator client {
-  provider        = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
-  output          = "../generated/prisma"
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -31,29 +30,35 @@ model Centro {
 }
 
 model Usuario {
-  id               String   @id @default(cuid())
-  nombre           String
-  email            String   @unique
-  password         String
-  rol              String   @default("estudiante")
-  genero           String?
-  grado            String?
+  id       String  @id @default(cuid())
+  nombre   String
+  email    String  @unique
+  password String
+  rol      String  @default("estudiante")
+  genero   String?
+  grado    String?
+
   // Arreglos de Strings soportados nativamente por Postgres
-  grados           String[] @default([])
-  niveles          String[] @default([])
-  ciclos           String[] @default([])
-  materias         String[] @default([])
+  grados   String[] @default([])
+  niveles  String[] @default([])
+  ciclos   String[] @default([])
+  materias String[] @default([])
+
   categoriaDocente String?
-  rne              String?  @unique
-  activo           Boolean  @default(true)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  rne              String? @unique
+  activo           Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   centroId String?
   centro   Centro? @relation(fields: [centroId], references: [id])
 
   evaluacionesEstudiante Evaluacion[] @relation("EstudianteEvaluacion")
   evaluacionesDocente    Evaluacion[] @relation("DocenteEvaluacion")
+
+  // NUEVO
+  suscripciones Suscripcion[]
 }
 
 model Materia {
@@ -88,12 +93,13 @@ model Periodo {
 }
 
 model Evaluacion {
-  id            String   @id @default(cuid())
+  id            String  @id @default(cuid())
   nota          Float
   materia       String?
   observaciones String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   estudianteId String
   estudiante   Usuario @relation("EstudianteEvaluacion", fields: [estudianteId], references: [id])
@@ -107,6 +113,56 @@ model Evaluacion {
   docenteId String
   docente   Usuario @relation("DocenteEvaluacion", fields: [docenteId], references: [id])
 
-  // Evita duplicados: Un estudiante solo tiene una nota por competencia en cada periodo
   @@unique([estudianteId, competenciaId, periodoId])
+}
+
+// =======================================
+// NUEVOS MODELOS SAAS / SUSCRIPCIONES
+// =======================================
+
+model Suscripcion {
+  id String @id @default(cuid())
+
+  usuarioId String
+  usuario   Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+
+  plan String @default("gratis")
+
+  estado String @default("inactive")
+
+  lemonCustomerId     String?
+  lemonSubscriptionId String?
+  lemonVariantId      String?
+
+  fechaInicio DateTime?
+  fechaFin    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  pagos Pago[]
+
+  @@index([usuarioId])
+  @@index([estado])
+}
+
+model Pago {
+  id String @id @default(cuid())
+
+  suscripcionId String
+  suscripcion   Suscripcion @relation(fields: [suscripcionId], references: [id], onDelete: Cascade)
+
+  monto Float
+
+  moneda String @default("USD")
+
+  estado String @default("pending")
+
+  lemonOrderId   String?
+  lemonPaymentId String?
+
+  createdAt DateTime @default(now())
+
+  @@index([suscripcionId])
+  @@index([estado])
 }
