@@ -32,9 +32,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         try {
           const usuario = await prisma.usuario.findUnique({
             where: { email: credentials.email, activo: true },
-            include: {
-              suscripcionActiva: true,  // ← Incluir suscripción activa
-            }
           })
 
           if (!usuario) return null
@@ -47,12 +44,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           if (usuario.centroId) {
             const centro = await prisma.centro.findUnique({ where: { id: usuario.centroId } })
             centroNombre = centro?.nombre || ''
-          }
-
-          // Determinar el plan del usuario
-          let plan = 'gratis'
-          if (usuario.suscripcionActiva && usuario.suscripcionActiva.estado === 'active') {
-            plan = usuario.suscripcionActiva.plan
           }
 
           return {
@@ -68,7 +59,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             ciclos: usuario.ciclos || [],
             centroId: usuario.centroId || "",
             centroNombre,
-            plan,  // ← AGREGAR PLAN
           }
         } catch (error) {
           console.error("Error login:", error)
@@ -90,7 +80,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         token.ciclos = user.ciclos
         token.centroId = user.centroId
         token.centroNombre = user.centroNombre
-        token.plan = user.plan  // ← AGREGAR PLAN
       }
       return token
     },
@@ -106,7 +95,6 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.ciclos = token.ciclos as string[]
         session.user.centroId = token.centroId as string
         session.user.centroNombre = token.centroNombre as string
-        session.user.plan = token.plan as string  // ← AGREGAR PLAN
       }
       return session
     },
