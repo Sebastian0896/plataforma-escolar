@@ -1,265 +1,130 @@
-// app/api/webhooks/lemon-squeezy/route.ts
-
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import crypto from 'crypto'
 
 export async function POST(req: NextRequest) {
   try {
-    console.log('🔵 Webhook recibido')
-
-    // =====================================================
-    // RAW BODY
-    // =====================================================
-
     const body = await req.text()
-
-    // =====================================================
-    // SIGNATURE
-    // =====================================================
-
     const signature = req.headers.get('x-signature')
-
-    if (!signature) {
-      console.log('❌ Signature faltante')
-      return NextResponse.json({ error: 'Signature faltante' }, { status: 401 })
-    }
-
-    // =====================================================
-    // VERIFY SIGNATURE
-    // =====================================================
-
     const secret = process.env.LEMON_SQUEEZY_WEBHOOK_SECRET
 
-    if (!secret) {
-      console.log('❌ Secret no configurado')
-      return NextResponse.json({ error: 'Webhook secret no configurado' }, { status: 500 })
+    if (!signature || !secret) {
+      return NextResponse.json({ error: 'Configuración inválida' }, { status: 401 })
     }
 
+    // Verificar Firma
     const hmac = crypto.createHmac('sha256', secret)
     const digest = hmac.update(body).digest('hex')
-
-    console.log('🔵 Signature:', signature)
-    console.log('🔵 Digest:', digest)
-
     if (signature !== digest) {
-      console.log('❌ Firma inválida')
       return NextResponse.json({ error: 'Firma inválida' }, { status: 401 })
     }
 
-    console.log('✅ Firma válida')
-
-    // =====================================================
-    // PAYLOAD
-    // =====================================================
-
     const payload = JSON.parse(body)
     const eventName = payload.meta?.event_name
-
-    console.log('🔵 Evento:', eventName)
-
-    // =====================================================
-    // DATA
-    // =====================================================
-
     const attributes = payload.data?.attributes || {}
     const customData = payload.meta?.custom_data || {}
 
-    // =====================================================
-    // CUSTOM DATA
-    // =====================================================
-
+    // Extraer IDs clave
     const userId = customData.user_id || customData.usuarioId
-    const plan = customData.plan || 'gratis'
-
-    // =====================================================
-    // LEMON DATA
-    // =====================================================
-
-    const customerId = attributes.customer_id?.toString()
+    const plan = customData.plan || 'premium' // Plan por defecto si viene de customData
+    
+    // El ID de la suscripción puede venir en diferentes lugares según el evento
     const subscriptionId = attributes.subscription_id?.toString() || payload.data?.id?.toString()
-    const orderId = payload.data?.id?.toString()
-    const total = Number(attributes.total || 0) / 100
-    const currency = attributes.currency || 'USD'
-    const status = attributes.status || 'paid'
-    const orderNumber = attributes.order_number?.toString()
-    
-    // =====================================================
-    // VARIANT ID - CAPTURA MEJORADA
-    // =====================================================
-    
-    let variantId: string | undefined
-    
-    // 1. Desde attributes
-    variantId = attributes.variant_id?.toString()
-    
-    // 2. Desde relaciones
-    if (!variantId) {
-      variantId = payload.data?.relationships?.variant?.data?.id?.toString()
-    }
-    
-    // 3. Desde custom_data
-    if (!variantId) {
-      variantId = customData.variant_id?.toString()
-    }
+    const customerId = attributes.customer_id?.toString()
+    const variantId = attributes.variant_id?.toString()
 
-    console.log('🔵 userId:', userId)
-    console.log('🔵 plan:', plan)
-    console.log('🔵 customerId:', customerId)
-    console.log('🔵 subscriptionId:', subscriptionId)
-    console.log('🔵 variantId:', variantId)
+    console.log(`🔔 Evento: ${eventName} | User: ${userId} | Sub: ${subscriptionId}`)
 
-    // =====================================================
-    // SUBSCRIPTION CREATED
-    // =====================================================
+    // 1. GESTIÓN DE SUSCRIPCIÓN (Created, Updated, Resumed, etc.)
+    if (eventName.startsWith('subscription_')) {
+      if (!subscriptionId) throw new Error('No subscriptionId found in payload')
 
-    if (eventName === 'subscription_created' && userId && plan !== 'gratis') {
-      console.log('🟢 Creando suscripción')
-
-      // Desactivar anteriores
-      await prisma.suscripcion.updateMany({
-        where: { usuarioId: userId, estado: 'active' },
-        data: { estado: 'inactive', fechaFin: new Date() },
-      })
-
-      // Verificar existente
-      const existe = await prisma.suscripcion.findFirst({
-        where: { lemonSubscriptionId: subscriptionId },
-      })
-
-      // Crear si no existe
-      if (!existe) {
-        await prisma.suscripcion.create({
-          data: {
-            id: `sub_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
+      // Si es una creación o actualización, necesitamos asegurar que el usuario existe en el registro
+      if (userId) {
+        await prisma.suscripcion.upsert({
+          where: { lemonSubscriptionId: subscriptionId },
+          update: {
+            estado: attributes.status === 'active' ? 'active' : 'inactive',
+            plan: plan,
+            lemonVariantId: variantId,
+          },
+          create: {
+            id: `sub_${Math.random().toString(36).slice(2, 11)}`,
             usuarioId: userId,
-            plan,
+            plan: plan,
             estado: 'active',
             lemonCustomerId: customerId,
             lemonSubscriptionId: subscriptionId,
-            lemonVariantId: variantId,  // ← AGREGADO
+            lemonVariantId: variantId,
             fechaInicio: new Date(),
-          },
+          }
         })
-        console.log('✅ Suscripción creada con variantId:', variantId)
+        console.log('✅ Suscripción procesada (Upsert)')
       }
     }
 
-    // =====================================================
-    // PAYMENT SUCCESS
-    // =====================================================
+    // 2. GESTIÓN DE PAGOS (Payment Success)
+    if (eventName === 'subscription_payment_success' || eventName === 'order_created') {
+      const orderId = payload.data?.id?.toString()
+      const total = Number(attributes.total || 0) / 100
+      const orderNumber = attributes.order_number?.toString()
 
-    if (eventName === 'subscription_payment_success') {
-      console.log('💰 Procesando pago')
-
-      // Buscar suscripción
-      let suscripcion = await prisma.suscripcion.findFirst({
-        where: { lemonSubscriptionId: subscriptionId },
+      // Intentar encontrar la suscripción para vincular el pago
+      let suscripcion = await prisma.suscripcion.findUnique({
+        where: { lemonSubscriptionId: subscriptionId }
       })
 
-      console.log('🔵 Suscripción encontrada:', !!suscripcion)
-
-      // Crear si no existe
+      // Si el pago llega antes que el evento de creación, intentamos crearla aquí
       if (!suscripcion && userId) {
-        console.log('⚠️ Suscripción no existía, creando automáticamente')
         suscripcion = await prisma.suscripcion.create({
           data: {
-            id: `sub_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
+            id: `sub_${Math.random().toString(36).slice(2, 11)}`,
             usuarioId: userId,
-            plan,
+            plan: plan,
             estado: 'active',
             lemonCustomerId: customerId,
             lemonSubscriptionId: subscriptionId,
-            lemonVariantId: variantId,  // ← AGREGADO
+            lemonVariantId: variantId,
             fechaInicio: new Date(),
-          },
+          }
         })
-        console.log('✅ Suscripción creada automáticamente con variantId:', variantId)
       }
 
-      if (!suscripcion) {
-        console.log('❌ No se pudo obtener la suscripción')
-        return NextResponse.json({ success: true })
-      }
-
-      // Actualizar variantId si no estaba
-      if (!suscripcion.lemonVariantId && variantId) {
-        await prisma.suscripcion.update({
-          where: { id: suscripcion.id },
-          data: { lemonVariantId: variantId },
-        })
-        console.log('✅ VariantId actualizado:', variantId)
-      }
-
-      // Evitar pagos duplicados
-      const pagoExistente = await prisma.pago.findFirst({
-        where: { lemonOrderId: orderId },
-      })
-
-      if (!pagoExistente) {
-        await prisma.pago.create({
-          data: {
-            id: `pay_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
+      if (suscripcion && orderId) {
+        await prisma.pago.upsert({
+          where: { lemonOrderId: orderId },
+          update: { estado: 'completado' },
+          create: {
+            id: `pay_${Math.random().toString(36).slice(2, 11)}`,
             suscripcionId: suscripcion.id,
             monto: total,
-            moneda: currency,
-            estado: status === 'paid' ? 'completado' : 'pendiente',
+            moneda: attributes.currency || 'USD',
+            estado: 'completado',
             lemonOrderId: orderId,
             lemonPaymentId: orderNumber,
-          },
+          }
         })
-        console.log('✅ Pago registrado')
+        console.log('✅ Pago registrado con éxito')
+      } else {
+        console.warn('⚠️ No se pudo registrar el pago: Suscripción o OrderId ausente')
       }
-
-      // Asegurar suscripción activa
-      await prisma.suscripcion.update({
-        where: { id: suscripcion.id },
-        data: { estado: 'active' },
-      })
     }
 
-    // =====================================================
-    // SUBSCRIPTION CANCELLED
-    // =====================================================
-
-    if (eventName === 'subscription_cancelled' && subscriptionId) {
-      console.log('⚠️ Cancelando suscripción')
+    // 3. CANCELACIONES / EXPIRACIONES
+    if (eventName === 'subscription_cancelled' || eventName === 'subscription_expired') {
       await prisma.suscripcion.updateMany({
         where: { lemonSubscriptionId: subscriptionId },
-        data: { estado: 'inactive', fechaFin: new Date() },
+        data: { 
+          estado: eventName === 'subscription_cancelled' ? 'inactive' : 'expired',
+          fechaFin: new Date() 
+        },
       })
-      console.log('❌ Suscripción cancelada')
-    }
-
-    // =====================================================
-    // SUBSCRIPTION EXPIRED
-    // =====================================================
-
-    if (eventName === 'subscription_expired' && subscriptionId) {
-      console.log('⌛ Expirando suscripción')
-      await prisma.suscripcion.updateMany({
-        where: { lemonSubscriptionId: subscriptionId },
-        data: { estado: 'expired', fechaFin: new Date() },
-      })
-      console.log('⌛ Suscripción expirada')
-    }
-
-    // =====================================================
-    // SUBSCRIPTION RESUMED
-    // =====================================================
-
-    if (eventName === 'subscription_resumed' && subscriptionId) {
-      console.log('🔄 Reactivando suscripción')
-      await prisma.suscripcion.updateMany({
-        where: { lemonSubscriptionId: subscriptionId },
-        data: { estado: 'active', fechaFin: null },
-      })
-      console.log('✅ Suscripción reactivada')
+      console.log('❌ Suscripción marcada como inactiva/expirada')
     }
 
     return NextResponse.json({ success: true })
-  } catch (error) {
-    console.error('❌ Webhook error:', error)
-    return NextResponse.json({ error: 'Error interno del webhook' }, { status: 500 })
+  } catch (error: any) {
+    console.error('❌ Webhook Error:', error.message)
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
