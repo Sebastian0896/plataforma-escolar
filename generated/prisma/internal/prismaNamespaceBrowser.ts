@@ -56,7 +56,9 @@ export const ModelName = {
   Materia: 'Materia',
   Competencia: 'Competencia',
   Periodo: 'Periodo',
-  Evaluacion: 'Evaluacion'
+  Evaluacion: 'Evaluacion',
+  Suscripcion: 'Suscripcion',
+  Pago: 'Pago'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -103,8 +105,8 @@ export const UsuarioScalarFieldEnum = {
   grados: 'grados',
   niveles: 'niveles',
   ciclos: 'ciclos',
-  categoriaDocente: 'categoriaDocente',
   materias: 'materias',
+  categoriaDocente: 'categoriaDocente',
   rne: 'rne',
   activo: 'activo',
   createdAt: 'createdAt',
@@ -153,6 +155,7 @@ export type PeriodoScalarFieldEnum = (typeof PeriodoScalarFieldEnum)[keyof typeo
 export const EvaluacionScalarFieldEnum = {
   id: 'id',
   nota: 'nota',
+  materia: 'materia',
   observaciones: 'observaciones',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
@@ -163,6 +166,37 @@ export const EvaluacionScalarFieldEnum = {
 } as const
 
 export type EvaluacionScalarFieldEnum = (typeof EvaluacionScalarFieldEnum)[keyof typeof EvaluacionScalarFieldEnum]
+
+
+export const SuscripcionScalarFieldEnum = {
+  id: 'id',
+  usuarioId: 'usuarioId',
+  plan: 'plan',
+  estado: 'estado',
+  lemonCustomerId: 'lemonCustomerId',
+  lemonSubscriptionId: 'lemonSubscriptionId',
+  lemonVariantId: 'lemonVariantId',
+  fechaInicio: 'fechaInicio',
+  fechaFin: 'fechaFin',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SuscripcionScalarFieldEnum = (typeof SuscripcionScalarFieldEnum)[keyof typeof SuscripcionScalarFieldEnum]
+
+
+export const PagoScalarFieldEnum = {
+  id: 'id',
+  suscripcionId: 'suscripcionId',
+  monto: 'monto',
+  moneda: 'moneda',
+  estado: 'estado',
+  lemonOrderId: 'lemonOrderId',
+  lemonPaymentId: 'lemonPaymentId',
+  createdAt: 'createdAt'
+} as const
+
+export type PagoScalarFieldEnum = (typeof PagoScalarFieldEnum)[keyof typeof PagoScalarFieldEnum]
 
 
 export const SortOrder = {

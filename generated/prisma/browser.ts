@@ -47,3 +47,13 @@ export type Periodo = Prisma.PeriodoModel
  * 
  */
 export type Evaluacion = Prisma.EvaluacionModel
+/**
+ * Model Suscripcion
+ * 
+ */
+export type Suscripcion = Prisma.SuscripcionModel
+/**
+ * Model Pago
+ * 
+ */
+export type Pago = Prisma.PagoModel

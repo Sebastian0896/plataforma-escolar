@@ -1,13 +1,12 @@
 // prisma/schema.prisma
 
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
   output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
-  // La URL se gestiona en prisma.config.ts según Prisma 7
 }
 
 // ========== MODELOS ==========

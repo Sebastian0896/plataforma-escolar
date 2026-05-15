@@ -37,6 +37,7 @@ export type EvaluacionSumAggregateOutputType = {
 export type EvaluacionMinAggregateOutputType = {
   id: string | null
   nota: number | null
+  materia: string | null
   observaciones: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -49,6 +50,7 @@ export type EvaluacionMinAggregateOutputType = {
 export type EvaluacionMaxAggregateOutputType = {
   id: string | null
   nota: number | null
+  materia: string | null
   observaciones: string | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -61,6 +63,7 @@ export type EvaluacionMaxAggregateOutputType = {
 export type EvaluacionCountAggregateOutputType = {
   id: number
   nota: number
+  materia: number
   observaciones: number
   createdAt: number
   updatedAt: number
@@ -83,6 +86,7 @@ export type EvaluacionSumAggregateInputType = {
 export type EvaluacionMinAggregateInputType = {
   id?: true
   nota?: true
+  materia?: true
   observaciones?: true
   createdAt?: true
   updatedAt?: true
@@ -95,6 +99,7 @@ export type EvaluacionMinAggregateInputType = {
 export type EvaluacionMaxAggregateInputType = {
   id?: true
   nota?: true
+  materia?: true
   observaciones?: true
   createdAt?: true
   updatedAt?: true
@@ -107,6 +112,7 @@ export type EvaluacionMaxAggregateInputType = {
 export type EvaluacionCountAggregateInputType = {
   id?: true
   nota?: true
+  materia?: true
   observaciones?: true
   createdAt?: true
   updatedAt?: true
@@ -206,6 +212,7 @@ export type EvaluacionGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inter
 export type EvaluacionGroupByOutputType = {
   id: string
   nota: number
+  materia: string | null
   observaciones: string | null
   createdAt: Date
   updatedAt: Date
@@ -241,6 +248,7 @@ export type EvaluacionWhereInput = {
   NOT?: Prisma.EvaluacionWhereInput | Prisma.EvaluacionWhereInput[]
   id?: Prisma.StringFilter<"Evaluacion"> | string
   nota?: Prisma.FloatFilter<"Evaluacion"> | number
+  materia?: Prisma.StringNullableFilter<"Evaluacion"> | string | null
   observaciones?: Prisma.StringNullableFilter<"Evaluacion"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Evaluacion"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Evaluacion"> | Date | string
@@ -257,6 +265,7 @@ export type EvaluacionWhereInput = {
 export type EvaluacionOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   nota?: Prisma.SortOrder
+  materia?: Prisma.SortOrderInput | Prisma.SortOrder
   observaciones?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -277,6 +286,7 @@ export type EvaluacionWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.EvaluacionWhereInput[]
   NOT?: Prisma.EvaluacionWhereInput | Prisma.EvaluacionWhereInput[]
   nota?: Prisma.FloatFilter<"Evaluacion"> | number
+  materia?: Prisma.StringNullableFilter<"Evaluacion"> | string | null
   observaciones?: Prisma.StringNullableFilter<"Evaluacion"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Evaluacion"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Evaluacion"> | Date | string
@@ -293,6 +303,7 @@ export type EvaluacionWhereUniqueInput = Prisma.AtLeast<{
 export type EvaluacionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   nota?: Prisma.SortOrder
+  materia?: Prisma.SortOrderInput | Prisma.SortOrder
   observaciones?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -313,6 +324,7 @@ export type EvaluacionScalarWhereWithAggregatesInput = {
   NOT?: Prisma.EvaluacionScalarWhereWithAggregatesInput | Prisma.EvaluacionScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Evaluacion"> | string
   nota?: Prisma.FloatWithAggregatesFilter<"Evaluacion"> | number
+  materia?: Prisma.StringNullableWithAggregatesFilter<"Evaluacion"> | string | null
   observaciones?: Prisma.StringNullableWithAggregatesFilter<"Evaluacion"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Evaluacion"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Evaluacion"> | Date | string
@@ -325,6 +337,7 @@ export type EvaluacionScalarWhereWithAggregatesInput = {
 export type EvaluacionCreateInput = {
   id?: string
   nota: number
+  materia?: string | null
   observaciones?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -337,6 +350,7 @@ export type EvaluacionCreateInput = {
 export type EvaluacionUncheckedCreateInput = {
   id?: string
   nota: number
+  materia?: string | null
   observaciones?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -349,6 +363,7 @@ export type EvaluacionUncheckedCreateInput = {
 export type EvaluacionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   nota?: Prisma.FloatFieldUpdateOperationsInput | number
+  materia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observaciones?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -361,6 +376,7 @@ export type EvaluacionUpdateInput = {
 export type EvaluacionUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   nota?: Prisma.FloatFieldUpdateOperationsInput | number
+  materia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observaciones?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -373,6 +389,7 @@ export type EvaluacionUncheckedUpdateInput = {
 export type EvaluacionCreateManyInput = {
   id?: string
   nota: number
+  materia?: string | null
   observaciones?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -385,6 +402,7 @@ export type EvaluacionCreateManyInput = {
 export type EvaluacionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   nota?: Prisma.FloatFieldUpdateOperationsInput | number
+  materia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observaciones?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -393,6 +411,7 @@ export type EvaluacionUpdateManyMutationInput = {
 export type EvaluacionUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   nota?: Prisma.FloatFieldUpdateOperationsInput | number
+  materia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observaciones?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -421,6 +440,7 @@ export type EvaluacionEstudianteIdCompetenciaIdPeriodoIdCompoundUniqueInput = {
 export type EvaluacionCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   nota?: Prisma.SortOrder
+  materia?: Prisma.SortOrder
   observaciones?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -437,6 +457,7 @@ export type EvaluacionAvgOrderByAggregateInput = {
 export type EvaluacionMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   nota?: Prisma.SortOrder
+  materia?: Prisma.SortOrder
   observaciones?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -449,6 +470,7 @@ export type EvaluacionMaxOrderByAggregateInput = {
 export type EvaluacionMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   nota?: Prisma.SortOrder
+  materia?: Prisma.SortOrder
   observaciones?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -641,6 +663,7 @@ export type FloatFieldUpdateOperationsInput = {
 export type EvaluacionCreateWithoutEstudianteInput = {
   id?: string
   nota: number
+  materia?: string | null
   observaciones?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -652,6 +675,7 @@ export type EvaluacionCreateWithoutEstudianteInput = {
 export type EvaluacionUncheckedCreateWithoutEstudianteInput = {
   id?: string
   nota: number
+  materia?: string | null
   observaciones?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -673,6 +697,7 @@ export type EvaluacionCreateManyEstudianteInputEnvelope = {
 export type EvaluacionCreateWithoutDocenteInput = {
   id?: string
   nota: number
+  materia?: string | null
   observaciones?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -684,6 +709,7 @@ export type EvaluacionCreateWithoutDocenteInput = {
 export type EvaluacionUncheckedCreateWithoutDocenteInput = {
   id?: string
   nota: number
+  materia?: string | null
   observaciones?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -724,6 +750,7 @@ export type EvaluacionScalarWhereInput = {
   NOT?: Prisma.EvaluacionScalarWhereInput | Prisma.EvaluacionScalarWhereInput[]
   id?: Prisma.StringFilter<"Evaluacion"> | string
   nota?: Prisma.FloatFilter<"Evaluacion"> | number
+  materia?: Prisma.StringNullableFilter<"Evaluacion"> | string | null
   observaciones?: Prisma.StringNullableFilter<"Evaluacion"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Evaluacion"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Evaluacion"> | Date | string
@@ -752,6 +779,7 @@ export type EvaluacionUpdateManyWithWhereWithoutDocenteInput = {
 export type EvaluacionCreateWithoutCompetenciaInput = {
   id?: string
   nota: number
+  materia?: string | null
   observaciones?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -763,6 +791,7 @@ export type EvaluacionCreateWithoutCompetenciaInput = {
 export type EvaluacionUncheckedCreateWithoutCompetenciaInput = {
   id?: string
   nota: number
+  materia?: string | null
   observaciones?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -800,6 +829,7 @@ export type EvaluacionUpdateManyWithWhereWithoutCompetenciaInput = {
 export type EvaluacionCreateWithoutPeriodoInput = {
   id?: string
   nota: number
+  materia?: string | null
   observaciones?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -811,6 +841,7 @@ export type EvaluacionCreateWithoutPeriodoInput = {
 export type EvaluacionUncheckedCreateWithoutPeriodoInput = {
   id?: string
   nota: number
+  materia?: string | null
   observaciones?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -848,6 +879,7 @@ export type EvaluacionUpdateManyWithWhereWithoutPeriodoInput = {
 export type EvaluacionCreateManyEstudianteInput = {
   id?: string
   nota: number
+  materia?: string | null
   observaciones?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -859,6 +891,7 @@ export type EvaluacionCreateManyEstudianteInput = {
 export type EvaluacionCreateManyDocenteInput = {
   id?: string
   nota: number
+  materia?: string | null
   observaciones?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -870,6 +903,7 @@ export type EvaluacionCreateManyDocenteInput = {
 export type EvaluacionUpdateWithoutEstudianteInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   nota?: Prisma.FloatFieldUpdateOperationsInput | number
+  materia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observaciones?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -881,6 +915,7 @@ export type EvaluacionUpdateWithoutEstudianteInput = {
 export type EvaluacionUncheckedUpdateWithoutEstudianteInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   nota?: Prisma.FloatFieldUpdateOperationsInput | number
+  materia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observaciones?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -892,6 +927,7 @@ export type EvaluacionUncheckedUpdateWithoutEstudianteInput = {
 export type EvaluacionUncheckedUpdateManyWithoutEstudianteInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   nota?: Prisma.FloatFieldUpdateOperationsInput | number
+  materia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observaciones?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -903,6 +939,7 @@ export type EvaluacionUncheckedUpdateManyWithoutEstudianteInput = {
 export type EvaluacionUpdateWithoutDocenteInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   nota?: Prisma.FloatFieldUpdateOperationsInput | number
+  materia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observaciones?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -914,6 +951,7 @@ export type EvaluacionUpdateWithoutDocenteInput = {
 export type EvaluacionUncheckedUpdateWithoutDocenteInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   nota?: Prisma.FloatFieldUpdateOperationsInput | number
+  materia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observaciones?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -925,6 +963,7 @@ export type EvaluacionUncheckedUpdateWithoutDocenteInput = {
 export type EvaluacionUncheckedUpdateManyWithoutDocenteInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   nota?: Prisma.FloatFieldUpdateOperationsInput | number
+  materia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observaciones?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -936,6 +975,7 @@ export type EvaluacionUncheckedUpdateManyWithoutDocenteInput = {
 export type EvaluacionCreateManyCompetenciaInput = {
   id?: string
   nota: number
+  materia?: string | null
   observaciones?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -947,6 +987,7 @@ export type EvaluacionCreateManyCompetenciaInput = {
 export type EvaluacionUpdateWithoutCompetenciaInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   nota?: Prisma.FloatFieldUpdateOperationsInput | number
+  materia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observaciones?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -958,6 +999,7 @@ export type EvaluacionUpdateWithoutCompetenciaInput = {
 export type EvaluacionUncheckedUpdateWithoutCompetenciaInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   nota?: Prisma.FloatFieldUpdateOperationsInput | number
+  materia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observaciones?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -969,6 +1011,7 @@ export type EvaluacionUncheckedUpdateWithoutCompetenciaInput = {
 export type EvaluacionUncheckedUpdateManyWithoutCompetenciaInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   nota?: Prisma.FloatFieldUpdateOperationsInput | number
+  materia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observaciones?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -980,6 +1023,7 @@ export type EvaluacionUncheckedUpdateManyWithoutCompetenciaInput = {
 export type EvaluacionCreateManyPeriodoInput = {
   id?: string
   nota: number
+  materia?: string | null
   observaciones?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -991,6 +1035,7 @@ export type EvaluacionCreateManyPeriodoInput = {
 export type EvaluacionUpdateWithoutPeriodoInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   nota?: Prisma.FloatFieldUpdateOperationsInput | number
+  materia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observaciones?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1002,6 +1047,7 @@ export type EvaluacionUpdateWithoutPeriodoInput = {
 export type EvaluacionUncheckedUpdateWithoutPeriodoInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   nota?: Prisma.FloatFieldUpdateOperationsInput | number
+  materia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observaciones?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1013,6 +1059,7 @@ export type EvaluacionUncheckedUpdateWithoutPeriodoInput = {
 export type EvaluacionUncheckedUpdateManyWithoutPeriodoInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   nota?: Prisma.FloatFieldUpdateOperationsInput | number
+  materia?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   observaciones?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1026,6 +1073,7 @@ export type EvaluacionUncheckedUpdateManyWithoutPeriodoInput = {
 export type EvaluacionSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   nota?: boolean
+  materia?: boolean
   observaciones?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1042,6 +1090,7 @@ export type EvaluacionSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
 export type EvaluacionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   nota?: boolean
+  materia?: boolean
   observaciones?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1058,6 +1107,7 @@ export type EvaluacionSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
 export type EvaluacionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   nota?: boolean
+  materia?: boolean
   observaciones?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1074,6 +1124,7 @@ export type EvaluacionSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
 export type EvaluacionSelectScalar = {
   id?: boolean
   nota?: boolean
+  materia?: boolean
   observaciones?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1083,7 +1134,7 @@ export type EvaluacionSelectScalar = {
   docenteId?: boolean
 }
 
-export type EvaluacionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nota" | "observaciones" | "createdAt" | "updatedAt" | "estudianteId" | "competenciaId" | "periodoId" | "docenteId", ExtArgs["result"]["evaluacion"]>
+export type EvaluacionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "nota" | "materia" | "observaciones" | "createdAt" | "updatedAt" | "estudianteId" | "competenciaId" | "periodoId" | "docenteId", ExtArgs["result"]["evaluacion"]>
 export type EvaluacionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   estudiante?: boolean | Prisma.UsuarioDefaultArgs<ExtArgs>
   competencia?: boolean | Prisma.CompetenciaDefaultArgs<ExtArgs>
@@ -1114,6 +1165,7 @@ export type $EvaluacionPayload<ExtArgs extends runtime.Types.Extensions.Internal
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     nota: number
+    materia: string | null
     observaciones: string | null
     createdAt: Date
     updatedAt: Date
@@ -1550,6 +1602,7 @@ export interface Prisma__EvaluacionClient<T, Null = never, ExtArgs extends runti
 export interface EvaluacionFieldRefs {
   readonly id: Prisma.FieldRef<"Evaluacion", 'String'>
   readonly nota: Prisma.FieldRef<"Evaluacion", 'Float'>
+  readonly materia: Prisma.FieldRef<"Evaluacion", 'String'>
   readonly observaciones: Prisma.FieldRef<"Evaluacion", 'String'>
   readonly createdAt: Prisma.FieldRef<"Evaluacion", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Evaluacion", 'DateTime'>

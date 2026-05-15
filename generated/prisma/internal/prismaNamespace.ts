@@ -389,7 +389,9 @@ export const ModelName = {
   Materia: 'Materia',
   Competencia: 'Competencia',
   Periodo: 'Periodo',
-  Evaluacion: 'Evaluacion'
+  Evaluacion: 'Evaluacion',
+  Suscripcion: 'Suscripcion',
+  Pago: 'Pago'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -405,7 +407,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "centro" | "usuario" | "materia" | "competencia" | "periodo" | "evaluacion"
+    modelProps: "centro" | "usuario" | "materia" | "competencia" | "periodo" | "evaluacion" | "suscripcion" | "pago"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -853,6 +855,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Suscripcion: {
+      payload: Prisma.$SuscripcionPayload<ExtArgs>
+      fields: Prisma.SuscripcionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SuscripcionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuscripcionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SuscripcionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuscripcionPayload>
+        }
+        findFirst: {
+          args: Prisma.SuscripcionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuscripcionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SuscripcionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuscripcionPayload>
+        }
+        findMany: {
+          args: Prisma.SuscripcionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuscripcionPayload>[]
+        }
+        create: {
+          args: Prisma.SuscripcionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuscripcionPayload>
+        }
+        createMany: {
+          args: Prisma.SuscripcionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SuscripcionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuscripcionPayload>[]
+        }
+        delete: {
+          args: Prisma.SuscripcionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuscripcionPayload>
+        }
+        update: {
+          args: Prisma.SuscripcionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuscripcionPayload>
+        }
+        deleteMany: {
+          args: Prisma.SuscripcionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SuscripcionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SuscripcionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuscripcionPayload>[]
+        }
+        upsert: {
+          args: Prisma.SuscripcionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SuscripcionPayload>
+        }
+        aggregate: {
+          args: Prisma.SuscripcionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSuscripcion>
+        }
+        groupBy: {
+          args: Prisma.SuscripcionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SuscripcionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SuscripcionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SuscripcionCountAggregateOutputType> | number
+        }
+      }
+    }
+    Pago: {
+      payload: Prisma.$PagoPayload<ExtArgs>
+      fields: Prisma.PagoFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PagoFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PagoPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PagoFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PagoPayload>
+        }
+        findFirst: {
+          args: Prisma.PagoFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PagoPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PagoFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PagoPayload>
+        }
+        findMany: {
+          args: Prisma.PagoFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PagoPayload>[]
+        }
+        create: {
+          args: Prisma.PagoCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PagoPayload>
+        }
+        createMany: {
+          args: Prisma.PagoCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PagoCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PagoPayload>[]
+        }
+        delete: {
+          args: Prisma.PagoDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PagoPayload>
+        }
+        update: {
+          args: Prisma.PagoUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PagoPayload>
+        }
+        deleteMany: {
+          args: Prisma.PagoDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PagoUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PagoUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PagoPayload>[]
+        }
+        upsert: {
+          args: Prisma.PagoUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PagoPayload>
+        }
+        aggregate: {
+          args: Prisma.PagoAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePago>
+        }
+        groupBy: {
+          args: Prisma.PagoGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PagoGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PagoCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PagoCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -920,8 +1070,8 @@ export const UsuarioScalarFieldEnum = {
   grados: 'grados',
   niveles: 'niveles',
   ciclos: 'ciclos',
-  categoriaDocente: 'categoriaDocente',
   materias: 'materias',
+  categoriaDocente: 'categoriaDocente',
   rne: 'rne',
   activo: 'activo',
   createdAt: 'createdAt',
@@ -970,6 +1120,7 @@ export type PeriodoScalarFieldEnum = (typeof PeriodoScalarFieldEnum)[keyof typeo
 export const EvaluacionScalarFieldEnum = {
   id: 'id',
   nota: 'nota',
+  materia: 'materia',
   observaciones: 'observaciones',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
@@ -980,6 +1131,37 @@ export const EvaluacionScalarFieldEnum = {
 } as const
 
 export type EvaluacionScalarFieldEnum = (typeof EvaluacionScalarFieldEnum)[keyof typeof EvaluacionScalarFieldEnum]
+
+
+export const SuscripcionScalarFieldEnum = {
+  id: 'id',
+  usuarioId: 'usuarioId',
+  plan: 'plan',
+  estado: 'estado',
+  lemonCustomerId: 'lemonCustomerId',
+  lemonSubscriptionId: 'lemonSubscriptionId',
+  lemonVariantId: 'lemonVariantId',
+  fechaInicio: 'fechaInicio',
+  fechaFin: 'fechaFin',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SuscripcionScalarFieldEnum = (typeof SuscripcionScalarFieldEnum)[keyof typeof SuscripcionScalarFieldEnum]
+
+
+export const PagoScalarFieldEnum = {
+  id: 'id',
+  suscripcionId: 'suscripcionId',
+  monto: 'monto',
+  moneda: 'moneda',
+  estado: 'estado',
+  lemonOrderId: 'lemonOrderId',
+  lemonPaymentId: 'lemonPaymentId',
+  createdAt: 'createdAt'
+} as const
+
+export type PagoScalarFieldEnum = (typeof PagoScalarFieldEnum)[keyof typeof PagoScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1190,6 +1372,8 @@ export type GlobalOmitConfig = {
   competencia?: Prisma.CompetenciaOmit
   periodo?: Prisma.PeriodoOmit
   evaluacion?: Prisma.EvaluacionOmit
+  suscripcion?: Prisma.SuscripcionOmit
+  pago?: Prisma.PagoOmit
 }
 
 /* Types for Logging */
