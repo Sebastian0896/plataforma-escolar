@@ -3,128 +3,99 @@ import { prisma } from '@/lib/prisma'
 import crypto from 'crypto'
 
 export async function POST(req: NextRequest) {
+  // 1. Capturar el body como texto para la firma
+  const rawBody = await req.text()
+  const signature = req.headers.get('x-signature')
+  const secret = process.env.LEMON_SQUEEZY_WEBHOOK_SECRET
+
+  if (!signature || !secret) {
+    console.error('❌ Configuración de webhook incompleta')
+    return NextResponse.json({ error: 'Configuración inválida' }, { status: 401 })
+  }
+
+  // 2. Verificar Firma HMAC SHA256
+  const hmac = crypto.createHmac('sha256', secret)
+  const digest = hmac.update(rawBody).digest('hex')
+
+  if (signature !== digest) {
+    console.error('❌ Firma de Lemon Squeezy inválida')
+    return NextResponse.json({ error: 'Firma inválida' }, { status: 401 })
+  }
+
   try {
-    const body = await req.text()
-    const signature = req.headers.get('x-signature')
-    const secret = process.env.LEMON_SQUEEZY_WEBHOOK_SECRET
-
-    if (!signature || !secret) {
-      return NextResponse.json({ error: 'Configuración inválida' }, { status: 401 })
-    }
-
-    // Verificar Firma
-    const hmac = crypto.createHmac('sha256', secret)
-    const digest = hmac.update(body).digest('hex')
-    if (signature !== digest) {
-      return NextResponse.json({ error: 'Firma inválida' }, { status: 401 })
-    }
-
-    const payload = JSON.parse(body)
+    const payload = JSON.parse(rawBody)
     const eventName = payload.meta?.event_name
     const attributes = payload.data?.attributes || {}
     const customData = payload.meta?.custom_data || {}
 
-    // Extraer IDs clave
-    const userId = customData.user_id || customData.usuarioId
-    const plan = customData.plan || 'premium' // Plan por defecto si viene de customData
-    
-    // El ID de la suscripción puede venir en diferentes lugares según el evento
+    // 3. Extracción forzada de IDs (Lemon Squeezy varía la estructura según el evento)
+    const userId = customData.user_id || customData.usuarioId || customData.userId
     const subscriptionId = attributes.subscription_id?.toString() || payload.data?.id?.toString()
-    const customerId = attributes.customer_id?.toString()
-    const variantId = attributes.variant_id?.toString()
+    const orderId = payload.data?.id?.toString() // ID de la orden o transacción
+    
+    console.log(`🔔 Evento Recibido: ${eventName} | User: ${userId} | SubID: ${subscriptionId}`)
 
-    console.log(`🔔 Evento: ${eventName} | User: ${userId} | Sub: ${subscriptionId}`)
+    // Si no hay userId, no podemos vincularlo a un registro en Postgres
+    if (!userId) {
+      console.error('❌ Error: No se encontró userId en custom_data. Revisa tu link de checkout.')
+      return NextResponse.json({ error: 'No userId' }, { status: 200 }) // Respondemos 200 para que Lemon no reintente infinitamente
+    }
 
-    // 1. GESTIÓN DE SUSCRIPCIÓN (Created, Updated, Resumed, etc.)
-    if (eventName.startsWith('subscription_')) {
-      if (!subscriptionId) throw new Error('No subscriptionId found in payload')
-
-      // Si es una creación o actualización, necesitamos asegurar que el usuario existe en el registro
-      if (userId) {
-        await prisma.suscripcion.upsert({
+    // 4. Lógica de Negocio con Transacciones para asegurar persistencia
+    return await prisma.$transaction(async (tx) => {
+      
+      // A. Gestión de Suscripción
+      if (eventName.startsWith('subscription_')) {
+        const subStatus = attributes.status === 'active' ? 'active' : 'inactive'
+        
+        const suscripcion = await tx.suscripcion.upsert({
           where: { lemonSubscriptionId: subscriptionId },
           update: {
-            estado: attributes.status === 'active' ? 'active' : 'inactive',
-            plan: plan,
-            lemonVariantId: variantId,
+            estado: subStatus,
+            plan: customData.plan || 'premium',
+            lemonVariantId: attributes.variant_id?.toString(),
+            fechaFin: eventName === 'subscription_cancelled' ? new Date() : null,
           },
           create: {
-            id: `sub_${Math.random().toString(36).slice(2, 11)}`,
+            // Generar ID único si tu esquema no usa autoincrement o uuid por defecto
             usuarioId: userId,
-            plan: plan,
+            plan: customData.plan || 'premium',
             estado: 'active',
-            lemonCustomerId: customerId,
+            lemonCustomerId: attributes.customer_id?.toString(),
             lemonSubscriptionId: subscriptionId,
-            lemonVariantId: variantId,
+            lemonVariantId: attributes.variant_id?.toString(),
             fechaInicio: new Date(),
-          }
+          },
         })
-        console.log('✅ Suscripción procesada (Upsert)')
-      }
-    }
 
-    // 2. GESTIÓN DE PAGOS (Payment Success)
-    if (eventName === 'subscription_payment_success' || eventName === 'order_created') {
-      const orderId = payload.data?.id?.toString()
-      const total = Number(attributes.total || 0) / 100
-      const orderNumber = attributes.order_number?.toString()
+        console.log(`✅ Suscripción ${suscripcion.id} procesada`)
 
-      // Intentar encontrar la suscripción para vincular el pago
-      let suscripcion = await prisma.suscripcion.findUnique({
-        where: { lemonSubscriptionId: subscriptionId }
-      })
-
-      // Si el pago llega antes que el evento de creación, intentamos crearla aquí
-      if (!suscripcion && userId) {
-        suscripcion = await prisma.suscripcion.create({
-          data: {
-            id: `sub_${Math.random().toString(36).slice(2, 11)}`,
-            usuarioId: userId,
-            plan: plan,
-            estado: 'active',
-            lemonCustomerId: customerId,
-            lemonSubscriptionId: subscriptionId,
-            lemonVariantId: variantId,
-            fechaInicio: new Date(),
-          }
-        })
+        // B. Gestión de Pagos (Solo si el evento es de pago exitoso)
+        if (eventName === 'subscription_payment_success' || eventName === 'order_created') {
+          const total = Number(attributes.total || 0) / 100
+          
+          const pago = await tx.pago.upsert({
+            where: { lemonOrderId: orderId },
+            update: { estado: 'completado' },
+            create: {
+              suscripcionId: suscripcion.id,
+              monto: total,
+              moneda: attributes.currency || 'USD',
+              estado: 'completado',
+              lemonOrderId: orderId,
+              lemonPaymentId: attributes.order_number?.toString(),
+            }
+          })
+          console.log(`✅ Pago ${pago.id} registrado`)
+        }
       }
 
-      if (suscripcion && orderId) {
-        await prisma.pago.upsert({
-          where: { lemonOrderId: orderId },
-          update: { estado: 'completado' },
-          create: {
-            id: `pay_${Math.random().toString(36).slice(2, 11)}`,
-            suscripcionId: suscripcion.id,
-            monto: total,
-            moneda: attributes.currency || 'USD',
-            estado: 'completado',
-            lemonOrderId: orderId,
-            lemonPaymentId: orderNumber,
-          }
-        })
-        console.log('✅ Pago registrado con éxito')
-      } else {
-        console.warn('⚠️ No se pudo registrar el pago: Suscripción o OrderId ausente')
-      }
-    }
+      return NextResponse.json({ success: true })
+    })
 
-    // 3. CANCELACIONES / EXPIRACIONES
-    if (eventName === 'subscription_cancelled' || eventName === 'subscription_expired') {
-      await prisma.suscripcion.updateMany({
-        where: { lemonSubscriptionId: subscriptionId },
-        data: { 
-          estado: eventName === 'subscription_cancelled' ? 'inactive' : 'expired',
-          fechaFin: new Date() 
-        },
-      })
-      console.log('❌ Suscripción marcada como inactiva/expirada')
-    }
-
-    return NextResponse.json({ success: true })
   } catch (error: any) {
-    console.error('❌ Webhook Error:', error.message)
+    console.error('❌ Error Crítico en Postgres:', error)
+    // Devolvemos 500 para que Lemon Squeezy reintente el envío más tarde
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }
