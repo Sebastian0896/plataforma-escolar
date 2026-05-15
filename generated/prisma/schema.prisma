@@ -57,7 +57,6 @@ model Usuario {
   evaluacionesEstudiante Evaluacion[] @relation("EstudianteEvaluacion")
   evaluacionesDocente    Evaluacion[] @relation("DocenteEvaluacion")
 
-  // NUEVO
   suscripciones Suscripcion[]
 }
 
@@ -131,7 +130,7 @@ model Suscripcion {
   estado String @default("inactive")
 
   lemonCustomerId     String?
-  lemonSubscriptionId String?
+  lemonSubscriptionId String? @unique
   lemonVariantId      String?
 
   fechaInicio DateTime?

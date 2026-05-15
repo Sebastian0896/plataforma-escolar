@@ -131,7 +131,7 @@ model Suscripcion {
   estado String @default("inactive")
 
   lemonCustomerId     String?
-  lemonSubscriptionId String?
+  lemonSubscriptionId String? @unique
   lemonVariantId      String?
 
   fechaInicio DateTime?
