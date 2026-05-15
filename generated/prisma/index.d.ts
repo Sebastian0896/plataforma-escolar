@@ -11683,6 +11683,7 @@ export namespace Prisma {
 
   export type SuscripcionWhereUniqueInput = Prisma.AtLeast<{
     id?: string
+    lemonSubscriptionId?: string
     AND?: SuscripcionWhereInput | SuscripcionWhereInput[]
     OR?: SuscripcionWhereInput[]
     NOT?: SuscripcionWhereInput | SuscripcionWhereInput[]
@@ -11690,7 +11691,6 @@ export namespace Prisma {
     plan?: StringFilter<"Suscripcion"> | string
     estado?: StringFilter<"Suscripcion"> | string
     lemonCustomerId?: StringNullableFilter<"Suscripcion"> | string | null
-    lemonSubscriptionId?: StringNullableFilter<"Suscripcion"> | string | null
     lemonVariantId?: StringNullableFilter<"Suscripcion"> | string | null
     fechaInicio?: DateTimeNullableFilter<"Suscripcion"> | Date | string | null
     fechaFin?: DateTimeNullableFilter<"Suscripcion"> | Date | string | null
@@ -11698,7 +11698,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Suscripcion"> | Date | string
     usuario?: XOR<UsuarioScalarRelationFilter, UsuarioWhereInput>
     pagos?: PagoListRelationFilter
-  }, "id">
+  }, "id" | "lemonSubscriptionId">
 
   export type SuscripcionOrderByWithAggregationInput = {
     id?: SortOrder
