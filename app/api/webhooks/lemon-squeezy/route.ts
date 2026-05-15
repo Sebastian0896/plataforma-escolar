@@ -136,8 +136,7 @@ export async function POST(req: NextRequest) {
     if (
       eventName === 'subscription_created' ||
       eventName === 'subscription_updated' ||
-      eventName === 'subscription_payment_success' ||
-      eventName === 'order_created'
+      eventName === 'subscription_payment_success' //|| eventName === 'order_created'
     ) {
       console.log('🟢 Procesando evento de suscripción')
 
@@ -249,6 +248,11 @@ export async function POST(req: NextRequest) {
           )
         }
       }
+    }
+
+    if (!lemonSubscriptionId) {
+      console.log('⚠️ No hay subscriptionId todavía')
+      return NextResponse.json({ success: true })
     }
 
     // =========================================================
