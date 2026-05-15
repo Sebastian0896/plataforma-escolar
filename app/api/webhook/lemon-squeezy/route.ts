@@ -16,26 +16,21 @@ export async function POST(req: NextRequest) {
 
     const rawBody = await req.text()
 
-    console.log('📦 RAW BODY:')
-    console.log(rawBody)
-
     // ======================================================
-    // SIGNATURE
+    // VERIFY SIGNATURE
     // ======================================================
 
     const signature = req.headers.get('x-signature')
     const secret = process.env.LEMON_SQUEEZY_WEBHOOK_SECRET || ''
 
-    console.log('🔐 Signature recibida:', signature)
-    console.log('🔐 Secret existe:', !!secret)
-
     const hmac = crypto.createHmac('sha256', secret)
     const digest = hmac.update(rawBody).digest('hex')
 
-    console.log('🔐 Digest generado:', digest)
+    console.log('🔐 Signature:', signature)
+    console.log('🔐 Digest:', digest)
 
     if (signature !== digest) {
-      console.error('❌ FIRMA INVÁLIDA')
+      console.error('❌ Firma inválida')
 
       return NextResponse.json(
         {
@@ -46,7 +41,7 @@ export async function POST(req: NextRequest) {
       )
     }
 
-    console.log('✅ FIRMA VÁLIDA')
+    console.log('✅ Firma válida')
 
     // ======================================================
     // PARSE PAYLOAD
@@ -54,38 +49,19 @@ export async function POST(req: NextRequest) {
 
     const payload = JSON.parse(rawBody)
 
-    console.log('📦 PAYLOAD COMPLETO:')
+    console.log('📦 PAYLOAD:')
     console.log(JSON.stringify(payload, null, 2))
-
-    // ======================================================
-    // EVENTO
-    // ======================================================
 
     const eventName = payload.meta?.event_name
 
     console.log('📡 EVENTO:', eventName)
 
     // ======================================================
-    // CUSTOM DATA
+    // DATA
     // ======================================================
 
     const customData = payload.meta?.custom_data || {}
-
-    console.log('📦 CUSTOM DATA:')
-    console.log(customData)
-
-    // ======================================================
-    // ATTRIBUTES
-    // ======================================================
-
     const attributes = payload.data?.attributes || {}
-
-    console.log('📦 ATTRIBUTES:')
-    console.log(attributes)
-
-    // ======================================================
-    // DATOS IMPORTANTES
-    // ======================================================
 
     const userId = customData.usuarioId?.toString()?.trim()
 
@@ -95,7 +71,8 @@ export async function POST(req: NextRequest) {
 
     const variantId =
       attributes.variant_id?.toString() ||
-      attributes.first_order_item?.variant_id?.toString()
+      attributes.first_order_item?.variant_id?.toString() ||
+      null
 
     const subscriptionId =
       attributes.subscription_id?.toString() ||
@@ -105,8 +82,11 @@ export async function POST(req: NextRequest) {
       attributes.order_id?.toString() ||
       payload.data?.id?.toString()
 
-    const total =
-      Number(attributes.total_usd || attributes.total || 0)
+    const total = Number(
+      attributes.total_usd ||
+      attributes.total ||
+      0
+    )
 
     console.log('==============================')
     console.log('📌 DATOS EXTRAIDOS')
@@ -121,7 +101,7 @@ export async function POST(req: NextRequest) {
     console.log('💰 total:', total)
 
     // ======================================================
-    // VALIDACIONES
+    // VALIDAR USER
     // ======================================================
 
     if (!userId) {
@@ -133,29 +113,15 @@ export async function POST(req: NextRequest) {
       })
     }
 
-    if (!plan) {
-      console.error('❌ plan vacío')
-
-      return NextResponse.json({
-        ok: false,
-        error: 'plan vacío',
-      })
-    }
-
     // ======================================================
-    // BUSCAR USUARIO
+    // VALIDAR USER EXISTS
     // ======================================================
-
-    console.log('🔎 Buscando usuario...')
 
     const usuario = await prisma.usuario.findUnique({
       where: {
         id: userId,
       },
     })
-
-    console.log('👤 Usuario encontrado:')
-    console.log(usuario)
 
     if (!usuario) {
       console.error('❌ Usuario no encontrado')
@@ -166,22 +132,30 @@ export async function POST(req: NextRequest) {
       })
     }
 
+    console.log('✅ Usuario encontrado')
+
     // ======================================================
-    // CREAR / ACTUALIZAR SUSCRIPCIÓN
+    // EVENT: subscription_created
     // ======================================================
 
-    let suscripcion = null
+    if (eventName === 'subscription_created') {
+      console.log('🟢 Procesando subscription_created')
 
-    if (subscriptionId) {
-      console.log('🔄 Intentando UPSERT de suscripción...')
+      if (!subscriptionId) {
+        console.error('❌ subscriptionId vacío')
 
-      suscripcion = await prisma.suscripcion.upsert({
+        return NextResponse.json({
+          ok: false,
+          error: 'subscriptionId vacío',
+        })
+      }
+
+      const suscripcion = await prisma.suscripcion.upsert({
         where: {
           lemonSubscriptionId: subscriptionId,
         },
 
         update: {
-          plan,
           estado: 'active',
           lemonCustomerId: customerId,
           lemonVariantId: variantId,
@@ -189,47 +163,140 @@ export async function POST(req: NextRequest) {
 
         create: {
           usuarioId: userId,
-          plan,
+          plan: plan || 'pendiente',
           estado: 'active',
+
           lemonSubscriptionId: subscriptionId,
           lemonCustomerId: customerId,
           lemonVariantId: variantId,
+
           fechaInicio: new Date(),
         },
       })
 
-      console.log('✅ SUSCRIPCIÓN GUARDADA:')
+      console.log('✅ SUSCRIPCIÓN BASE CREADA')
       console.log(suscripcion)
-    } else {
-      console.log('⚠️ subscriptionId vacío, no se creó suscripción')
     }
 
     // ======================================================
-    // CREAR PAGO
+    // EVENT: subscription_payment_success
     // ======================================================
 
     if (
-      suscripcion &&
-      (
-        eventName === 'subscription_payment_success' ||
-        eventName === 'order_created'
-      )
+      eventName === 'subscription_payment_success' ||
+      eventName === 'order_created'
     ) {
-      console.log('💳 Creando pago...')
+      console.log('🟢 Procesando pago')
+
+      // ==================================================
+      // BUSCAR SUSCRIPCIÓN
+      // ==================================================
+
+      let suscripcion = null
+
+      if (subscriptionId) {
+        suscripcion = await prisma.suscripcion.findUnique({
+          where: {
+            lemonSubscriptionId: subscriptionId,
+          },
+        })
+      }
+
+      // ==================================================
+      // SI NO EXISTE → CREARLA
+      // ==================================================
+
+      if (!suscripcion) {
+        console.log('⚠️ No existe suscripción → creando automática')
+
+        suscripcion = await prisma.suscripcion.create({
+          data: {
+            usuarioId: userId,
+
+            plan: plan || 'pendiente',
+
+            estado: 'active',
+
+            lemonSubscriptionId: subscriptionId || null,
+            lemonCustomerId: customerId || null,
+            lemonVariantId: variantId || null,
+
+            fechaInicio: new Date(),
+          },
+        })
+
+        console.log('✅ Suscripción automática creada')
+      }
+
+      // ==================================================
+      // ACTUALIZAR SUSCRIPCIÓN
+      // ==================================================
+
+      suscripcion = await prisma.suscripcion.update({
+        where: {
+          id: suscripcion.id,
+        },
+
+        data: {
+          estado: 'active',
+          plan: plan || suscripcion.plan,
+
+          lemonCustomerId:
+            customerId || suscripcion.lemonCustomerId,
+
+          lemonVariantId:
+            variantId || suscripcion.lemonVariantId,
+        },
+      })
+
+      console.log('✅ Suscripción actualizada')
+
+      // ==================================================
+      // CREAR PAGO
+      // ==================================================
 
       const pago = await prisma.pago.create({
         data: {
           suscripcionId: suscripcion.id,
+
           monto: total,
+
           moneda: attributes.currency || 'USD',
+
           estado: 'completado',
-          lemonOrderId: orderId,
-          lemonPaymentId: payload.data?.id?.toString(),
+
+          lemonOrderId: orderId || null,
+
+          lemonPaymentId:
+            payload.data?.id?.toString() || null,
         },
       })
 
-      console.log('✅ PAGO CREADO:')
+      console.log('✅ PAGO CREADO')
       console.log(pago)
+    }
+
+    // ======================================================
+    // EVENT: subscription_cancelled
+    // ======================================================
+
+    if (eventName === 'subscription_cancelled') {
+      console.log('🟢 Procesando cancelación')
+
+      if (subscriptionId) {
+        await prisma.suscripcion.updateMany({
+          where: {
+            lemonSubscriptionId: subscriptionId,
+          },
+
+          data: {
+            estado: 'inactive',
+            fechaFin: new Date(),
+          },
+        })
+
+        console.log('✅ Suscripción cancelada')
+      }
     }
 
     console.log('==============================')
@@ -242,7 +309,7 @@ export async function POST(req: NextRequest) {
     })
   } catch (error: any) {
     console.error('==============================')
-    console.error('❌ ERROR CRÍTICO WEBHOOK')
+    console.error('❌ ERROR WEBHOOK')
     console.error('==============================')
 
     console.error(error)
@@ -253,14 +320,10 @@ export async function POST(req: NextRequest) {
     console.error('📌 STACK:')
     console.error(error?.stack)
 
-    console.error('📌 JSON ERROR:')
-    console.error(JSON.stringify(error, null, 2))
-
     return NextResponse.json(
       {
         ok: false,
         error: error?.message || 'Error interno',
-        stack: error?.stack || null,
       },
       { status: 500 }
     )
