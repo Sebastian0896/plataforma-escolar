@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { connectDB } from '@/lib/db'
 import Diario from '@/lib/models/Diario'
+import { canUseFeature } from '@/lib/authz'
 
 export const runtime = "nodejs"
 
@@ -45,9 +46,25 @@ export async function GET(request: Request) {
 // POST — Guardar registros del día
 export async function POST(request: Request) {
   const session = await auth()
-  if (!session || (session.user?.role !== 'docente' && session.user?.role !== 'admin_centro')) {
+
+  if (!session || session.user?.role !== 'docente') {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
   }
+  
+  // ✅ Verificar permisos ANTES de ejecutar lógica
+  const puedeUsarDiario = await canUseFeature('diario')
+  
+  if (!puedeUsarDiario) {
+    return NextResponse.json(
+      { error: 'Upgrade required. El diario está disponible en planes de pago.' },
+      { status: 403 }
+    )
+  }
+
+
+  /* if (!session || (session.user?.role !== 'docente' && session.user?.role !== 'admin_centro')) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  } */
 
   const { grado, materia, periodo, fecha, registros } = await request.json()
 

@@ -1,4 +1,4 @@
-/* // app/page.tsx
+// app/page.tsx
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -65,9 +65,9 @@ export default function HomePage() {
       </div>
     </div>
   )
-} */
+}
+/* 
 
-  // app/page.tsx (temporal)
 'use client'
 
 import { Card, CardContent } from '@/components/ui/card'
@@ -79,7 +79,7 @@ export default function LandingPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900">
       <div className="container mx-auto px-4 py-16">
         
-        {/* Header */}
+      
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full mb-6">
             <Shield className="h-4 w-4 text-primary" />
@@ -93,7 +93,7 @@ export default function LandingPage() {
           </p>
         </div>
 
-        {/* Cards */}
+    
         <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-12">
           <Card>
             <CardContent className="p-6 text-center">
@@ -126,7 +126,7 @@ export default function LandingPage() {
           </Card>
         </div>
 
-        {/* Mensaje principal */}
+
         <Card className="max-w-2xl mx-auto border-primary/20">
           <CardContent className="p-8 text-center">
             <div className="bg-yellow-50 dark:bg-yellow-950/30 rounded-lg p-4 mb-6">
@@ -145,11 +145,11 @@ export default function LandingPage() {
           </CardContent>
         </Card>
         
-        {/* Footer */}
+    
         <div className="text-center mt-12 text-sm text-muted-foreground">
           <p>© {new Date().getFullYear()} Plataforma Educativa. Todos los derechos reservados.</p>
         </div>
       </div>
     </div>
   )
-}
+} */

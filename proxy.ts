@@ -7,12 +7,27 @@ export const proxy = auth(async function proxy(req: NextRequest) {
   const session = await auth()
   const path = req.nextUrl.pathname
   
+  // ✅ Rutas públicas (no requieren autenticación)
+  const publicPaths = ['/login', '/auth/login', '/api/auth']
+  if (publicPaths.some(p => path.startsWith(p))) {
+    return NextResponse.next()
+  }
+  
+  // ✅ Verificar autenticación para rutas protegidas
+  const isProtectedRoute = path.startsWith('/admin') || path.startsWith('/dashboard')
+  
+  if (isProtectedRoute && !session) {
+    const loginUrl = new URL('/login', req.url)
+    loginUrl.searchParams.set('callbackUrl', path)
+    return NextResponse.redirect(loginUrl)
+  }
+  
   // ✅ No redirigir si ya está en /dashboard
   if (path === '/dashboard') {
     return NextResponse.next()
   }
   
-  // Solo redirigir en la raíz
+  // ✅ Solo redirigir en la raíz
   if (path === '/') {
     const rol = session?.user?.role
     const centroId = session?.user?.centroId
@@ -35,5 +50,5 @@ export const proxy = auth(async function proxy(req: NextRequest) {
 })
 
 export const config = {
-  matcher: ['/', '/dashboard'],
+  matcher: ['/', '/dashboard', '/admin/:path*', '/api/:path*'],
 }
