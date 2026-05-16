@@ -8,290 +8,486 @@ export async function POST(req: NextRequest) {
   try {
     console.log('🔵 Webhook recibido')
 
-    // =========================================================
-    // RAW BODY
-    // =========================================================
-    const rawBody = await req.text()
+    const body = await req.text()
 
-    // =========================================================
-    // VERIFY SIGNATURE
-    // =========================================================
-    const signature = req.headers.get('x-signature')
-    const secret = process.env.LEMON_SQUEEZY_WEBHOOK_SECRET
+    const signature =
+      req.headers.get('x-signature')
+
+    if (!signature) {
+      return NextResponse.json(
+        {
+          error: 'Signature faltante',
+        },
+        { status: 401 }
+      )
+    }
+
+    const secret =
+      process.env
+        .LEMON_SQUEEZY_WEBHOOK_SECRET
 
     if (!secret) {
-      console.error('❌ LEMON_SQUEEZY_WEBHOOK_SECRET no existe')
       return NextResponse.json(
-        { error: 'Webhook secret no configurado' },
+        {
+          error:
+            'Webhook secret faltante',
+        },
         { status: 500 }
       )
     }
 
     const digest = crypto
       .createHmac('sha256', secret)
-      .update(rawBody)
+      .update(body)
       .digest('hex')
 
     if (signature !== digest) {
-      console.error('❌ Firma inválida')
-      console.log('🔵 Signature:', signature)
-      console.log('🔵 Digest:', digest)
+      console.log('❌ Firma inválida')
 
       return NextResponse.json(
-        { error: 'Firma inválida' },
+        {
+          error: 'Firma inválida',
+        },
         { status: 401 }
       )
     }
 
     console.log('✅ Firma válida')
 
-    // =========================================================
-    // PARSE PAYLOAD
-    // =========================================================
-    const payload = JSON.parse(rawBody)
+    const payload = JSON.parse(body)
 
     console.log(
       '📦 PAYLOAD:',
       JSON.stringify(payload, null, 2)
     )
 
-    const eventName = payload.meta?.event_name
+    const eventName =
+      payload.meta?.event_name
 
-    const customData = payload.meta?.custom_data || {}
-    const attributes = payload.data?.attributes || {}
+    const attributes =
+      payload.data?.attributes || {}
 
-    console.log('🔵 Evento:', eventName)
+    const customData =
+      payload.meta?.custom_data || {}
 
-    // =========================================================
-    // USER DATA
-    // =========================================================
-    const usuarioId = customData.usuarioId
-      ? String(customData.usuarioId)
-      : null
+    console.log(
+      '🔵 Evento:',
+      eventName
+    )
 
-    const plan =
-      customData.plan ||
-      'docente_pro'
+    // =====================================================
+    // EXTRAER DATOS
+    // =====================================================
 
-    // =========================================================
-    // IDs
-    // =========================================================
+    const userId =
+      customData.user_id ||
+      customData.usuarioId
+
+    const planDesdeCustom =
+      customData.plan || 'gratis'
+
+    const customerId =
+      attributes.customer_id?.toString()
+
+    const variantId =
+      attributes.variant_id?.toString()
+
     const lemonOrderId =
-      payload.data?.type === 'orders'
-        ? String(payload.data?.id)
-        : attributes.order_id
-          ? String(attributes.order_id)
-          : null
+      attributes.order_id?.toString()
 
-    const lemonSubscriptionId =
-      attributes.subscription_id
-        ? String(attributes.subscription_id)
-        : payload.data?.type === 'subscriptions'
-          ? String(payload.data?.id)
-          : null
+    let subscriptionId = null
 
-    const lemonCustomerId = attributes.customer_id
-      ? String(attributes.customer_id)
-      : null
-
-    const lemonVariantId = attributes.variant_id
-      ? String(attributes.variant_id)
-      : attributes.first_order_item?.variant_id
-        ? String(attributes.first_order_item.variant_id)
-        : null
-
-    // =========================================================
-    // PAYMENT DATA
-    // =========================================================
-    const total =
-      attributes.total_usd ||
-      attributes.total ||
-      0
-
-    const currency =
-      attributes.currency ||
-      'USD'
-
-    console.log('👤 usuarioId:', usuarioId)
-    console.log('📦 plan:', plan)
-    console.log('🧾 lemonOrderId:', lemonOrderId)
-    console.log('🔁 lemonSubscriptionId:', lemonSubscriptionId)
-    console.log('🪪 lemonVariantId:', lemonVariantId)
-
-    // =========================================================
-    // VALIDATION
-    // =========================================================
-    if (!usuarioId) {
-      console.error('❌ usuarioId no recibido')
-
-      return NextResponse.json(
-        { error: 'usuarioId faltante' },
-        { status: 200 }
-      )
+    if (attributes.subscription_id) {
+      subscriptionId =
+        attributes.subscription_id.toString()
+    } else if (
+      payload.data?.type ===
+      'subscriptions'
+    ) {
+      subscriptionId =
+        payload.data?.id?.toString()
     }
 
-    // =========================================================
-    // HANDLE SUBSCRIPTION EVENTS
-    // =========================================================
+    console.log(
+      '👤 usuarioId:',
+      userId
+    )
+
+    console.log(
+      '📦 plan:',
+      planDesdeCustom
+    )
+
+    console.log(
+      '🧾 lemonOrderId:',
+      lemonOrderId
+    )
+
+    console.log(
+      '🔁 lemonSubscriptionId:',
+      subscriptionId
+    )
+
+    console.log(
+      '🪪 lemonVariantId:',
+      variantId
+    )
+
+    // =====================================================
+    // DETERMINAR PLAN
+    // =====================================================
+
+    let planDeterminado =
+      planDesdeCustom
+
     if (
-      eventName === 'subscription_created' ||
-      eventName === 'subscription_updated' ||
-      eventName === 'subscription_payment_success' //|| eventName === 'order_created'
+      variantId ===
+        process.env
+          .LEMON_VARIANT_DOCENTE_PRO_MENSUAL ||
+      variantId ===
+        process.env
+          .LEMON_VARIANT_DOCENTE_PRO_ANUAL
     ) {
-      console.log('🟢 Procesando evento de suscripción')
+      planDeterminado =
+        'docente_pro'
+    }
 
-      // =====================================================
-      // SEARCH EXISTING SUBSCRIPTION
-      // =====================================================
-      let suscripcion = null
+    if (
+      variantId ===
+        process.env
+          .LEMON_VARIANT_DOCENTE_PREMIUM_MENSUAL ||
+      variantId ===
+        process.env
+          .LEMON_VARIANT_DOCENTE_PREMIUM_ANUAL
+    ) {
+      planDeterminado =
+        'docente_premium'
+    }
 
-      if (lemonSubscriptionId) {
-        suscripcion = await prisma.suscripcion.findFirst({
-          where: {
-            lemonSubscriptionId,
-          },
-        })
-      }
+    // =====================================================
+    // SUBSCRIPTION CREATED
+    // =====================================================
 
-      // =====================================================
-      // CREATE IF NOT EXISTS
-      // =====================================================
-      if (!suscripcion) {
-        console.log('🆕 Creando nueva suscripción')
+    if (
+      eventName ===
+      'subscription_created'
+    ) {
+      console.log(
+        '🟢 SUBSCRIPTION CREATED'
+      )
 
-        suscripcion = await prisma.suscripcion.create({
-          data: {
-            usuarioId,
-            plan,
-            estado: 'active',
-
-            lemonCustomerId,
-            lemonSubscriptionId,
-            lemonVariantId,
-
-            fechaInicio: new Date(),
-          },
-        })
-
-        console.log(
-          '✅ Suscripción creada:',
-          suscripcion.id
-        )
-      } else {
-        // =================================================
-        // UPDATE EXISTING
-        // =================================================
-        console.log('♻️ Actualizando suscripción existente')
-
-        suscripcion = await prisma.suscripcion.update({
-          where: {
-            id: suscripcion.id,
-          },
-          data: {
-            plan,
-            estado: 'active',
-
-            lemonCustomerId:
-              lemonCustomerId ||
-              suscripcion.lemonCustomerId,
-
-            lemonVariantId:
-              lemonVariantId ||
-              suscripcion.lemonVariantId,
-          },
-        })
-
-        console.log(
-          '✅ Suscripción actualizada:',
-          suscripcion.id
-        )
-      }
-
-      // =====================================================
-      // CREATE PAYMENT ONLY IF NOT EXISTS
-      // =====================================================
-      if (lemonOrderId) {
-        const pagoExistente = await prisma.pago.findFirst({
-          where: {
-            lemonOrderId,
-          },
-        })
-
-        if (!pagoExistente) {
-          console.log('💰 Creando pago')
-
-          const pago = await prisma.pago.create({
-            data: {
-              suscripcionId: suscripcion.id,
-
-              monto: Number(total),
-
-              moneda: currency,
-
-              estado: 'completado',
-
-              lemonOrderId,
-
-              lemonPaymentId:
-                lemonSubscriptionId ||
-                lemonOrderId,
+      if (userId && subscriptionId) {
+        await prisma.suscripcion.updateMany(
+          {
+            where: {
+              usuarioId: userId,
+              estado: 'active',
+              NOT: {
+                lemonSubscriptionId:
+                  subscriptionId,
+              },
             },
-          })
+            data: {
+              estado: 'inactive',
+              fechaFin: new Date(),
+            },
+          }
+        )
+
+        const existe =
+          await prisma.suscripcion.findFirst(
+            {
+              where: {
+                lemonSubscriptionId:
+                  subscriptionId,
+              },
+            }
+          )
+
+        if (!existe) {
+          const nueva =
+            await prisma.suscripcion.create(
+              {
+                data: {
+                  usuarioId: userId,
+
+                  plan:
+                    planDeterminado,
+
+                  estado: 'active',
+
+                  lemonCustomerId:
+                    customerId,
+
+                  lemonSubscriptionId:
+                    subscriptionId,
+
+                  lemonVariantId:
+                    variantId,
+
+                  fechaInicio:
+                    new Date(),
+
+                  fechaFin:
+                    attributes.renews_at
+                      ? new Date(
+                          attributes.renews_at
+                        )
+                      : null,
+                },
+              }
+            )
 
           console.log(
-            '✅ Pago creado:',
-            pago.id
-          )
-        } else {
-          console.log(
-            '⚠️ Pago ya existe, no se duplica'
+            '✅ Suscripción creada:',
+            nueva.id
           )
         }
       }
     }
 
-    if (!lemonSubscriptionId) {
-      console.log('⚠️ No hay subscriptionId todavía')
-      return NextResponse.json({ success: true })
-    }
+    // =====================================================
+    // SUBSCRIPTION UPDATED
+    // =====================================================
 
-    // =========================================================
-    // CANCELLED
-    // =========================================================
-    if (eventName === 'subscription_cancelled') {
-      console.log('🔴 Cancelando suscripción')
+    else if (
+      eventName ===
+      'subscription_updated'
+    ) {
+      console.log(
+        '♻️ SUBSCRIPTION UPDATED'
+      )
 
-      if (lemonSubscriptionId) {
-        await prisma.suscripcion.updateMany({
-          where: {
-            lemonSubscriptionId,
-          },
-          data: {
-            estado: 'inactive',
-            fechaFin: new Date(),
-          },
-        })
+      if (subscriptionId) {
+        await prisma.suscripcion.updateMany(
+          {
+            where: {
+              lemonSubscriptionId:
+                subscriptionId,
+            },
+            data: {
+              estado: 'active',
 
-        console.log('✅ Suscripción cancelada')
+              plan:
+                planDeterminado,
+
+              fechaFin:
+                attributes.renews_at
+                  ? new Date(
+                      attributes.renews_at
+                    )
+                  : null,
+            },
+          }
+        )
       }
     }
 
-    // =========================================================
-    // SUCCESS
-    // =========================================================
+    // =====================================================
+    // PAYMENT SUCCESS
+    // =====================================================
+
+    else if (
+      eventName ===
+      'subscription_payment_success'
+    ) {
+      console.log(
+        '💰 PAYMENT SUCCESS'
+      )
+
+      const facturaId =
+        payload.data?.id?.toString()
+
+      const rawAmount =
+        attributes.total ?? 0
+
+      console.log(
+        '💵 RAW AMOUNT:',
+        rawAmount
+      )
+
+      const monto =
+        Number(rawAmount) / 100
+
+      console.log(
+        '💵 MONTO FINAL:',
+        monto
+      )
+
+      if (!subscriptionId) {
+        console.log(
+          '❌ subscriptionId faltante'
+        )
+
+        return NextResponse.json({
+          success: false,
+        })
+      }
+
+      const suscripcion =
+        await prisma.suscripcion.findFirst(
+          {
+            where: {
+              lemonSubscriptionId:
+                subscriptionId,
+            },
+          }
+        )
+
+      if (!suscripcion) {
+        console.log(
+          '❌ Suscripción no encontrada'
+        )
+
+        return NextResponse.json({
+          success: false,
+        })
+      }
+
+      const pagoExistente =
+        await prisma.pago.findFirst({
+          where: {
+            lemonPaymentId:
+              facturaId,
+          },
+        })
+
+      if (
+        !pagoExistente &&
+        monto > 0
+      ) {
+        const nuevoPago =
+          await prisma.pago.create({
+            data: {
+              suscripcionId:
+                suscripcion.id,
+
+              monto,
+
+              moneda:
+                attributes.currency ||
+                'USD',
+
+              estado:
+                'completado',
+
+              lemonOrderId:
+                lemonOrderId ||
+                null,
+
+              lemonPaymentId:
+                facturaId,
+            },
+          })
+
+        console.log(
+          '✅ Pago creado:',
+          nuevoPago.id
+        )
+      } else {
+        console.log(
+          '⏭️ Pago omitido'
+        )
+      }
+    }
+
+    // =====================================================
+    // CANCELLED
+    // =====================================================
+
+    else if (
+      eventName ===
+      'subscription_cancelled'
+    ) {
+      console.log(
+        '❌ SUBSCRIPTION CANCELLED'
+      )
+
+      if (subscriptionId) {
+        await prisma.suscripcion.updateMany(
+          {
+            where: {
+              lemonSubscriptionId:
+                subscriptionId,
+            },
+            data: {
+              estado: 'inactive',
+              fechaFin: new Date(),
+            },
+          }
+        )
+      }
+    }
+
+    // =====================================================
+    // EXPIRED
+    // =====================================================
+
+    else if (
+      eventName ===
+      'subscription_expired'
+    ) {
+      console.log(
+        '⌛ SUBSCRIPTION EXPIRED'
+      )
+
+      if (subscriptionId) {
+        await prisma.suscripcion.updateMany(
+          {
+            where: {
+              lemonSubscriptionId:
+                subscriptionId,
+            },
+            data: {
+              estado: 'expired',
+              fechaFin: new Date(),
+            },
+          }
+        )
+      }
+    }
+
+    // =====================================================
+    // RESUMED
+    // =====================================================
+
+    else if (
+      eventName ===
+      'subscription_resumed'
+    ) {
+      console.log(
+        '🔄 SUBSCRIPTION RESUMED'
+      )
+
+      if (subscriptionId) {
+        await prisma.suscripcion.updateMany(
+          {
+            where: {
+              lemonSubscriptionId:
+                subscriptionId,
+            },
+            data: {
+              estado: 'active',
+              fechaFin: null,
+            },
+          }
+        )
+      }
+    }
+
     return NextResponse.json({
       success: true,
     })
-  } catch (error: any) {
-    console.error('❌ WEBHOOK ERROR')
-    console.error(error)
-    console.error('📛 MESSAGE:', error?.message)
-    console.error('📛 CODE:', error?.code)
+  } catch (error) {
+    console.error(
+      '❌ Error crítico webhook:',
+      error
+    )
 
     return NextResponse.json(
       {
-        success: false,
-        error: error?.message,
+        error:
+          'Internal Server Error',
       },
       { status: 500 }
     )

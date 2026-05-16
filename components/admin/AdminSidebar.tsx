@@ -30,6 +30,7 @@ import {
   CalendarDays,
   Eye,
   TrendingUp,
+  CreditCard,
 } from 'lucide-react'
 
 export default function AdminSidebar() {
@@ -177,6 +178,12 @@ export default function AdminSidebar() {
         href: '/admin/docente/planificaciones/nueva',
         label: 'Nueva Planificación',
         icon: PlusCircle,
+        roles: ['docente'],
+      })
+      links.push({
+        href: '/admin/docente/suscripcion',
+        label: 'Suscripción',
+        icon: CreditCard,
         roles: ['docente'],
       })
     }

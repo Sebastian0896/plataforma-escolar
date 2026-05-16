@@ -10,7 +10,7 @@ export default async function AdminDashboard() {
   // Estos roles van a su propio panel
   if (rol === 'docente') redirect('/admin/docente')
   if (rol === 'registro') redirect('/admin/registro/comprobantes')
-  if (rol === 'admin_centro' && session.user?.centroId) redirect(`/admin/centro/${session.user.centroId}`)
+  if (rol === 'admin_centro' && session.user?.centroId) redirect(`/admin/centros/${session.user.centroId}`)
   if (rol === 'coodinador' && session.user?.centroId) redirect(`/admin/centro/${session?.user?.centroId}/coodinador`)
 
   // Admin y superadmin se quedan
