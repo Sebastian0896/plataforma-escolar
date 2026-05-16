@@ -1,3 +1,4 @@
+// app/api/docente/pendientes/route.ts
 import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { connectDB } from '@/lib/db'
@@ -18,22 +19,48 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const session = await auth()
-  if (!session || session.user?.role !== 'docente') {
-    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  try {
+    const session = await auth()
+    
+    if (!session || session.user?.role !== 'docente') {
+      return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+    }
+
+    const { grado } = await request.json()
+    
+    if (!grado) {
+      return NextResponse.json({ error: 'Grado requerido' }, { status: 400 })
+    }
+
+    const semana = getNumeroSemana(new Date())
+
+    await connectDB()
+
+    // Buscar si ya existe
+    const existe = await PendienteIgnorado.findOne({
+      docenteId: session.user.id,
+      grado,
+      semana,
+      centroId: session.user.centroId,
+    })
+
+    if (!existe) {
+      await PendienteIgnorado.create({
+        docenteId: session.user.id,
+        grado,
+        semana,
+        centroId: session.user.centroId,
+        createdAt: new Date(),
+      })
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      ignored: !existe 
+    })
+    
+  } catch (error) {
+    console.error('Error al ignorar pendiente:', error)
+    return NextResponse.json({ error: 'Error interno' }, { status: 500 })
   }
-
-  const { grado } = await request.json()
-  const semana = getNumeroSemana(new Date())
-
-  await connectDB()
-
-  await PendienteIgnorado.create({
-    docenteId: session.user.id,
-    grado,
-    semana,
-    centroId: session.user.centroId,
-  })
-
-  return NextResponse.json({ success: true })
 }

@@ -1,7 +1,7 @@
 {
   "crons": [
     {
-      "path": "/api/cron/recordatorios?token=TU_SECRET",
+      "path": "/api/cron/recordatorios?token=wn^QetOc^IvMrqakFYiBliLHjl2A!NEd",
       "schedule": "0 6 * * *"
     }
   ]

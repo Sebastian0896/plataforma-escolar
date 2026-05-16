@@ -1,36 +1,174 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📚 Plataforma Educativa
 
-## Getting Started
+Sistema de gestión educativa multi-tenant con arquitectura híbrida (PostgreSQL + MongoDB), diseñado para centros educativos, docentes y estudiantes.
 
-First, run the development server:
+## 🚀 Tecnologías
+
+| Capa | Tecnologías |
+|------|-------------|
+| **Frontend** | Next.js 15, React 19, Tailwind CSS, shadcn/ui |
+| **Backend** | Next.js API Routes, NextAuth.js v5 |
+| **Bases de datos** | PostgreSQL (Prisma ORM), MongoDB (Mongoose) |
+| **Pagos** | Lemon Squeezy |
+| **Despliegue** | Vercel |
+| **Email** | Resend (preparado) |
+
+## 📋 Estado del proyecto
+
+✅ **En producción activa** - [mieducacion.edu.do](https://mieducacion.edu.do)
+
+## 🏗️ Arquitectura
+
+### Base de datos híbrida
+
+**PostgreSQL (Prisma) - Gestión principal**
+- Usuarios (docentes, estudiantes, admins)
+- Centros educativos
+- Materias y competencias
+- Periodos académicos
+- Evaluaciones y calificaciones
+- Suscripciones y pagos
+
+**MongoDB (Mongoose) - Contenido dinámico**
+- Planificaciones pedagógicas
+- Diario del docente
+- Asistencia diaria
+- Notificaciones
+
+## 👥 Roles y permisos
+
+| Rol | Responsabilidad | Ruta principal |
+|-----|-----------------|----------------|
+| **superadmin** | Gestión global del sistema | `/admin` |
+| **admin** | Gestión nacional | `/admin` |
+| **admin_centro** | Gestión de un centro educativo | `/admin/centro/[id]` |
+| **coordinador** | Supervisión académica | `/admin/centro/[id]/coordinador` |
+| **tecnico_distrital** | Supervisión distrital | `/admin/distrital` |
+| **registro** | Inscripciones y matrículas | `/admin/registro` |
+| **docente** | Gestión de clases | `/admin/docente` |
+| **estudiante** | Consulta de contenido | `/dashboard` |
+
+## 📁 Estructura de rutas agrupadas
+
+
+
+## 🔐 Sistema de protección por niveles
+
+| Nivel | Validación | Rutas |
+|-------|------------|-------|
+| **(protected)** | ✅ Auth + Rol | materias, usuarios, centros |
+| **(pro)** | ✅ Auth + Rol + Plan Pro | diario, evaluaciones, planificaciones |
+| **(premium)** | ✅ Auth + Rol + Plan Premium | analytics, reportes avanzados |
+
+## 💰 Sistema de suscripciones
+
+| Plan | Precio | Características |
+|------|--------|-----------------|
+| **Gratis** | $0 | Asistencia, gestión básica, hasta 10 estudiantes |
+| **Docente Pro** | $5/mes o $50/año | Diario, evaluaciones, planificaciones ilimitadas, hasta 200 estudiantes |
+| **Docente Premium** | $10/mes o $100/año | Analytics avanzado, exportación de reportes, estudiantes ilimitados |
+
+## 🗄️ Tablas en PostgreSQL
+
+| Tabla | Propósito |
+|-------|-----------|
+| `Usuario` | Usuarios del sistema |
+| `Centro` | Centros educativos |
+| `Materia` | Materias académicas |
+| `Competencia` | Competencias evaluadas (estática) |
+| `Periodo` | Períodos académicos |
+| `Evaluacion` | Calificaciones |
+| `Suscripcion` | Suscripciones de docentes |
+| `Pago` | Historial de pagos |
+
+## 📂 Estructura del proyecto
+├── app/
+│ ├── admin/ # Panel administrativo
+│ │ ├── (protected)/ # Rutas con auth+rol
+│ │ ├── (pro)/ # Rutas con plan Pro
+│ │ ├── (premium)/ # Rutas con plan Premium
+│ │ ├── centro/ # Gestión de centros
+│ │ └── docente/ # Oficina del docente
+│ ├── api/ # Endpoints
+│ ├── dashboard/ # Vista de estudiantes
+│ └── layout.tsx
+│
+├── components/
+│ ├── admin/ # Componentes del panel
+│ ├── ui/ # Componentes shadcn
+│ └── ...
+│
+├── lib/
+│ ├── authz.ts # Autorización y permisos
+│ ├── permissions.ts # Features por plan
+│ ├── prisma.ts # Cliente Prisma
+│ ├── db.ts # Conexión MongoDB
+│ └── mail.ts # Configuración de email
+│
+├── prisma/
+│ └── schema.prisma # Esquema de PostgreSQL
+│
+├── types/
+│ └── next-auth.d.ts # Tipos de NextAuth
+│
+├── proxy.ts # Middleware de autenticación
+└── auth.ts # Configuración de NextAuth
+
+
+## 🔐 Seguridad implementada
+
+- ✅ Autenticación con NextAuth.js (JWT)
+- ✅ Autorización por rol y plan
+- ✅ Protección por grupos de rutas (`(protected)`, `(pro)`, `(premium)`)
+- ✅ Webhooks con verificación de firma
+- ✅ Rate limiting en login
+- ✅ Contraseñas hasheadas con bcrypt
+- ✅ Variables de entorno en Vercel
+
+## 🔄 Integraciones
+
+| Servicio | Estado | Propósito |
+|----------|--------|-----------|
+| **Lemon Squeezy** | ✅ Completado | Pagos y suscripciones |
+| **Resend** | ⏳ Pendiente | Envío de emails |
+| **Cloudflare** | ❌ No utilizado | No recomendado para Vercel |
+
+## 📦 Comandos útiles
 
 ```bash
+# Desarrollo
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+# Build de producción
+npm run build
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+# Generar cliente Prisma
+npx prisma generate
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# Migración de base de datos
+npx prisma migrate dev --name nombre_migracion
 
-## Learn More
+# Desplegar en Vercel
+vercel --prod
 
-To learn more about Next.js, take a look at the following resources:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Base de datos
+DATABASE_URL=postgresql://...
+MONGODB_URI=mongodb+srv://...
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# NextAuth
+AUTH_SECRET=...
+AUTH_TRUST_HOST=true
 
-## Deploy on Vercel
+# Lemon Squeezy
+LEMON_SQUEEZY_API_KEY=...
+LEMON_SQUEEZY_STORE_ID=...
+LEMON_SQUEEZY_WEBHOOK_SECRET=...
+LEMON_VARIANT_DOCENTE_PRO_MENSUAL=...
+LEMON_VARIANT_DOCENTE_PRO_ANUAL=...
+LEMON_VARIANT_DOCENTE_PREMIUM_MENSUAL=...
+LEMON_VARIANT_DOCENTE_PREMIUM_ANUAL=...
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Email (preparado)
+RESEND_API_KEY=...
+RESEND_FROM_EMAIL=...
