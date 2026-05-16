@@ -1,7 +1,7 @@
+
 import { NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { connectDB } from '@/lib/db'
-import Evaluacion from '@/lib/models/Evaluacion'
+import { prisma } from '@/lib/prisma'
 import { jsPDF } from 'jspdf'
 
 export const runtime = "nodejs"
@@ -14,33 +14,78 @@ export async function GET(request: Request) {
   const grado = searchParams.get('grado')
   const periodo = searchParams.get('periodo') || 'P1'
   const todos = periodo === 'todos'
-  const periodos = todos ? ['P1', 'P2', 'P3', 'P4'] : [periodo] 
+  const periodos = todos ? ['P1', 'P2', 'P3', 'P4'] : [periodo]
 
   if (!grado) return NextResponse.json({ error: 'Grado requerido' }, { status: 400 })
 
-  await connectDB()
+  // =====================================================
+  // POSTGRESQL - Obtener estudiantes y centro
+  // =====================================================
 
-  const estudiantes = await Usuario.find({
-    centroId: session.user?.centroId,
-    rol: 'estudiante',
-    grado,
-    activo: true,
-  }).select('nombre grado rne').sort({ nombre: 1 }).lean()
+  const estudiantes = await prisma.usuario.findMany({
+    where: {
+      centroId: session.user?.centroId,
+      rol: 'estudiante',
+      grado: grado,
+      activo: true,
+    },
+    select: {
+      id: true,
+      nombre: true,
+      grado: true,
+      rne: true,
+    },
+    orderBy: {
+      nombre: 'asc',
+    },
+  })
 
-  const centro = session.user?.centroId ? await Centro.findById(session.user.centroId).lean() : null
+  const centro = await prisma.centro.findUnique({
+    where: { id: session.user?.centroId },
+    select: { id: true, nombre: true, codigo: true },
+  })
 
-  const evaluaciones = await Evaluacion.find({
-    grado,
-    centroId: session.user?.centroId,
-  }).lean()
+  // =====================================================
+  // POSTGRESQL - Obtener evaluaciones
+  // =====================================================
 
-  //const periodos = ['P1', 'P2', 'P3', 'P4']
+  // Obtener período(s) correspondiente(s)
+  const periodosDB = await prisma.periodo.findMany({
+    where: {
+      centroId: session.user?.centroId,
+      nombre: { in: periodos },
+    },
+    select: { id: true, nombre: true },
+  })
+
+  const evaluaciones = await prisma.evaluacion.findMany({
+    where: {
+      estudiante: {
+        centroId: session.user?.centroId,
+        grado: grado,
+      },
+      periodoId: { in: periodosDB.map(p => p.id) },
+    },
+    select: {
+      id: true,
+      nota: true,
+      materia: true,
+      estudianteId: true,
+      periodo: {
+        select: { nombre: true },
+      },
+    },
+  })
+
+  // =====================================================
+  // GENERAR PDF
+  // =====================================================
 
   const doc = new jsPDF()
   const pageWidth = doc.internal.pageSize.getWidth()
   let y = 25
 
-  // Header una sola vez
+  // Header
   doc.setFillColor(30, 64, 175)
   doc.rect(0, 0, pageWidth, 40, 'F')
   doc.setTextColor(255, 255, 255)
@@ -57,53 +102,68 @@ export async function GET(request: Request) {
 
   doc.setFontSize(8)
 
+  // Tabla headers
+  doc.setFont('helvetica', 'bold')
+  doc.text('Estudiante', 15, y)
+  let x = 65
+  periodos.forEach(p => {
+    doc.text(p, x, y, { align: 'center' })
+    x += 20
+  })
+  y += 6
+  doc.setFont('helvetica', 'normal')
+
   for (const estudiante of estudiantes) {
-    if (y > 240) { doc.addPage(); y = 20 }
-
-    // Nombre del estudiante
-    doc.setFont('helvetica', 'bold')
-    doc.text(estudiante.nombre || '', 15, y)
-    y += 6
-
-    // Tabla de materias
-    const evals = evaluaciones.filter(e => e.estudianteId?.toString() === estudiante._id.toString())
-    const porMateria: Record<string, Record<string, number>> = {}
-    evals.forEach((e: any) => {
-      const mat = e.materia || 'Sin materia'
-      if (!porMateria[mat]) porMateria[mat] = {}
-      const valores = Object.values(e.notas || {}) as number[]
-      porMateria[mat][e.periodo] = valores.length > 0 ? Math.round(valores.reduce((a,b) => a+b, 0) / valores.length) : 0
-    })
-
-    const materias = Object.keys(porMateria).sort()
-
-    if (materias.length === 0) {
-      doc.setFont('helvetica', 'normal')
-      doc.text('Sin evaluaciones', 20, y)
-      y += 6
-    } else {
-      materias.forEach(materia => {
-        let x = 20
-        doc.setFont('helvetica', 'normal')
-        doc.text(materia.substring(0, 25), x, y)
-        x += 50
-        periodos.forEach(p => {
-          const nota = porMateria[materia][p]
-          doc.text(nota !== undefined ? String(nota) : '-', x, y, { align: 'center' })
-          x += 15
-        })
-        y += 5
+    if (y > 240) {
+      doc.addPage()
+      y = 20
+      
+      // Repetir header en nueva página
+      doc.setFont('helvetica', 'bold')
+      doc.text('Estudiante', 15, y)
+      let xHeader = 65
+      periodos.forEach(p => {
+        doc.text(p, xHeader, y, { align: 'center' })
+        xHeader += 20
       })
+      y += 6
+      doc.setFont('helvetica', 'normal')
     }
 
-    y += 4
+    // Nombre del estudiante
+    doc.text(estudiante.nombre || '', 15, y)
+    
+    // Notas por período
+    let xNota = 65
+    for (const p of periodos) {
+      // Buscar evaluaciones del estudiante para este período
+      const evalsEstudiante = evaluaciones.filter(
+        e => e.estudianteId === estudiante.id && e.periodo?.nombre === p
+      )
+      
+      let notaPromedio = '-'
+      if (evalsEstudiante.length > 0) {
+        const sumaNotas = evalsEstudiante.reduce((acc: number, e: any) => {
+          return acc + (e.nota || 0)
+        }, 0)
+        notaPromedio = Math.round(sumaNotas / evalsEstudiante.length).toString()
+      }
+      
+      doc.text(notaPromedio, xNota, y, { align: 'center' })
+      xNota += 20
+    }
+    
+    y += 6
+    
+    // Línea separadora
     doc.setDrawColor(200, 200, 200)
-    doc.line(15, y, pageWidth - 15, y)
-    y += 4
+    doc.line(15, y - 2, pageWidth - 15, y - 2)
   }
 
   const pdfBuffer = Buffer.from(doc.output('arraybuffer'))
+  
   return new NextResponse(pdfBuffer, {
+    status: 200,
     headers: {
       'Content-Type': 'application/pdf',
       'Content-Disposition': `inline; filename="comprobantes-${grado}.pdf"`,
