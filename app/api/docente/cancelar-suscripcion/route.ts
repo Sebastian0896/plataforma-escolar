@@ -1,4 +1,4 @@
-// app/api/docente/cancelar-suscripcion/route.ts (mejorado)
+// app/api/docente/cancelar-suscripcion/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
@@ -11,6 +11,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    // Buscar suscripción activa
     const suscripcion = await prisma.suscripcion.findFirst({
       where: {
         usuarioId: session.user.id,
@@ -22,9 +23,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No hay suscripción activa' }, { status: 400 })
     }
 
-    let lemonCancelled = false
-
-    // Cancelar en Lemon Squeezy
+    // Cancelar en Lemon Squeezy si tiene subscriptionId
     if (suscripcion.lemonSubscriptionId) {
       const response = await fetch(
         `https://api.lemonsqueezy.com/v1/subscriptions/${suscripcion.lemonSubscriptionId}`,
@@ -37,16 +36,12 @@ export async function POST(req: NextRequest) {
         }
       )
 
-      if (response.ok) {
-        lemonCancelled = true
-        console.log('✅ Cancelado en Lemon Squeezy')
-      } else {
-        const error = await response.json()
-        console.error('Lemon Squeezy error:', error)
+      if (!response.ok) {
+        console.error('Error cancelando en Lemon Squeezy')
       }
     }
 
-    // ✅ Actualizar BD LOCAL inmediatamente (independientemente de Lemon)
+    // ✅ ACTUALIZAR BD LOCAL INMEDIATAMENTE
     await prisma.suscripcion.update({
       where: { id: suscripcion.id },
       data: {
@@ -55,16 +50,7 @@ export async function POST(req: NextRequest) {
       },
     })
 
-    console.log('✅ Suscripción cancelada en BD local')
-
-    return NextResponse.json({ 
-      success: true, 
-      lemonCancelled,
-      message: lemonCancelled 
-        ? 'Suscripción cancelada exitosamente' 
-        : 'Suscripción cancelada localmente. El webhook sincronizará el cambio.'
-    })
-    
+    return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Error cancelando suscripción:', error)
     return NextResponse.json({ error: 'Error interno' }, { status: 500 })

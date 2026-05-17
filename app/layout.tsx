@@ -4,6 +4,7 @@ import SessionProvider from '@/components/SessionProvider'
 import ThemeProvider from '@/components/ThemeProvider'
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { LoadingOverlay } from '@/components/loading-overlay';
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
@@ -22,6 +23,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SessionProvider>
           <ThemeProvider>
             {children}
+            <LoadingOverlay />
           </ThemeProvider>
         </SessionProvider>
       </body>

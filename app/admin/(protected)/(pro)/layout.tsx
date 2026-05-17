@@ -9,7 +9,7 @@ export default async function ProLayout({
   try {
     await requirePlan('docente_pro')
   } catch {
-    redirect('/admin/upgrade')
+    redirect('/admin/docente/planes')
   }
 
   return <>{children}</>

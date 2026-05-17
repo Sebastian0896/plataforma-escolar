@@ -92,8 +92,7 @@ export async function POST(req: NextRequest) {
     const variantId =
       attributes.variant_id?.toString()
 
-    const lemonOrderId =
-      attributes.order_id?.toString()
+    const lemonOrderId = payload.data?.id || attributes.order_id?.toString()
 
     let subscriptionId = null
 
@@ -354,7 +353,7 @@ export async function POST(req: NextRequest) {
 
       if (
         !pagoExistente &&
-        monto > 0
+        monto >= 0
       ) {
         const nuevoPago =
           await prisma.pago.create({
