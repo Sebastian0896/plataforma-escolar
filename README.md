@@ -11,7 +11,7 @@ Sistema de gestión educativa multi-tenant con arquitectura híbrida (PostgreSQL
 | **Bases de datos** | PostgreSQL (Prisma ORM), MongoDB (Mongoose) |
 | **Pagos** | Lemon Squeezy |
 | **Despliegue** | Vercel |
-| **Email** | Resend (preparado) |
+| **Iconos** | Lucide React |
 
 ## 📋 Estado del proyecto
 
@@ -34,6 +34,7 @@ Sistema de gestión educativa multi-tenant con arquitectura híbrida (PostgreSQL
 - Diario del docente
 - Asistencia diaria
 - Notificaciones
+- Pendientes ignorados
 
 ## 👥 Roles y permisos
 
@@ -50,15 +51,24 @@ Sistema de gestión educativa multi-tenant con arquitectura híbrida (PostgreSQL
 
 ## 📁 Estructura de rutas agrupadas
 
+app/admin/
+├── (protected)/ # Autenticación + rol (sin plan)
+│ ├── materias/
+│ ├── usuarios/
+│ └── centros/
+├── (pro)/ # Auth + rol + plan Pro/Premium
+│ ├── diario/
+│ ├── asistencia/
+│ ├── evaluaciones/
+│ └── planificaciones/
+├── centro/ # Rutas específicas de centro
+│ └── [id]/
+│ ├── coordinador/
+│ └── page.tsx
+├── docente/ # Oficina virtual del docente
+│ └── page.tsx
+└── layout.tsx
 
-
-## 🔐 Sistema de protección por niveles
-
-| Nivel | Validación | Rutas |
-|-------|------------|-------|
-| **(protected)** | ✅ Auth + Rol | materias, usuarios, centros |
-| **(pro)** | ✅ Auth + Rol + Plan Pro | diario, evaluaciones, planificaciones |
-| **(premium)** | ✅ Auth + Rol + Plan Premium | analytics, reportes avanzados |
 
 ## 💰 Sistema de suscripciones
 
@@ -68,62 +78,14 @@ Sistema de gestión educativa multi-tenant con arquitectura híbrida (PostgreSQL
 | **Docente Pro** | $5/mes o $50/año | Diario, evaluaciones, planificaciones ilimitadas, hasta 200 estudiantes |
 | **Docente Premium** | $10/mes o $100/año | Analytics avanzado, exportación de reportes, estudiantes ilimitados |
 
-## 🗄️ Tablas en PostgreSQL
-
-| Tabla | Propósito |
-|-------|-----------|
-| `Usuario` | Usuarios del sistema |
-| `Centro` | Centros educativos |
-| `Materia` | Materias académicas |
-| `Competencia` | Competencias evaluadas (estática) |
-| `Periodo` | Períodos académicos |
-| `Evaluacion` | Calificaciones |
-| `Suscripcion` | Suscripciones de docentes |
-| `Pago` | Historial de pagos |
-
-## 📂 Estructura del proyecto
-├── app/
-│ ├── admin/ # Panel administrativo
-│ │ ├── (protected)/ # Rutas con auth+rol
-│ │ ├── (pro)/ # Rutas con plan Pro
-│ │ ├── (premium)/ # Rutas con plan Premium
-│ │ ├── centro/ # Gestión de centros
-│ │ └── docente/ # Oficina del docente
-│ ├── api/ # Endpoints
-│ ├── dashboard/ # Vista de estudiantes
-│ └── layout.tsx
-│
-├── components/
-│ ├── admin/ # Componentes del panel
-│ ├── ui/ # Componentes shadcn
-│ └── ...
-│
-├── lib/
-│ ├── authz.ts # Autorización y permisos
-│ ├── permissions.ts # Features por plan
-│ ├── prisma.ts # Cliente Prisma
-│ ├── db.ts # Conexión MongoDB
-│ └── mail.ts # Configuración de email
-│
-├── prisma/
-│ └── schema.prisma # Esquema de PostgreSQL
-│
-├── types/
-│ └── next-auth.d.ts # Tipos de NextAuth
-│
-├── proxy.ts # Middleware de autenticación
-└── auth.ts # Configuración de NextAuth
-
-
 ## 🔐 Seguridad implementada
 
 - ✅ Autenticación con NextAuth.js (JWT)
 - ✅ Autorización por rol y plan
-- ✅ Protección por grupos de rutas (`(protected)`, `(pro)`, `(premium)`)
+- ✅ Protección por grupos de rutas (`(protected)`, `(pro)`)
 - ✅ Webhooks con verificación de firma
 - ✅ Rate limiting en login
 - ✅ Contraseñas hasheadas con bcrypt
-- ✅ Variables de entorno en Vercel
 
 ## 🔄 Integraciones
 
@@ -151,7 +113,6 @@ npx prisma migrate dev --name nombre_migracion
 # Desplegar en Vercel
 vercel --prod
 
-
 # Base de datos
 DATABASE_URL=postgresql://...
 MONGODB_URI=mongodb+srv://...
@@ -169,6 +130,3 @@ LEMON_VARIANT_DOCENTE_PRO_ANUAL=...
 LEMON_VARIANT_DOCENTE_PREMIUM_MENSUAL=...
 LEMON_VARIANT_DOCENTE_PREMIUM_ANUAL=...
 
-# Email (preparado)
-RESEND_API_KEY=...
-RESEND_FROM_EMAIL=...

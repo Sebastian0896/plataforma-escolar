@@ -13,6 +13,7 @@ import { useTheme } from 'next-themes'
 import { signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import NotificacionesBell from './NotificacionesBell'
+import Image from 'next/image'
 
 export default function Navbar() {
   const { data: session } = useSession()
@@ -47,7 +48,7 @@ export default function Navbar() {
 
           {/* Logo desktop */}
           <Link href={inicioHref} className="hidden lg:flex items-center gap-2 font-bold">
-            <span className="text-xl">📚</span>
+            <span className="text-xl"><Image src='/logo.png' alt='logo' width={40} height={40} /></span>
             <span>Plataforma Educativa</span>
           </Link>
 

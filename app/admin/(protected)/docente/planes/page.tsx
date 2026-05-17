@@ -245,6 +245,10 @@ export default function PlanesDocentePage() {
                 </div>
               )}
 
+              <div className="pt-2 text-sm text-muted-foreground text-center">
+                Pago seguro vía Lemon Squeezy
+              </div>
+
               {esActual && (
                 <div className="absolute top-3 right-3 z-10">
                   <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 border-none">

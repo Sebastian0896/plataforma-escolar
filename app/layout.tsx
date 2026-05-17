@@ -8,12 +8,27 @@ import { LoadingOverlay } from '@/components/loading-overlay';
 
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
+
 export const metadata: Metadata = {
   title: {
     default: 'Plataforma Educativa',
-    template: '%s | Plataforma Educativa',
+    template: '%s | Plataforma Educativa'
   },
-  description: 'Sistema de planificaciones docentes',
+  description: 'Sistema de gestión educativa para centros escolares, docentes y estudiantes',
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: '192x192' },
+      { url: '/icon-192.png', type: 'image/png', sizes: '192x192' },
+      { url: '/icon-512.png', type: 'image/png', sizes: '512x512' },
+    ],
+    apple: '/apple-touch-icon.png',
+  },
+  manifest: '/site.webmanifest',
+  openGraph: {
+    title: 'Plataforma Educativa',
+    description: 'Sistema de gestión educativa',
+    images: '/og-image.png',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -45,6 +45,7 @@ export async function POST(req: NextRequest) {
               plan: String(planSlug),
               email: String(session.user.email || ''),
             },
+            
           },
         },
         relationships: {

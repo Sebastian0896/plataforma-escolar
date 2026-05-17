@@ -57,8 +57,8 @@ export async function canAccessRoute(route: string): Promise<boolean> {
     '/admin/docente/diario': 'diario',
     '/admin/docente/asistencia': 'asistencia',
     '/admin/docente/evaluaciones': 'evaluaciones',
-    '/admin/docente/reportes': 'reportes',
-    '/admin/docente/analytics': 'analytics',
+    '/admin/docente/planificaciones': 'planificaciones',
+    '/admin/docente/calendario': 'calendario',
   }
   
   const feature = routeFeatureMap[route]

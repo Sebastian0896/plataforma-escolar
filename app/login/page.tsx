@@ -1,7 +1,7 @@
 'use client'
 
 import { signIn } from 'next-auth/react'
-import { useState, Suspense } from 'react'
+import { useState, Suspense, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, Lock, Mail, Key, AlertCircle, GraduationCap } from 'lucide-react'
+import { toast } from 'sonner'
 
 function LoginForm() {
   const searchParams = useSearchParams()
@@ -59,6 +60,12 @@ function LoginForm() {
     // Redirección exitosa
     window.location.href = '/admin'
   }
+
+  useEffect(() => {
+    if (searchParams.get('payment') === 'success') {
+      toast.success('¡Pago exitoso! Ahora puedes iniciar sesión con tu cuenta')
+    }
+  }, [searchParams])
 
   return (
     <div className="w-full max-w-md space-y-8 animate-in fade-in zoom-in duration-500">
