@@ -130,3 +130,13 @@ LEMON_VARIANT_DOCENTE_PRO_ANUAL=...
 LEMON_VARIANT_DOCENTE_PREMIUM_MENSUAL=...
 LEMON_VARIANT_DOCENTE_PREMIUM_ANUAL=...
 
+## 📅 Actualización - 18/05/2026
+
+### ✅ Restablecimiento de contraseña
+- Modelo `PasswordResetToken` en Prisma
+- API endpoints: `forgot-password`, `reset-password`, `validate-reset-token`
+- Páginas: `/auth/forgot-password` y `/auth/reset-password`
+- Integración con Resend para envío de emails
+- Template de email profesional y responsive
+- Enlace seguro con expiración de 1 hora
+- Validación de token y manejo de errores
