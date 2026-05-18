@@ -40,7 +40,7 @@ export default function HomePage() {
           
             <div className="grid gap-4">
               <Button asChild size="lg" className="h-14 text-lg font-semibold shadow-lg shadow-blue-600/20 group">
-                <Link className='flex items-center' href="/login">
+                <Link className='flex items-center' href="/auth/login">
                   Ingresar al Sistema
                   <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </Link>

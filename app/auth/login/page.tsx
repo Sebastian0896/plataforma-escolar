@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, Lock, Mail, Key, AlertCircle, GraduationCap } from 'lucide-react'
 import { toast } from 'sonner'
+import Link from 'next/link'
 
 function LoginForm() {
   const searchParams = useSearchParams()
@@ -165,12 +166,19 @@ function LoginForm() {
                 'Acceder al Sistema'
               )}
             </Button>
+            <Link
+              href="/auth/forgot-password"
+              className="text-sm inline-block w-full text-center text-muted-foreground hover:text-primary transition-colors"
+            >
+              ¿Olvidaste tu contraseña?
+            </Link>
           </form>
         </CardContent>
       </Card>
-
+      
       <footer className="text-center text-sm text-muted-foreground">
-        &copy; {new Date().getFullYear()} Plataforma Educativa. Todos los derechos reservados.
+        <p>&copy; {new Date().getFullYear()} Plataforma Educativa. Todos los derechos reservados.</p>
+        <p className='my-4'>Desarrollado por: Sebastian Gonzalez R.</p>
       </footer>
     </div>
   )

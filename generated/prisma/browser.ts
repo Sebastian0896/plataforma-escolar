@@ -57,3 +57,8 @@ export type Suscripcion = Prisma.SuscripcionModel
  * 
  */
 export type Pago = Prisma.PagoModel
+/**
+ * Model PasswordResetToken
+ * 
+ */
+export type PasswordResetToken = Prisma.PasswordResetTokenModel

@@ -165,3 +165,17 @@ model Pago {
   @@index([suscripcionId])
   @@index([estado])
 }
+
+// prisma/schema.prisma
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  email     String
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([token])
+  @@index([email])
+  @@index([expiresAt])
+}

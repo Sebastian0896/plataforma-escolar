@@ -77,11 +77,11 @@ export default async function PlanificacionPage({
                   </div>
                 </div>
 
-                <div className="flex gap-2">
-                  <Badge variant="secondary" className="rounded-lg px-2.5 py-0.5 text-xs font-semibold uppercase">
+                <div className="flex-col md:flex-row gap-2">
+                  <Badge variant="secondary" className="w-full my-1 mx-1 md:my-0 md:w-[194px] rounded-lg px-2.5 py-0.5 text-xs font-semibold uppercase">
                     Documento Oficial
                   </Badge>
-                  <Badge variant="outline" className="rounded-lg px-2.5 py-0.5 text-xs font-semibold uppercase">
+                  <Badge variant="outline" className="w-full my-1 mx-1 md:my-0 md:w-[194px] rounded-lg px-2.5 py-0.5 text-xs font-semibold uppercase">
                     Planificación Curricular
                   </Badge>
                 </div>
