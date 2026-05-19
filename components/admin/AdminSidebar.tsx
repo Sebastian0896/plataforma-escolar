@@ -164,7 +164,7 @@ export default function AdminSidebar() {
       })
       links.push({
         href: '/admin/docente/asistencia',
-        label: 'Pase de Lista',
+        label: 'Asistencia',
         icon: ClipboardCheck,
         roles: ['docente'],
       })
