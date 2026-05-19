@@ -27,7 +27,8 @@ export default function TomarAsistenciaPage() {
   const [asistencias, setAsistencias] = useState<Record<string, { presente: boolean; observacion: string }>>({})
   const [cargandoEstudiantes, setCargandoEstudiantes] = useState(false)
   const [guardando, setGuardando] = useState(false)
-  
+  const [ultimoGuardado, setUltimoGuardado] = useState<string | null>(null)
+
   // Estados para filtros
   const [searchTerm, setSearchTerm] = useState('')
   const [filtroAsistencia, setFiltroAsistencia] = useState<string>('todos') // todos, presente, ausente
@@ -170,10 +171,16 @@ export default function TomarAsistenciaPage() {
   }
 
   // Guardar asistencia
-  const guardarAsistencia = async () => {
-    if (!gradoActivo || !materia) {
-      toast.error('Selecciona grado y materia')
-      return
+    const guardarAsistencia = async () => {
+    // Evitar guardados duplicados rápidos
+    
+    if (guardando) return
+    
+    // Evitar guardar la misma fecha múltiples veces
+    const key = `${gradoActivo}-${materia}-${fecha}-${periodo}`
+    if (ultimoGuardado === key) {
+        toast.info('Ya se guardó esta asistencia recientemente')
+        return
     }
 
     setGuardando(true)
@@ -196,6 +203,7 @@ export default function TomarAsistenciaPage() {
 
       if (!res.ok) throw new Error('Error al guardar')
       
+      setUltimoGuardado(key)
       toast.success('¡Asistencia guardada exitosamente!')
     } catch (error) {
       console.error(error)

@@ -24,4 +24,11 @@ const AsistenciaSchema = new Schema<IAsistencia>({
   centroId: { type: String, required: true },
 }, { timestamps: true })
 
+
+// ✅ Índice único para evitar duplicados
+AsistenciaSchema.index(
+  { estudianteId: 1, grado: 1, materia: 1, periodo: 1, fecha: 1 },
+  { unique: true }
+)
+
 export default mongoose.models.Asistencia || mongoose.model<IAsistencia>('Asistencia', AsistenciaSchema)
