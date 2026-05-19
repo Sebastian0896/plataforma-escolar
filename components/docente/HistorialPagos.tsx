@@ -41,6 +41,7 @@ export function HistorialPagos() {
 
   const cargarHistorial = async () => {
     try {
+      await update();
       const res = await fetch('/api/docente/pagos')
       const data = await res.json()
       setPagos(data.pagos || [])
@@ -75,7 +76,7 @@ export function HistorialPagos() {
     }
   }
 
-  const handleSincronizar = async () => {
+ /*  const handleSincronizar = async () => {
     setSincronizando(true)
     try {
       const res = await fetch('/api/docente/sincronizar-suscripcion', {
@@ -94,7 +95,7 @@ export function HistorialPagos() {
     } finally {
       setSincronizando(false)
     }
-  }
+  } */
 
   const getPlanNombre = (plan: string) => {
     switch (plan) {
@@ -142,7 +143,7 @@ export function HistorialPagos() {
               <CreditCard className="h-5 w-5" />
               Suscripción actual
             </span>
-            <Button 
+            {/* <Button 
               variant="ghost" 
               size="sm" 
               onClick={handleSincronizar}
@@ -150,7 +151,7 @@ export function HistorialPagos() {
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${sincronizando ? 'animate-spin' : ''}`} />
               Sincronizar
-            </Button>
+            </Button> */}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">

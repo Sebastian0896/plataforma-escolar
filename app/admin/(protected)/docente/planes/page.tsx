@@ -1,7 +1,7 @@
-// app/admin/docente/planes/page.tsx
+// app/admin/(protected)/docente/planes/page.tsx
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -28,6 +28,7 @@ export default function PlanesDocentePage() {
   const [ciclo, setCiclo] = useState<'mensual' | 'anual'>('mensual')
   const [suscripcionActiva, setSuscripcionActiva] = useState<SuscripcionActiva | null>(null)
   const [cargandoSuscripcion, setCargandoSuscripcion] = useState(true)
+  const paymentProcessed = useRef(false)
 
   const planActual = suscripcionActiva?.plan || 'gratis'
   const tieneSuscripcionActiva = suscripcionActiva && suscripcionActiva.estado === 'active'
@@ -47,13 +48,31 @@ export default function PlanesDocentePage() {
 
   // Función para refrescar todo después de una acción
   const refrescarTodo = async () => {
-    await update() // Actualizar sesión
-    await cargarSuscripcion() // Recargar suscripción
-    router.refresh() // Refrescar la página
+    await update()
+    await cargarSuscripcion()
   }
 
   useEffect(() => {
     cargarSuscripcion()
+  }, [])
+
+  // Verificar retorno de pago
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const paymentStatus = urlParams.get('payment')
+    
+    if (paymentStatus === 'success' && !paymentProcessed.current) {
+      paymentProcessed.current = true
+      window.history.replaceState({}, '', '/admin/docente/planes')
+      toast.success('¡Pago completado! Tu suscripción ya está activa.')
+      refrescarTodo()
+    }
+    
+    if (paymentStatus === 'cancelled' && !paymentProcessed.current) {
+      paymentProcessed.current = true
+      window.history.replaceState({}, '', '/admin/docente/planes')
+      toast.info('Pago cancelado. Puedes intentarlo nuevamente.')
+    }
   }, [])
 
   const handleCambiarAGratis = async () => {
@@ -71,7 +90,13 @@ export default function PlanesDocentePage() {
       
       if (res.ok) {
         toast.success('Suscripción cancelada. Ahora estás en plan Gratis.', { id: 'cancelar' })
+        
+        // ✅ Refrescar datos
         await refrescarTodo()
+        
+        // ✅ Redirigir a la página de suscripción
+        router.push('/admin/docente/suscripcion')
+        router.refresh()
       } else {
         toast.error(data.error || 'Error al cancelar la suscripción', { id: 'cancelar' })
       }
@@ -244,10 +269,6 @@ export default function PlanesDocentePage() {
                   </Badge>
                 </div>
               )}
-
-              <div className="pt-2 text-sm text-muted-foreground text-center">
-                Pago seguro vía Lemon Squeezy
-              </div>
 
               {esActual && (
                 <div className="absolute top-3 right-3 z-10">

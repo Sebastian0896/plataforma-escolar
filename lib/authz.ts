@@ -2,24 +2,26 @@
 import { auth } from '@/auth'
 import { prisma } from './prisma'
 import { PLAN_FEATURES, Feature, Plan, getFeatureValue, getLimiteEstudiantes } from './permissions'
-import { cache } from 'react'
+import { unstable_cache } from 'next/cache'
+//import { cache } from 'react'
 
 // Cachear la suscripción activa para evitar múltiples consultas
-export const getSuscripcionActiva = cache(async (usuarioId: string) => {
-  if (!usuarioId) return null
-  
-  return await prisma.suscripcion.findFirst({
-    where: {
-      usuarioId,
-      estado: 'active',
-      OR: [
-        { fechaFin: null },
-        { fechaFin: { gt: new Date() } }
-      ]
-    },
-    orderBy: { fechaInicio: 'desc' }
-  })
-})
+export const getSuscripcionActiva = unstable_cache(
+  async (usuarioId: string) => {
+    return await prisma.suscripcion.findFirst({
+      where: {
+        usuarioId,
+        estado: 'active',
+        OR: [
+          { fechaFin: null },
+          { fechaFin: { gt: new Date() } }
+        ]
+      }
+    })
+  },
+  ['suscripcion-activa'],
+  { revalidate: 60 } // Cache por 60 segundos
+)
 
 // Obtener el plan activo del usuario
 export async function getPlanActivo(usuarioId?: string): Promise<Plan> {
