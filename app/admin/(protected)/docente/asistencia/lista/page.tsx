@@ -173,7 +173,6 @@ export default function TomarAsistenciaPage() {
   // Guardar asistencia
     const guardarAsistencia = async () => {
     // Evitar guardados duplicados rápidos
-    
     if (guardando) return
     
     // Evitar guardar la misma fecha múltiples veces

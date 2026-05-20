@@ -179,3 +179,20 @@ model PasswordResetToken {
   @@index([email])
   @@index([expiresAt])
 }
+
+model Sugerencia {
+  id             String   @id @default(cuid())
+  titulo         String
+  descripcion    String   @db.Text
+  tipo           String   // bug, mejora, nueva
+  estado         String   @default("pendiente") // pendiente, revisada, implementada, rechazada
+  usuarioId      String
+  usuarioNombre  String
+  usuarioRol     String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([estado])
+  @@index([usuarioId])
+  @@index([createdAt])
+}

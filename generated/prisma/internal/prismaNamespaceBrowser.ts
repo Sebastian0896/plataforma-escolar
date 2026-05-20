@@ -59,7 +59,8 @@ export const ModelName = {
   Evaluacion: 'Evaluacion',
   Suscripcion: 'Suscripcion',
   Pago: 'Pago',
-  PasswordResetToken: 'PasswordResetToken'
+  PasswordResetToken: 'PasswordResetToken',
+  Sugerencia: 'Sugerencia'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -210,6 +211,22 @@ export const PasswordResetTokenScalarFieldEnum = {
 } as const
 
 export type PasswordResetTokenScalarFieldEnum = (typeof PasswordResetTokenScalarFieldEnum)[keyof typeof PasswordResetTokenScalarFieldEnum]
+
+
+export const SugerenciaScalarFieldEnum = {
+  id: 'id',
+  titulo: 'titulo',
+  descripcion: 'descripcion',
+  tipo: 'tipo',
+  estado: 'estado',
+  usuarioId: 'usuarioId',
+  usuarioNombre: 'usuarioNombre',
+  usuarioRol: 'usuarioRol',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SugerenciaScalarFieldEnum = (typeof SugerenciaScalarFieldEnum)[keyof typeof SugerenciaScalarFieldEnum]
 
 
 export const SortOrder = {

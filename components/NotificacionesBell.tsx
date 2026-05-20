@@ -139,22 +139,22 @@ export default function NotificacionesBell({
   const [totalNoLeidas, setTotalNoLeidas] = useState(0)
   const [open, setOpen] = useState(defaultOpen)
 
-  const fetchData = async () => {
-    try {
-      const [resNoLeidas, resTodas] = await Promise.all([
-        fetch('/api/notificaciones?noLeidas=true'),
-        fetch('/api/notificaciones')
-      ])
-      const d1 = await resNoLeidas.json()
-      const d2 = await resTodas.json()
-      setTotalNoLeidas(d1.totalNoLeidas || 0)
-      setNotificaciones(d2.notificaciones || [])
-    } catch (error) {
-      console.error("Error cargando notificaciones:", error)
-    }
-  }
-
+  
   useEffect(() => { 
+    const fetchData = async () => {
+      try {
+        const [resNoLeidas, resTodas] = await Promise.all([
+          fetch('/api/notificaciones?noLeidas=true'),
+          fetch('/api/notificaciones')
+        ])
+        const d1 = await resNoLeidas.json()
+        const d2 = await resTodas.json()
+        setTotalNoLeidas(d1.totalNoLeidas || 0)
+        setNotificaciones(d2.notificaciones || [])
+      } catch (error) {
+        console.error("Error cargando notificaciones:", error)
+      }
+    }
     fetchData() 
   }, [])
 

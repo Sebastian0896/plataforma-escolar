@@ -33,5 +33,6 @@ export default async function ProLayout({
     return <RequierePlanMessage feature="estas funcionalidades" requiredPlan="pro" />
   }
   
-  return <>{children}</>
+  return 
+  <>{children}</>
 }

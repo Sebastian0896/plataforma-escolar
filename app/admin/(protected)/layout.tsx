@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import Navbar from '@/components/Navbar'
 import Breadcrumbs from '@/components/Breadcrumbs'
 import AdminSidebar from '@/components/admin/AdminSidebar'
+import { SugerenciaButton } from '@/components/SugerenciaButton'
 
 export const runtime = 'nodejs'
 
@@ -64,6 +65,7 @@ export default async function AdminLayout({
             {/* Page Content */}
             <div className="mt-6 space-y-8 pb-24">
               {children}
+               <SugerenciaButton />
             </div>
           </div>
         </main>

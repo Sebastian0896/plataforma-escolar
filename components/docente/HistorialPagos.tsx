@@ -1,14 +1,15 @@
 // components/docente/HistorialPagos.tsx
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react' // ✅ Agregar useCallback
 import { useSession } from 'next-auth/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { CreditCard, AlertCircle, RefreshCw } from 'lucide-react'
-import { Skeleton } from '@/components/ui/skeleton'
+import { CreditCard, AlertCircle, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
+import { Skeleton } from '../ui/skeleton'
 
 interface Pago {
   id: string
@@ -33,25 +34,25 @@ export function HistorialPagos() {
   const [suscripcion, setSuscripcion] = useState<Suscripcion | null>(null)
   const [loading, setLoading] = useState(true)
   const [cancelando, setCancelando] = useState(false)
-  const [sincronizando, setSincronizando] = useState(false)
 
+  // ✅ Mover cargarHistorial ANTES de usarlo en useEffect
+  
+  // ✅ Ahora cargarHistorial ya está declarado
   useEffect(() => {
+    const cargarHistorial = async () => {
+      try {
+        const res = await fetch('/api/docente/pagos')
+        const data = await res.json()
+        setPagos(data.pagos || [])
+        setSuscripcion(data.suscripcion)
+      } catch (error) {
+        console.error('Error:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
     cargarHistorial()
   }, [])
-
-  const cargarHistorial = async () => {
-    try {
-      await update();
-      const res = await fetch('/api/docente/pagos')
-      const data = await res.json()
-      setPagos(data.pagos || [])
-      setSuscripcion(data.suscripcion)
-    } catch (error) {
-      console.error('Error:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
 
   const handleCancelar = async () => {
     if (!confirm('¿Cancelar tu suscripción? Perderás acceso a funciones premium al final del período.')) return
@@ -63,14 +64,15 @@ export function HistorialPagos() {
       })
       
       if (res.ok) {
-        await update() // Forzar actualización de sesión
+        await update()
         await cargarHistorial()
+        toast.success('Suscripción cancelada exitosamente')
       } else {
         const data = await res.json()
-        alert(data.error || 'Error al cancelar')
+        toast.error(data.error || 'Error al cancelar')
       }
     } catch (error) {
-      alert('Error al cancelar')
+      toast.error('Error al cancelar')
     } finally {
       setCancelando(false)
     }

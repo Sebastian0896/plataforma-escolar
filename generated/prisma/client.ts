@@ -86,3 +86,8 @@ export type Pago = Prisma.PagoModel
  * 
  */
 export type PasswordResetToken = Prisma.PasswordResetTokenModel
+/**
+ * Model Sugerencia
+ * 
+ */
+export type Sugerencia = Prisma.SugerenciaModel

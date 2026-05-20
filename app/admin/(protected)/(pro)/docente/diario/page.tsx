@@ -1,7 +1,7 @@
 // app/admin/docente/diario/page.tsx
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { CalendarDays, Sparkles, Search, Filter } from 'lucide-react'
 
@@ -67,30 +67,44 @@ export default function DiarioPage() {
 
   const gradosDocente = session?.user?.grados || []
   const materiasDocente = session?.user?.materias || []
-
+  
   useEffect(() => {
-    if (grado && materia) {
-      cargarDatos()
-    } else {
+  // Limpiar estados si falta información
+  if (!grado || !materia) {
+    queueMicrotask(() => {
       setEstudiantes([])
       setRegistros({})
-    }
-  }, [grado, materia, fecha, periodo])
+    })
+    return
+  }
 
   const cargarDatos = async () => {
     setLoading(true)
+
     try {
       const [estudiantesRes, registrosRes] = await Promise.all([
-        fetch(`/api/docente/estudiantes?grado=${grado}`).then(r => r.json()),
-        fetch(`/api/diario?grado=${grado}&materia=${materia}&fecha=${fecha}&periodo=${periodo}`).then(r => r.json()),
+        fetch(`/api/docente/estudiantes?grado=${grado}`).then((r) =>
+          r.json()
+        ),
+
+        fetch(
+          `/api/diario?grado=${grado}&materia=${materia}&fecha=${fecha}&periodo=${periodo}`
+        ).then((r) => r.json()),
       ])
-      
-      const estudiantesList = Array.isArray(estudiantesRes) ? estudiantesRes : estudiantesRes.estudiantes || []
+
+      const estudiantesList = Array.isArray(estudiantesRes)
+        ? estudiantesRes
+        : estudiantesRes.estudiantes || []
+
       setEstudiantes(estudiantesList)
-      
-      // ✅ Convertir a objeto en lugar de Map
+
+      // Convertir registros a objeto
       const registrosObj: Record<string, RegistroDiario> = {}
-      const registrosList = Array.isArray(registrosRes) ? registrosRes : []
+
+      const registrosList = Array.isArray(registrosRes)
+        ? registrosRes
+        : []
+
       registrosList.forEach((reg: any) => {
         registrosObj[reg.estudianteId] = {
           estudianteId: reg.estudianteId,
@@ -100,6 +114,7 @@ export default function DiarioPage() {
           puntosExtra: reg.puntosExtra ?? 0,
         }
       })
+
       setRegistros(registrosObj)
     } catch (error) {
       console.error('Error:', error)
@@ -108,6 +123,10 @@ export default function DiarioPage() {
       setLoading(false)
     }
   }
+
+  cargarDatos()
+  }, [grado, materia, fecha, periodo])
+
 
   // ✅ Actualizar campo - ahora con objeto
   const actualizarCampo = (estudianteId: string, campo: keyof RegistroDiario, valor: any) => {

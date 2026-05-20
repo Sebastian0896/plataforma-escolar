@@ -392,7 +392,8 @@ export const ModelName = {
   Evaluacion: 'Evaluacion',
   Suscripcion: 'Suscripcion',
   Pago: 'Pago',
-  PasswordResetToken: 'PasswordResetToken'
+  PasswordResetToken: 'PasswordResetToken',
+  Sugerencia: 'Sugerencia'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -408,7 +409,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "centro" | "usuario" | "materia" | "competencia" | "periodo" | "evaluacion" | "suscripcion" | "pago" | "passwordResetToken"
+    modelProps: "centro" | "usuario" | "materia" | "competencia" | "periodo" | "evaluacion" | "suscripcion" | "pago" | "passwordResetToken" | "sugerencia"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1078,6 +1079,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Sugerencia: {
+      payload: Prisma.$SugerenciaPayload<ExtArgs>
+      fields: Prisma.SugerenciaFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SugerenciaFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SugerenciaPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SugerenciaFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SugerenciaPayload>
+        }
+        findFirst: {
+          args: Prisma.SugerenciaFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SugerenciaPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SugerenciaFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SugerenciaPayload>
+        }
+        findMany: {
+          args: Prisma.SugerenciaFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SugerenciaPayload>[]
+        }
+        create: {
+          args: Prisma.SugerenciaCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SugerenciaPayload>
+        }
+        createMany: {
+          args: Prisma.SugerenciaCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SugerenciaCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SugerenciaPayload>[]
+        }
+        delete: {
+          args: Prisma.SugerenciaDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SugerenciaPayload>
+        }
+        update: {
+          args: Prisma.SugerenciaUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SugerenciaPayload>
+        }
+        deleteMany: {
+          args: Prisma.SugerenciaDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SugerenciaUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SugerenciaUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SugerenciaPayload>[]
+        }
+        upsert: {
+          args: Prisma.SugerenciaUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SugerenciaPayload>
+        }
+        aggregate: {
+          args: Prisma.SugerenciaAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSugerencia>
+        }
+        groupBy: {
+          args: Prisma.SugerenciaGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SugerenciaGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SugerenciaCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SugerenciaCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1249,6 +1324,22 @@ export const PasswordResetTokenScalarFieldEnum = {
 } as const
 
 export type PasswordResetTokenScalarFieldEnum = (typeof PasswordResetTokenScalarFieldEnum)[keyof typeof PasswordResetTokenScalarFieldEnum]
+
+
+export const SugerenciaScalarFieldEnum = {
+  id: 'id',
+  titulo: 'titulo',
+  descripcion: 'descripcion',
+  tipo: 'tipo',
+  estado: 'estado',
+  usuarioId: 'usuarioId',
+  usuarioNombre: 'usuarioNombre',
+  usuarioRol: 'usuarioRol',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SugerenciaScalarFieldEnum = (typeof SugerenciaScalarFieldEnum)[keyof typeof SugerenciaScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1462,6 +1553,7 @@ export type GlobalOmitConfig = {
   suscripcion?: Prisma.SuscripcionOmit
   pago?: Prisma.PagoOmit
   passwordResetToken?: Prisma.PasswordResetTokenOmit
+  sugerencia?: Prisma.SugerenciaOmit
 }
 
 /* Types for Logging */

@@ -14,7 +14,7 @@ export default async function DashboardPage() {
   const usuarioId = session.user?.id
   
   // Datos comunes para todos los roles
-  let data = {
+  const data = {
     rol,
     nombre: session.user?.name,
     centroNombre: null as string | null,
