@@ -14,7 +14,7 @@ interface BotonSuscripcionProps {
   esActual?: boolean
 }
 
-export function BotonSuscripcion({ planSlug, planNombre, ciclo, variantId, esActual }: BotonSuscripcionProps) {
+export function BotonSuscripcion({ planSlug, ciclo, esActual }: BotonSuscripcionProps) {
   const [loading, setLoading] = useState(false)
 
   const handleSuscribirse = async () => {

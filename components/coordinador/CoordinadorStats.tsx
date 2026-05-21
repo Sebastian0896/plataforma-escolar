@@ -2,7 +2,7 @@
 'use client'
 
 import { Card, CardContent } from '@/components/ui/card'
-import { Users, BookOpen, CalendarDays, TrendingUp, FileText, Clock } from 'lucide-react'
+import { Users, BookOpen, TrendingUp, FileText, Clock } from 'lucide-react'
 
 interface StatsData {
   totalDocentes: number

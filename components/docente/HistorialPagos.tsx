@@ -72,6 +72,7 @@ export function HistorialPagos() {
         toast.error(data.error || 'Error al cancelar')
       }
     } catch (error) {
+      console.error("SG - ERROR: ", error)
       toast.error('Error al cancelar')
     } finally {
       setCancelando(false)
