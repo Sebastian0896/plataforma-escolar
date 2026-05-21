@@ -19,7 +19,6 @@ import {
   Building2,
   Crown,
   FileText,
-  Home,
   LogOut,
   X,
   ChevronRight,

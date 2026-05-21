@@ -63,14 +63,14 @@ export default function DocenteDashboard() {
     {
       title: 'Nueva Planificación',
       description: 'Crear contenido académico',
-      href: '/admin/planificaciones/nueva',
+      href: '/admin/docente/planificaciones/nueva',
       icon: FilePlus2,
       premium: true,
     },
     {
       title: 'Mis Planificaciones',
       description: 'Ver y gestionar',
-      href: '/admin/planificaciones',
+      href: '/admin/docente/planificaciones',
       icon: BookOpen,
       premium: true,
     },

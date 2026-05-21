@@ -13,7 +13,7 @@ interface ProtegeRutaPremiumProps {
 export async function ProtegeRutaPremium({ 
   children, 
   feature, 
-  redirectTo = '/admin/docente/planes' 
+  //redirectTo = '/admin/docente/planes' 
 }: ProtegeRutaPremiumProps) {
   const session = await auth()
   
