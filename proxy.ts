@@ -22,12 +22,18 @@ export const proxy = auth(async function proxy(req: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
   
-  // ✅ No redirigir si ya está en /dashboard
-  if (path === '/dashboard') {
-    const rol = session?.user?.role
-    const grado = session?.user?.grado
+      // ✅ No redirigir si ya está en /dashboard
+      if (path === '/dashboard') {
+        const rol = session?.user?.role
+        //const grado = session?.user?.grado
+        
+        const baseUrl = process.env.NODE_ENV === 'production' 
+      ? 'https://mieducacion.edu.do' 
+      : 'http://localhost:3000'
+
     if (rol === 'estudiante') {
-      return NextResponse.redirect(new URL(`/estudiante/${grado}`, req.url))
+      const grado = session?.user?.grado
+      return NextResponse.redirect(new URL(`/estudiante/${grado}`, baseUrl))
     }
     
     return NextResponse.next()
