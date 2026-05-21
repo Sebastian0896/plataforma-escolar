@@ -60,6 +60,7 @@ export async function GET(request: Request) {
 }
 
 // POST
+// app/api/planificaciones/route.ts (POST)
 export async function POST(request: Request) {
   const session = await auth()
   if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
@@ -70,9 +71,6 @@ export async function POST(request: Request) {
     const slugBase = generarSlug(data.title)
     const slug = `${slugBase}-${session.user?.centroId?.toString().slice(-6)}`
 
-    console.log('📦 fechaProgramada recibida:', data.fechaProgramada)
-    console.log('📦 Objeto create:', { ...data, fechaProgramada: data.fechaProgramada })
-    console.log('📦 Schema paths:', Object.keys(Planificacion.schema.paths))
     const plan = await Planificacion.create({
       slug,
       tema: data.title,
@@ -81,42 +79,39 @@ export async function POST(request: Request) {
       ciclo: data.ciclo,
       grado: data.grado,
       categoriaDocente: data.categoriaDocente,
-      competencia: data.acf.competencia,
-      indicadorLogro: data.acf.indicador_logro,
-      contenidoEstudiante: data.acf.contenido_estudiante_general,
-      maestro: data.acf.maestro,
-      coordinadora: data.acf.coordinadora,
-      centroEducativo: data.acf.centro_educativo,
-      anoEscolar: data.acf.ano_escolar,
+      competencia: data.acf?.competencia || data.competencia,  // ← flexible
+      indicadorLogro: data.acf?.indicador_logro || data.indicadorLogro,  // ← flexible
+      contenidoEstudiante: data.acf?.contenido_estudiante_general || data.estudianteGeneral,  // ← flexible
+      maestro: data.acf?.maestro || data.maestro,
+      coordinadora: data.acf?.coordinadora || data.coordinadora,
+      centroEducativo: data.acf?.centro_educativo || data.centroEducativo,
+      anoEscolar: data.acf?.ano_escolar || data.anoEscolar,
       centroId: session.user?.centroId,
-      creadoPor: session.user?.id, // ← NUEVO
+      creadoPor: session.user?.id,
       fechaProgramada: data.fechaProgramada ? new Date(data.fechaProgramada) : null,
       momentos: [
         {
           tipo: 'inicio',
-          descripcion: data.acf.m1_descripcion,
-          contenidoEstudiante: data.acf.m1_estudiante,
-          actividades: JSON.parse(data.acf.m1_actividades || '[]'),
+          descripcion: data.acf?.m1_descripcion || data.momentos?.[0]?.descripcion || '',
+          contenidoEstudiante: data.acf?.m1_estudiante || data.momentos?.[0]?.contenidoEstudiante || '',
+          actividades: JSON.parse(data.acf?.m1_actividades || '[]'),
         },
         {
           tipo: 'desarrollo',
-          descripcion: data.acf.m2_descripcion,
-          contenidoEstudiante: data.acf.m2_estudiante,
-          actividades: JSON.parse(data.acf.m2_actividades || '[]'),
+          descripcion: data.acf?.m2_descripcion || data.momentos?.[1]?.descripcion || '',
+          contenidoEstudiante: data.acf?.m2_estudiante || data.momentos?.[1]?.contenidoEstudiante || '',
+          actividades: JSON.parse(data.acf?.m2_actividades || '[]'),
         },
         {
           tipo: 'cierre',
-          descripcion: data.acf.m3_descripcion,
-          contenidoEstudiante: data.acf.m3_estudiante,
-          actividades: JSON.parse(data.acf.m3_actividades || '[]'),
+          descripcion: data.acf?.m3_descripcion || data.momentos?.[2]?.descripcion || '',
+          contenidoEstudiante: data.acf?.m3_estudiante || data.momentos?.[2]?.contenidoEstudiante || '',
+          actividades: JSON.parse(data.acf?.m3_actividades || '[]'),
         },
       ],
-      
     })
 
-    //console.log("Imprimiendo plan creada: ", plan)
-
-    // Notificar a estudiantes del grado
+    // Notificar a estudiantes
     await Notificacion.create({
       tipo: 'nueva_plan',
       titulo: 'Nueva planificación',
@@ -135,64 +130,80 @@ export async function POST(request: Request) {
 }
 
 // PUT
-export async function PUT(request: Request) {
+// app/api/planificaciones/route.ts (PUT)
+export async function PUT(req: NextRequest) {
   const session = await auth()
-  if (!session) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  if (!session) {
+    return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+  }
 
   try {
-    const data = await request.json()
-    await connectDB()
+    const body = await req.json()
+    const { id, slug, ...data } = body
 
-    const plan = await Planificacion.findByIdAndUpdate(
-      data.id,
-      {
-        tema: data.title,
-        materia: data.materia,
-        nivel: data.nivel,
-        ciclo: data.ciclo,
-        grado: data.grado,
-        categoriaDocente: data.categoriaDocente,
-        competencia: data.acf.competencia,
-        indicadorLogro: data.acf.indicador_logro,
-        contenidoEstudiante: data.acf.contenido_estudiante_general,
-        maestro: data.acf.maestro,
-        coordinadora: data.acf.coordinadora,
-        centroEducativo: data.acf.centro_educativo,
-        anoEscolar: data.acf.ano_escolar,
-        fechaProgramada: data.fechaProgramada ? new Date(data.fechaProgramada) : null,
-        momentos: [
-          {
-            tipo: 'inicio',
-            descripcion: data.acf.m1_descripcion,
-            contenidoEstudiante: data.acf.m1_estudiante,
-            actividades: JSON.parse(data.acf.m1_actividades || '[]'),
-          },
-          {
-            tipo: 'desarrollo',
-            descripcion: data.acf.m2_descripcion,
-            contenidoEstudiante: data.acf.m2_estudiante,
-            actividades: JSON.parse(data.acf.m2_actividades || '[]'),
-          },
-          {
-            tipo: 'cierre',
-            descripcion: data.acf.m3_descripcion,
-            contenidoEstudiante: data.acf.m3_estudiante,
-            actividades: JSON.parse(data.acf.m3_actividades || '[]'),
-          },
-        ],
-        
-      },
-      {returnDocument: "after"}
-    )
+    console.log('🔵 [PUT] Datos recibidos:', JSON.stringify({ id, slug, ...data }, null, 2))
 
-    if (!plan) {
-      return NextResponse.json({ error: 'No encontrada' }, { status: 404 })
+    if (!id && !slug) {
+      return NextResponse.json({ error: 'ID o slug de planificación requerido' }, { status: 400 })
     }
 
-    return NextResponse.json(plan)
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : 'Error'
-    return NextResponse.json({ error: message }, { status: 500 })
+    await connectDB()
+
+    // Buscar por ID o slug
+    const query = id ? { _id: id } : { slug: slug }
+    const existe = await Planificacion.findOne(query)
+
+    if (!existe) {
+      return NextResponse.json({ error: 'Planificación no encontrada' }, { status: 404 })
+    }
+
+    // Construir objeto de actualización
+    const updateData: any = {
+      tema: data.tema,
+      materia: data.materia,
+      nivel: data.nivel,
+      ciclo: data.ciclo,
+      grado: data.grado,
+      categoriaDocente: data.categoriaDocente,
+      competencia: data.competencia,
+      indicadorLogro: data.indicadorLogro,
+      contenidoEstudiante: data.estudianteGeneral,
+      maestro: data.maestro,
+      coordinadora: data.coordinadora,
+      centroEducativo: data.centroEducativo,
+      anoEscolar: data.anoEscolar,
+      updatedAt: new Date(),
+    }
+
+    // Fecha programada
+    if (data.fechaProgramada) {
+      updateData.fechaProgramada = new Date(data.fechaProgramada)
+    }
+
+    // Momentos
+    if (data.momentos && Array.isArray(data.momentos)) {
+      updateData.momentos = data.momentos.map((momento: any) => ({
+        tipo: momento.tipo,
+        descripcion: momento.descripcion || '',
+        contenidoEstudiante: momento.contenidoEstudiante || '',
+        actividades: momento.actividades || [],
+      }))
+    }
+
+    console.log('🔵 [PUT] UpdateData:', JSON.stringify(updateData, null, 2))
+
+    const planificacion = await Planificacion.findByIdAndUpdate(
+      existe._id,
+      { $set: updateData },
+      { new: true }
+    ).lean()
+
+    console.log('✅ [PUT] Planificación actualizada:', planificacion?._id)
+
+    return NextResponse.json({ success: true, planificacion })
+  } catch (error) {
+    console.error('❌ [PUT] Error:', error)
+    return NextResponse.json({ error: 'Error interno' }, { status: 500 })
   }
 }
 

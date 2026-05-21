@@ -24,6 +24,12 @@ export const proxy = auth(async function proxy(req: NextRequest) {
   
   // ✅ No redirigir si ya está en /dashboard
   if (path === '/dashboard') {
+    const rol = session?.user?.role
+  
+    if (rol === 'estudiante') {
+      return NextResponse.redirect(new URL('/dashboard-estudiante', req.url))
+    }
+    
     return NextResponse.next()
   }
   
