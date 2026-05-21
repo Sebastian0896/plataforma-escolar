@@ -30,6 +30,7 @@ export default function FormMomento({ momento, index, onChange }: Props) {
           titulo: '',
           descripcion: '',
           estudiante: '',
+          contenidoEstudiante: '',
           duracion: '',
           recursos: [],
         },

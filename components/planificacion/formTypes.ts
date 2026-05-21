@@ -10,6 +10,7 @@ export interface Actividad {
   titulo: string
   descripcion: string
   estudiante: string
+  contenidoEstudiante?: string
   duracion: string
   recursos: Recurso[]
 }

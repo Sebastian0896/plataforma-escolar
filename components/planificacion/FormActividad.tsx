@@ -33,6 +33,7 @@ export default function FormActividad({ actividad, index, onChange, onDelete }: 
         { tipo: 'audio', url: '', texto: '', traduccion: '', descripcion: '' }
       ]
     })
+    
   }
 
   return (
@@ -108,8 +109,8 @@ export default function FormActividad({ actividad, index, onChange, onDelete }: 
             </Label>
             <Textarea 
               placeholder="Texto o instrucciones que verá el alumno..." 
-              value={actividad.estudiante}
-              onChange={(e) => onChange({ ...actividad, estudiante: e.target.value })}
+              value={actividad.contenidoEstudiante}
+              onChange={(e) => onChange({ ...actividad, contenidoEstudiante: e.target.value })}
               className="min-h-[100px] bg-white dark:bg-slate-950 border-blue-200/50"
               rows={3} 
             />

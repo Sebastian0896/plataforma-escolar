@@ -41,6 +41,7 @@ export default function EditarPlanificacionPage() {
     competencia: '',
     indicadorLogro: '',
     estudianteGeneral: '',
+    contenidoEstudiante: '',
     maestro: '',
     coordinadora: '',
     centroEducativo: '',
@@ -48,6 +49,7 @@ export default function EditarPlanificacionPage() {
     fechaProgramada: '',
   })
   const [momentos, setMomentos] = useState<Momento[]>(MOMENTOS_VACIOS)
+
 
   useEffect(() => {
     const cargarPlanificacion = async () => {
@@ -59,11 +61,10 @@ export default function EditarPlanificacionPage() {
         if (!res.ok) throw new Error('Planificación no encontrada')
         
         const data = await res.json()
-        console.log('📦 Datos recibidos:', data) // Debug
+        console.log('📦 Datos recibidos:', data)
         
-        setPlanificacionId(data.id)
+        setPlanificacionId(data._id || data.id)
         
-        // ✅ Cargar TODOS los datos
         setDatos({
           materia: data.materia || '',
           nivel: data.nivel || '',
@@ -73,39 +74,30 @@ export default function EditarPlanificacionPage() {
           tema: data.tema || '',
           competencia: data.competencia || '',
           indicadorLogro: data.indicadorLogro || '',
-          estudianteGeneral: data.contenidoEstudiante || '',
+          contenidoEstudiante: data.contenidoEstudiante || '',
           maestro: data.maestro || '',
           coordinadora: data.coordinadora || '',
           centroEducativo: data.centroEducativo || '',
           anoEscolar: data.anoEscolar || '',
           fechaProgramada: data.fechaProgramada || '',
         })
-
-        // ✅ Cargar momentos
+        
+        // ✅ Cargar momentos con actividades incluyendo contenidoEstudiante
         if (data.momentos && data.momentos.length === 3) {
-          setMomentos(data.momentos)
-        } else {
-          setMomentos([
-            {
-              tipo: 'inicio',
-              descripcion: data.m1_descripcion || '',
-              estudiante: data.m1_estudiante || '',
-              actividades: data.m1_actividades ? JSON.parse(data.m1_actividades) : [],
-            },
-            {
-              tipo: 'desarrollo',
-              descripcion: data.m2_descripcion || '',
-              estudiante: data.m2_estudiante || '',
-              actividades: data.m2_actividades ? JSON.parse(data.m2_actividades) : [],
-            },
-            {
-              tipo: 'cierre',
-              descripcion: data.m3_descripcion || '',
-              estudiante: data.m3_estudiante || '',
-              actividades: data.m3_actividades ? JSON.parse(data.m3_actividades) : [],
-            },
-          ])
+          setMomentos(data.momentos.map((m: any) => ({
+            tipo: m.tipo,
+            descripcion: m.descripcion || '',
+            estudiante: m.contenidoEstudiante || '',
+            actividades: (m.actividades || []).map((act: any) => ({
+              titulo: act.titulo || '',
+              descripcion: act.descripcion || '',
+              contenidoEstudiante: act.contenidoEstudiante || '',  // ← CLAVE: cargar contenidoEstudiante de la actividad
+              recursos: act.recursos || [],
+              duracion: act.duracion || '',
+            })),
+          })))
         }
+        
       } catch (err) {
         console.error('Error:', err)
         setError(err instanceof Error ? err.message : 'Error de conexión')

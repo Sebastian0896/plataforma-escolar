@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import { connectDB } from '@/lib/db'
 import Planificacion from '@/lib/models/Planificacion'
@@ -94,19 +94,37 @@ export async function POST(request: Request) {
           tipo: 'inicio',
           descripcion: data.acf?.m1_descripcion || data.momentos?.[0]?.descripcion || '',
           contenidoEstudiante: data.acf?.m1_estudiante || data.momentos?.[0]?.contenidoEstudiante || '',
-          actividades: JSON.parse(data.acf?.m1_actividades || '[]'),
+          actividades: JSON.parse(data.acf?.m1_actividades || '[]').map((act: any) => ({
+            titulo: act.titulo || '',
+            descripcion: act.descripcion || '',
+            contenidoEstudiante: act.contenidoEstudiante || '',  // ← AGREGAR
+            recursos: act.recursos || [],
+            duracion: act.duracion || '',
+          })),
         },
         {
           tipo: 'desarrollo',
           descripcion: data.acf?.m2_descripcion || data.momentos?.[1]?.descripcion || '',
           contenidoEstudiante: data.acf?.m2_estudiante || data.momentos?.[1]?.contenidoEstudiante || '',
-          actividades: JSON.parse(data.acf?.m2_actividades || '[]'),
+          actividades: JSON.parse(data.acf?.m1_actividades || '[]').map((act: any) => ({
+            titulo: act.titulo || '',
+            descripcion: act.descripcion || '',
+            contenidoEstudiante: act.contenidoEstudiante || '',  // ← AGREGAR
+            recursos: act.recursos || [],
+            duracion: act.duracion || '',
+          })),
         },
         {
           tipo: 'cierre',
           descripcion: data.acf?.m3_descripcion || data.momentos?.[2]?.descripcion || '',
           contenidoEstudiante: data.acf?.m3_estudiante || data.momentos?.[2]?.contenidoEstudiante || '',
-          actividades: JSON.parse(data.acf?.m3_actividades || '[]'),
+          actividades: JSON.parse(data.acf?.m1_actividades || '[]').map((act: any) => ({
+            titulo: act.titulo || '',
+            descripcion: act.descripcion || '',
+            contenidoEstudiante: act.contenidoEstudiante || '',  // ← AGREGAR
+            recursos: act.recursos || [],
+            duracion: act.duracion || '',
+          })),
         },
       ],
     })
@@ -131,6 +149,7 @@ export async function POST(request: Request) {
 
 // PUT
 // app/api/planificaciones/route.ts (PUT)
+
 export async function PUT(req: NextRequest) {
   const session = await auth()
   if (!session) {
@@ -141,15 +160,23 @@ export async function PUT(req: NextRequest) {
     const body = await req.json()
     const { id, slug, ...data } = body
 
-    console.log('🔵 [PUT] Datos recibidos:', JSON.stringify({ id, slug, ...data }, null, 2))
+    console.log('🔵 [PUT] Datos recibidos:', JSON.stringify({
+      id,
+      slug,
+      estudianteGeneral: data.estudianteGeneral,
+      momentos: data.momentos?.map((m: any) => ({
+        tipo: m.tipo,
+        contenidoEstudiante: m.estudiante,
+        actividades: m.actividades
+      }))
+    }, null, 2))
 
     if (!id && !slug) {
-      return NextResponse.json({ error: 'ID o slug de planificación requerido' }, { status: 400 })
+      return NextResponse.json({ error: 'ID o slug requerido' }, { status: 400 })
     }
 
     await connectDB()
 
-    // Buscar por ID o slug
     const query = id ? { _id: id } : { slug: slug }
     const existe = await Planificacion.findOne(query)
 
@@ -157,7 +184,7 @@ export async function PUT(req: NextRequest) {
       return NextResponse.json({ error: 'Planificación no encontrada' }, { status: 404 })
     }
 
-    // Construir objeto de actualización
+    // ✅ Construir updateData correctamente
     const updateData: any = {
       tema: data.tema,
       materia: data.materia,
@@ -167,7 +194,7 @@ export async function PUT(req: NextRequest) {
       categoriaDocente: data.categoriaDocente,
       competencia: data.competencia,
       indicadorLogro: data.indicadorLogro,
-      contenidoEstudiante: data.estudianteGeneral,
+      contenidoEstudiante: data.estudianteGeneral,  // ← mapeo correcto
       maestro: data.maestro,
       coordinadora: data.coordinadora,
       centroEducativo: data.centroEducativo,
@@ -175,18 +202,23 @@ export async function PUT(req: NextRequest) {
       updatedAt: new Date(),
     }
 
-    // Fecha programada
     if (data.fechaProgramada) {
       updateData.fechaProgramada = new Date(data.fechaProgramada)
     }
 
-    // Momentos
+    // ✅ Mapear momentos correctamente
     if (data.momentos && Array.isArray(data.momentos)) {
       updateData.momentos = data.momentos.map((momento: any) => ({
         tipo: momento.tipo,
         descripcion: momento.descripcion || '',
-        contenidoEstudiante: momento.contenidoEstudiante || '',
-        actividades: momento.actividades || [],
+        contenidoEstudiante: momento.estudiante || '',  // ← contenido para el estudiante del momento
+        actividades: (momento.actividades || []).map((act: any) => ({
+          titulo: act.titulo || '',
+          descripcion: act.descripcion || '',
+          contenidoEstudiante: act.contenidoEstudiante || '',  // ← AGREGAR: contenido para el estudiante de la actividad
+          recursos: act.recursos || [],
+          duracion: act.duracion || '',
+        })),
       }))
     }
 
@@ -198,7 +230,7 @@ export async function PUT(req: NextRequest) {
       { new: true }
     ).lean()
 
-    console.log('✅ [PUT] Planificación actualizada:', planificacion?._id)
+    console.log('✅ [PUT] Planificación actualizada')
 
     return NextResponse.json({ success: true, planificacion })
   } catch (error) {
