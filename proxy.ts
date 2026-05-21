@@ -25,9 +25,9 @@ export const proxy = auth(async function proxy(req: NextRequest) {
   // ✅ No redirigir si ya está en /dashboard
   if (path === '/dashboard') {
     const rol = session?.user?.role
-  
+    const grado = session?.user?.grado
     if (rol === 'estudiante') {
-      return NextResponse.redirect(new URL('/estudiante', req.url))
+      return NextResponse.redirect(new URL(`/estudiante/${grado}`, req.url))
     }
     
     return NextResponse.next()
@@ -37,6 +37,7 @@ export const proxy = auth(async function proxy(req: NextRequest) {
   if (path === '/') {
     const rol = session?.user?.role
     const centroId = session?.user?.centroId
+    
     
     if (rol === 'coordinador' && centroId) {
       return NextResponse.redirect(new URL(`/admin/centro/${centroId}/coordinador`, req.url))
