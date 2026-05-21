@@ -27,7 +27,7 @@ export const proxy = auth(async function proxy(req: NextRequest) {
     const rol = session?.user?.role
   
     if (rol === 'estudiante') {
-      return NextResponse.redirect(new URL('/dashboard-estudiante', req.url))
+      return NextResponse.redirect(new URL('/estudiante', req.url))
     }
     
     return NextResponse.next()
