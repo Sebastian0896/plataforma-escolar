@@ -23,12 +23,12 @@ export const metadata: Metadata = {
     ],
     apple: '/apple-touch-icon.png',
   },
-  /* manifest: '/site.webmanifest',
+  manifest: '/site.webmanifest',
   openGraph: {
     title: 'Plataforma Educativa',
     description: 'Sistema de gestión educativa',
     images: '/og-image.png',
-  }, */
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

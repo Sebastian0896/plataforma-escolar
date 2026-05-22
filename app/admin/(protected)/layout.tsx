@@ -65,7 +65,7 @@ export default async function AdminLayout({
             {/* Page Content */}
             <div className="mt-6 space-y-8 pb-24">
               {children}
-               <SugerenciaButton />
+              <div><SugerenciaButton /></div>
             </div>
           </div>
         </main>

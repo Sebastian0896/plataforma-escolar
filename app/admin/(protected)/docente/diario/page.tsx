@@ -20,6 +20,8 @@ import {
 } from '@/components/ui/select'
 import { toast } from 'sonner'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { redirect } from 'next/navigation'
+import { ConfiguracionAcademica } from '@/components/diario/ConfiguracionAcademica'
 
 const OBSERVACIONES = [
   { value: '', label: 'Sin observación', color: 'default' },
@@ -49,13 +51,40 @@ interface RegistroDiario {
   puntosExtra: number
 }
 
+function obtenerPeriodoActual() {
+  const hoy = new Date()
+
+  const year = hoy.getMonth() >= 7
+    ? hoy.getFullYear()
+    : hoy.getFullYear() - 1
+
+  // Inicio estimado del año escolar:
+  // 25 de agosto
+  const inicioEscolar = new Date(year, 7, 25)
+
+  // Diferencia en días
+  const diffMs = hoy.getTime() - inicioEscolar.getTime()
+  const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+
+  // Cada período ≈ 70 días (~2 meses y medio)
+  if (diffDias < 70) return 'P1'
+  if (diffDias < 140) return 'P2'
+  if (diffDias < 210) return 'P3'
+
+  return 'P4'
+}
+
+
 export default function DiarioPage() {
   const { data: session } = useSession()
   
   const [grado, setGrado] = useState('')
   const [materia, setMateria] = useState('')
   const [fecha, setFecha] = useState(new Date().toISOString().split('T')[0])
-  const [periodo, setPeriodo] = useState('P1')
+  //const [periodo, setPeriodo] = useState('P1')
+  const [periodo, setPeriodo] = useState(
+    obtenerPeriodoActual()
+  )
   
   const [estudiantes, setEstudiantes] = useState<Estudiante[]>([])
   // ✅ Cambiar a Record<string, RegistroDiario> en lugar de Map
@@ -168,10 +197,14 @@ export default function DiarioPage() {
       
       if (res.ok) {
         toast.success('Diario guardado correctamente')
+        setTimeout(() => {
+          redirect("/admin/docente/estudiantes")
+        }, 2500);
       } else {
         toast.error('Error al guardar')
       }
     } catch (error) {
+      console.error("SG - ERROR: ", error)
       toast.error('Error al guardar')
     } finally {
       setSaving(false)
@@ -216,61 +249,20 @@ export default function DiarioPage() {
       </div>
 
       {/* Panel de configuración */}
-      <Card>
-        <CardHeader className="pb-4">
-          <CardTitle className="text-lg">Configuración</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="space-y-2">
-              <Label>Grado</Label>
-              <Select value={grado} onValueChange={setGrado}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar grado" />
-                </SelectTrigger>
-                <SelectContent>
-                  {gradosDocente.map((g: string) => (
-                    <SelectItem key={g} value={g}>{g?.replace('-', ' ')}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
 
-            <div className="space-y-2">
-              <Label>Materia</Label>
-              <Select value={materia} onValueChange={setMateria}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Seleccionar materia" />
-                </SelectTrigger>
-                <SelectContent>
-                  {materiasDocente.map((m: string) => (
-                    <SelectItem key={m} value={m}>{m}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Fecha</Label>
-              <Input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Período</Label>
-              <Select value={periodo} onValueChange={setPeriodo}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {['P1','P2','P3','P4'].map(p => (
-                    <SelectItem key={p} value={p}>{p}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+      <ConfiguracionAcademica
+        grado={grado}
+        setGrado={setGrado}
+        materia={materia}
+        setMateria={setMateria}
+        fecha={fecha}
+        setFecha={setFecha}
+        periodo={periodo}
+        setPeriodo={setPeriodo}
+        gradosDocente={gradosDocente}
+        materiasDocente={materiasDocente}
+        obtenerPeriodoActual={obtenerPeriodoActual}
+      />
 
       {(!grado || !materia) && (
         <Card className="bg-muted/30 border-dashed">
@@ -292,120 +284,216 @@ export default function DiarioPage() {
 
       {grado && materia && estudiantes.length > 0 && (
         <>
-          {/* Barra de acciones y estadísticas */}
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 flex-1">
-              <Card>
-                <CardContent className="p-3 flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-muted-foreground">Total</p>
-                    <p className="text-xl font-bold">{estudiantes.length}</p>
-                  </div>
-                  <div className="text-2xl">👥</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-3 flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-muted-foreground">Tareas</p>
-                    <p className="text-xl font-bold">{tareasEntregadas}</p>
-                  </div>
-                  <div className="text-2xl">📚</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-3 flex items-center justify-between">
-                  <div>
-                    <p className="text-xs text-muted-foreground">Participación</p>
-                    <p className="text-xl font-bold">{promedioParticipacion.toFixed(1)}</p>
-                  </div>
-                  <div className="text-2xl">⭐</div>
-                </CardContent>
-              </Card>
+          {/* HEADER ACTION BAR */}
+          <div className="sticky top-0 z-20 -mx-2 sm:mx-0 mb-4 border-b bg-background/90 px-2 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/70">
+            {/* <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+              
+              
+              <div className="grid grid-cols-3 gap-3">
+                <Card className="shadow-none">
+                  <CardContent className="p-3 flex items-center justify-between">
+                    <div>
+                      <p className="text-[11px] text-muted-foreground">
+                        Estudiantes
+                      </p>
+                      <p className="text-xl font-bold">
+                        {estudiantes.length}
+                      </p>
+                    </div>
+
+                    <div className="text-xl">
+                      👥
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="shadow-none">
+                  <CardContent className="p-3 flex items-center justify-between">
+                    <div>
+                      <p className="text-[11px] text-muted-foreground">
+                        Tareas
+                      </p>
+                      <p className="text-xl font-bold">
+                        {tareasEntregadas}
+                      </p>
+                    </div>
+
+                    <div className="text-xl">
+                      📚
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="shadow-none">
+                  <CardContent className="p-3 flex items-center justify-between">
+                    <div>
+                      <p className="text-[11px] text-muted-foreground">
+                        Participación
+                      </p>
+                      <p className="text-xl font-bold">
+                        {promedioParticipacion.toFixed(1)}
+                      </p>
+                    </div>
+
+                    <div className="text-xl">
+                      ⭐
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              
+              <div className="hidden md:flex items-center gap-2">
+                <Button
+                  onClick={guardarTodos}
+                  disabled={saving}
+                  size="lg"
+                  className="gap-2 shadow-sm"
+                >
+                  <Sparkles className="h-4 w-4" />
+
+                  {saving
+                    ? 'Guardando...'
+                    : 'Guardar Todo'}
+                </Button>
+              </div>
+            </div> */}
+
+            {/* Filters */}
+            <div className="mt-4 flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+
+                <Input
+                  placeholder="Buscar estudiante..."
+                  value={searchTerm}
+                  onChange={(e) =>
+                    setSearchTerm(e.target.value)
+                  }
+                  className="pl-9"
+                />
+              </div>
+
+              <Select
+                value={filtroAsistencia}
+                onValueChange={setFiltroAsistencia}
+              >
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <Filter className="mr-2 h-4 w-4" />
+                  <SelectValue placeholder="Filtrar" />
+                </SelectTrigger>
+
+                <SelectContent>
+                  <SelectItem value="todos">
+                    Todos
+                  </SelectItem>
+
+                  <SelectItem value="presente">
+                    Con tarea
+                  </SelectItem>
+
+                  <SelectItem value="ausente">
+                    Sin tarea
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            
-            <Button onClick={guardarTodos} disabled={saving} className="gap-2 w-full sm:w-auto">
-              <Sparkles className="h-4 w-4" />
-              {saving ? 'Guardando...' : 'Guardar Todo'}
-            </Button>
           </div>
 
-          {/* Filtros */}
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Buscar estudiante..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9"
-              />
-            </div>
-            <Select value={filtroAsistencia} onValueChange={setFiltroAsistencia}>
-              <SelectTrigger className="w-full sm:w-[160px]">
-                <Filter className="h-4 w-4 mr-2" />
-                <SelectValue placeholder="Filtrar" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="todos">Todos</SelectItem>
-                <SelectItem value="presente">Con tarea</SelectItem>
-                <SelectItem value="ausente">Sin tarea</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Vista Kanban */}
+          {/* CONTENT */}
           {loading ? (
-            <div className="flex justify-center py-12">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <div className="flex justify-center py-16">
+              <div className="flex items-center gap-3 text-muted-foreground">
+                <div className="animate-spin rounded-full h-7 w-7 border-b-2 border-primary" />
+                Cargando estudiantes...
+              </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-4 2xl:grid-cols-3 gap-5 pb-24">
               {estudiantesFiltrados.map((estudiante) => {
-                // ✅ Obtener valores directamente del objeto registros
-                const registro = registros[estudiante.id] || {
-                  estudianteId: estudiante.id,
-                  participacion: 0,
-                  tarea: false,
-                  observacion: '',
-                  puntosExtra: 0,
-                }
-                
+                const registro =
+                  registros[estudiante.id] || {
+                    estudianteId:
+                      estudiante.id,
+                    participacion: 0,
+                    tarea: false,
+                    observacion: '',
+                    puntosExtra: 0,
+                  }
+
                 return (
-                  <Card 
-                    key={estudiante.id} 
-                    className="overflow-hidden hover:shadow-md transition-all group"
+                  <Card
+                    key={estudiante.id}
+                    className="overflow-hidden border shadow-sm transition-all duration-200 hover:shadow-lg hover:-translate-y-1"
                   >
-                    <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-4 border-b">
+                    {/* HEADER */}
+                    <div className="border-b bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-4">
                       <div className="flex items-center gap-3">
-                        <Avatar className="h-10 w-10 border-2 border-primary/20">
-                          <AvatarFallback className="bg-primary/20 text-primary font-bold">
-                            {estudiante.nombre.charAt(0).toUpperCase()}
+                        <Avatar className="h-11 w-11 border border-primary/20">
+                          <AvatarFallback className="bg-primary/10 text-primary font-bold">
+                            {estudiante.nombre
+                              .charAt(0)
+                              .toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold truncate">{estudiante.nombre}</h3>
-                          <p className="text-xs text-muted-foreground">{estudiante.grado}</p>
+
+                        <div className="min-w-0 flex-1">
+                          <h3 className="truncate font-semibold">
+                            {estudiante.nombre}
+                          </h3>
+
+                          <p className="text-xs text-muted-foreground">
+                            {estudiante.grado}
+                          </p>
                         </div>
-                        <Badge variant={registro.tarea ? 'default' : 'secondary'} className="gap-1">
-                          {registro.tarea ? '✓ Tarea' : '○ Pendiente'}
+
+                        <Badge
+                          variant={
+                            registro.tarea
+                              ? 'default'
+                              : 'secondary'
+                          }
+                          className="shrink-0"
+                        >
+                          {registro.tarea
+                            ? '✓'
+                            : '○'}
                         </Badge>
                       </div>
                     </div>
-                    
-                    <CardContent className="p-4 space-y-4">
+
+                    {/* BODY */}
+                    <CardContent className="space-y-5 p-4">
+                      
+                      {/* Participación */}
                       <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <Label className="text-xs text-muted-foreground">Participación</Label>
-                          <span className="font-medium text-primary">{registro.participacion}/5</span>
+                        <div className="flex items-center justify-between">
+                          <Label className="text-xs text-muted-foreground">
+                            Participación
+                          </Label>
+
+                          <span className="text-sm font-bold text-primary">
+                            {registro.participacion}/5
+                          </span>
                         </div>
-                        <div className="flex gap-1">
-                          {[1,2,3,4,5].map(star => (
+
+                        <div className="flex justify-between gap-1">
+                          {[1,2,3,4,5].map((star) => (
                             <button
                               key={star}
-                              onClick={() => actualizarCampo(estudiante.id, 'participacion', star)}
-                              className={`text-xl transition-all hover:scale-110 ${
-                                star <= registro.participacion ? 'text-yellow-500' : 'text-gray-300'
+                              type="button"
+                              onClick={() =>
+                                actualizarCampo(
+                                  estudiante.id,
+                                  'participacion',
+                                  star
+                                )
+                              }
+                              className={`flex-1 rounded-xl border py-2 text-lg transition-all ${
+                                star <=
+                                registro.participacion
+                                  ? 'border-yellow-300 bg-yellow-50 text-yellow-500'
+                                  : 'bg-muted/40 text-muted-foreground hover:bg-muted'
                               }`}
                             >
                               ★
@@ -413,18 +501,29 @@ export default function DiarioPage() {
                           ))}
                         </div>
                       </div>
-                      
+
+                      {/* Puntos */}
                       <div className="space-y-2">
-                        <Label className="text-xs text-muted-foreground">Puntos extra</Label>
-                        <div className="flex flex-wrap gap-1">
-                          {[0,2,4,6,8,10].map(val => (
+                        <Label className="text-xs text-muted-foreground">
+                          Puntos extra
+                        </Label>
+
+                        <div className="grid grid-cols-3 gap-2">
+                          {[0,2,4,6,8,10].map((val) => (
                             <button
                               key={val}
-                              onClick={() => actualizarCampo(estudiante.id, 'puntosExtra', val)}
-                              className={`px-2 py-1 text-xs rounded-md transition-all ${
+                              type="button"
+                              onClick={() =>
+                                actualizarCampo(
+                                  estudiante.id,
+                                  'puntosExtra',
+                                  val
+                                )
+                              }
+                              className={`rounded-xl border px-3 py-2 text-sm font-medium transition-all ${
                                 registro.puntosExtra === val
                                   ? 'bg-primary text-primary-foreground'
-                                  : 'bg-muted hover:bg-muted/80'
+                                  : 'bg-muted/30 hover:bg-muted'
                               }`}
                             >
                               +{val}
@@ -432,58 +531,133 @@ export default function DiarioPage() {
                           ))}
                         </div>
                       </div>
-                      
-                      <div className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
-                        <Label className="text-sm">Tarea entregada</Label>
+
+                      {/* Tarea */}
+                      <div className="flex items-center justify-between rounded-xl border bg-muted/20 p-3">
+                        <div>
+                          <p className="text-sm font-medium">
+                            Tarea entregada
+                          </p>
+
+                          <p className="text-xs text-muted-foreground">
+                            Marcar entrega
+                          </p>
+                        </div>
+
                         <Switch
                           checked={registro.tarea}
-                          onCheckedChange={(checked) => actualizarCampo(estudiante.id, 'tarea', checked)}
+                          onCheckedChange={(checked) =>
+                            actualizarCampo(
+                              estudiante.id,
+                              'tarea',
+                              checked
+                            )
+                          }
                         />
                       </div>
-                      
+
+                      {/* Observación */}
                       <div className="space-y-2">
-                        <Label className="text-xs text-muted-foreground">Observación</Label>
+                        <Label className="text-xs text-muted-foreground">
+                          Observación
+                        </Label>
+
                         <Select
                           value={registro.observacion}
-                          onValueChange={(value) => actualizarCampo(estudiante.id, 'observacion', value)}
+                          onValueChange={(value) =>
+                            actualizarCampo(
+                              estudiante.id,
+                              'observacion',
+                              value
+                            )
+                          }
                         >
-                          <SelectTrigger className={`${getObservacionStyle(registro.observacion)} border-0`}>
+                          <SelectTrigger
+                            className={`${getObservacionStyle(
+                              registro.observacion
+                            )} border-0`}
+                          >
                             <SelectValue placeholder="Sin observación" />
                           </SelectTrigger>
+
                           <SelectContent>
-                            {OBSERVACIONES.map(obs => (
-                              <SelectItem key={obs.value} value={obs.value}>
+                            {OBSERVACIONES.map((obs) => (
+                              <SelectItem
+                                key={obs.value}
+                                value={obs.value}
+                              >
                                 {obs.label}
                               </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
                       </div>
-                    </CardContent>
-                    
-                    {/* ✅ Barra de progreso que SÍ se actualiza */}
-                    <div className="px-4 pb-4">
+
+                      {/* Progress */}
                       <div className="space-y-1">
                         <div className="flex justify-between text-xs text-muted-foreground">
                           <span>Progreso</span>
-                          <span>{Math.round((registro.participacion / 5) * 100)}%</span>
+
+                          <span>
+                            {Math.round(
+                              (registro.participacion /
+                                5) *
+                                100
+                            )}
+                            %
+                          </span>
                         </div>
-                        <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-primary transition-all duration-300 ease-in-out"
-                            style={{ 
-                              width: `${(registro.participacion / 5) * 100}%`,
-                              transition: 'width 0.3s ease-in-out'
+
+                        <div className="h-2 overflow-hidden rounded-full bg-muted">
+                          <div
+                            className="h-full rounded-full bg-primary transition-all duration-300"
+                            style={{
+                              width: `${
+                                (registro.participacion /
+                                  5) *
+                                100
+                              }%`,
                             }}
                           />
                         </div>
                       </div>
-                    </div>
+                    </CardContent>
                   </Card>
                 )
               })}
             </div>
           )}
+
+          {/* MOBILE FLOATING SAVE */}
+          <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 p-4 backdrop-blur md:hidden">
+            <Button
+              onClick={guardarTodos}
+              disabled={saving}
+              className="h-12 w-full gap-2 rounded-xl text-sm font-semibold shadow-lg"
+            >
+              <Sparkles className="h-4 w-4" />
+
+              {saving
+                ? 'Guardando cambios...'
+                : 'Guardar Todo'}
+            </Button>
+          </div>
+
+          {/* DESKTOP FOOTER */}
+          <div className="hidden md:flex justify-end pt-2">
+            <Button
+              onClick={guardarTodos}
+              disabled={saving}
+              size="lg"
+              className="gap-2 rounded-xl px-8 shadow-sm"
+            >
+              <Sparkles className="h-4 w-4" />
+
+              {saving
+                ? 'Guardando...'
+                : 'Guardar Todo'}
+            </Button>
+          </div>
         </>
       )}
     </div>
