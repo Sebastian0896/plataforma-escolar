@@ -149,7 +149,7 @@ export default function SemanaPage() {
             }
           >
             <ChevronLeft className="mr-1 h-4 w-4" />
-            Anterior
+            <span>Anterior</span>
           </Button>
 
           <div className="min-w-[240px] text-center text-sm font-medium">
@@ -179,7 +179,7 @@ export default function SemanaPage() {
               setSemanaOffset((s) => s + 1)
             }
           >
-            Siguiente
+            <span>Siguiente</span>
             <ChevronRight className="ml-1 h-4 w-4" />
           </Button>
         </div>

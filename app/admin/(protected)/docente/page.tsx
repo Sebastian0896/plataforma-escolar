@@ -203,7 +203,7 @@ export default function DocenteDashboard() {
                   ? 'border-l-red-500 bg-red-50/60 dark:bg-red-950/20'
                   : 'border-l-amber-500 bg-amber-50/60 dark:bg-amber-950/20'
               }`}
-              onClick={() => window.location.href = `/admin/planificaciones/nueva?grado=${p.grado}`}
+              onClick={() => window.location.href = `/admin/docente/planificaciones/nueva?grado=${p.grado}`}
             >
               <CardContent className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between">
                 <div>

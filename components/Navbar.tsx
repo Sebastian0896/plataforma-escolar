@@ -78,10 +78,12 @@ export default function Navbar() {
             
             <div className="md:hidden">
               <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
-                <PopoverTrigger asChild>
-                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-bold text-primary cursor-pointer hover:bg-primary/20 transition-colors">
+                <PopoverTrigger>
+                  <span
+                    className="w-8 h-8 rounded-full bg-primary/10 inline-flex items-center justify-center text-sm font-bold text-primary hover:bg-primary/20 transition-colors cursor-pointer"
+                  >
                     {session?.user?.name?.charAt(0)?.toUpperCase() || 'U'}
-                  </div>
+                  </span>
                 </PopoverTrigger>
                 <PopoverContent align="end" className="w-56 p-0">
                   <div className="px-3 py-3 border-b">
