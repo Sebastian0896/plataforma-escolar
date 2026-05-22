@@ -22,6 +22,7 @@ import { toast } from 'sonner'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { redirect } from 'next/navigation'
 import { ConfiguracionAcademica } from '@/components/diario/ConfiguracionAcademica'
+import obtenerPeriodoActual from '@/lib/obtenerPeriodoActual'
 
 const OBSERVACIONES = [
   { value: '', label: 'Sin observación', color: 'default' },
@@ -51,28 +52,6 @@ interface RegistroDiario {
   puntosExtra: number
 }
 
-function obtenerPeriodoActual() {
-  const hoy = new Date()
-
-  const year = hoy.getMonth() >= 7
-    ? hoy.getFullYear()
-    : hoy.getFullYear() - 1
-
-  // Inicio estimado del año escolar:
-  // 25 de agosto
-  const inicioEscolar = new Date(year, 7, 25)
-
-  // Diferencia en días
-  const diffMs = hoy.getTime() - inicioEscolar.getTime()
-  const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-
-  // Cada período ≈ 70 días (~2 meses y medio)
-  if (diffDias < 70) return 'P1'
-  if (diffDias < 140) return 'P2'
-  if (diffDias < 210) return 'P3'
-
-  return 'P4'
-}
 
 
 export default function DiarioPage() {
@@ -284,122 +263,6 @@ export default function DiarioPage() {
 
       {grado && materia && estudiantes.length > 0 && (
         <>
-          {/* HEADER ACTION BAR */}
-          <div className="sticky top-0 z-20 -mx-2 sm:mx-0 mb-4 border-b bg-background/90 px-2 py-3 backdrop-blur supports-[backdrop-filter]:bg-background/70">
-            {/* <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-              
-              
-              <div className="grid grid-cols-3 gap-3">
-                <Card className="shadow-none">
-                  <CardContent className="p-3 flex items-center justify-between">
-                    <div>
-                      <p className="text-[11px] text-muted-foreground">
-                        Estudiantes
-                      </p>
-                      <p className="text-xl font-bold">
-                        {estudiantes.length}
-                      </p>
-                    </div>
-
-                    <div className="text-xl">
-                      👥
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="shadow-none">
-                  <CardContent className="p-3 flex items-center justify-between">
-                    <div>
-                      <p className="text-[11px] text-muted-foreground">
-                        Tareas
-                      </p>
-                      <p className="text-xl font-bold">
-                        {tareasEntregadas}
-                      </p>
-                    </div>
-
-                    <div className="text-xl">
-                      📚
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="shadow-none">
-                  <CardContent className="p-3 flex items-center justify-between">
-                    <div>
-                      <p className="text-[11px] text-muted-foreground">
-                        Participación
-                      </p>
-                      <p className="text-xl font-bold">
-                        {promedioParticipacion.toFixed(1)}
-                      </p>
-                    </div>
-
-                    <div className="text-xl">
-                      ⭐
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-
-              
-              <div className="hidden md:flex items-center gap-2">
-                <Button
-                  onClick={guardarTodos}
-                  disabled={saving}
-                  size="lg"
-                  className="gap-2 shadow-sm"
-                >
-                  <Sparkles className="h-4 w-4" />
-
-                  {saving
-                    ? 'Guardando...'
-                    : 'Guardar Todo'}
-                </Button>
-              </div>
-            </div> */}
-
-            {/* Filters */}
-            <div className="mt-4 flex flex-col sm:flex-row gap-3">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-
-                <Input
-                  placeholder="Buscar estudiante..."
-                  value={searchTerm}
-                  onChange={(e) =>
-                    setSearchTerm(e.target.value)
-                  }
-                  className="pl-9"
-                />
-              </div>
-
-              <Select
-                value={filtroAsistencia}
-                onValueChange={setFiltroAsistencia}
-              >
-                <SelectTrigger className="w-full sm:w-[180px]">
-                  <Filter className="mr-2 h-4 w-4" />
-                  <SelectValue placeholder="Filtrar" />
-                </SelectTrigger>
-
-                <SelectContent>
-                  <SelectItem value="todos">
-                    Todos
-                  </SelectItem>
-
-                  <SelectItem value="presente">
-                    Con tarea
-                  </SelectItem>
-
-                  <SelectItem value="ausente">
-                    Sin tarea
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
           {/* CONTENT */}
           {loading ? (
             <div className="flex justify-center py-16">
