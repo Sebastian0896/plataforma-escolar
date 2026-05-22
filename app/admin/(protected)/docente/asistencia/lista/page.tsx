@@ -7,10 +7,34 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Badge } from '@/components/ui/badge'
-import { Check, X, Users, BookOpen, Clock, Calendar, AlertCircle, Loader2, Save, Search, Filter } from 'lucide-react'
+import { Check, X, Users, AlertCircle, Loader2, Save, Search } from 'lucide-react'
 import { toast } from 'sonner'
+import { FiltrosClaseRapidos } from '@/components/asistencia/FiltrosClaseRapidos'
+
+
+function obtenerPeriodoActual() {
+  const hoy = new Date()
+
+  const year = hoy.getMonth() >= 7
+    ? hoy.getFullYear()
+    : hoy.getFullYear() - 1
+
+  // Inicio estimado del año escolar:
+  // 25 de agosto
+  const inicioEscolar = new Date(year, 7, 25)
+
+  // Diferencia en días
+  const diffMs = hoy.getTime() - inicioEscolar.getTime()
+  const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+
+  // Cada período ≈ 70 días (~2 meses y medio)
+  if (diffDias < 70) return 'P1'
+  if (diffDias < 140) return 'P2'
+  if (diffDias < 210) return 'P3'
+
+  return 'P4'
+}
+
 
 export default function TomarAsistenciaPage() {
   const { data: session } = useSession()
@@ -18,7 +42,8 @@ export default function TomarAsistenciaPage() {
   // Estados de configuración de la sesión de clase
   const [gradoActivo, setGradoActivo] = useState<string>('')
   const [materia, setMateria] = useState<string>('')
-  const [periodo, setPeriodo] = useState<string>('P1')
+  //const [periodo, setPeriodo] = useState<string>('P1')
+  const [periodo, setPeriodo] = useState(obtenerPeriodoActual())
   const [fecha, setFecha] = useState<string>(new Date().toISOString().split('T')[0])
   
   // Estados para estudiantes y UI
@@ -229,48 +254,19 @@ export default function TomarAsistenciaPage() {
       </div>
 
       {/* Controladores de Clase */}
-      <Card className="shadow-sm border-muted/70">
-        <CardContent className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="space-y-1">
-            <Label className="text-xs flex items-center gap-1"><BookOpen className="h-3 w-3" /> Materia</Label>
-            <Select value={materia} onValueChange={setMateria}>
-              <SelectTrigger className="h-9 text-xs"><SelectValue placeholder="Seleccionar" /></SelectTrigger>
-              <SelectContent>
-                {materiasDisponibles.map((m: string) => (
-                  <SelectItem key={m} value={m}>{m}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-1">
-            <Label className="text-xs flex items-center gap-1"><Clock className="h-3 w-3" /> Periodo</Label>
-            <Select value={periodo} onValueChange={setPeriodo}>
-              <SelectTrigger className="h-9 text-xs"><SelectValue /></SelectTrigger>
-              <SelectContent>
-                {['P1', 'P2', 'P3', 'P4'].map(p => <SelectItem key={p} value={p}>{p}</SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-1">
-            <Label className="text-xs flex items-center gap-1"><Calendar className="h-3 w-3" /> Fecha</Label>
-            <Input type="date" value={fecha} onChange={e => setFecha(e.target.value)} className="h-9 text-xs" />
-          </div>
-
-          <div className="space-y-1">
-            <Label className="text-xs flex items-center gap-1"><Filter className="h-3 w-3" /> Grado</Label>
-            <Select value={gradoActivo} onValueChange={setGradoActivo}>
-              <SelectTrigger className="h-9 text-xs"><SelectValue placeholder="Seleccionar" /></SelectTrigger>
-              <SelectContent>
-                {gradosDisponibles.map((g: string) => (
-                  <SelectItem key={g} value={g}>{g?.replace('-', ' ')}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </CardContent>
-      </Card>
+      <FiltrosClaseRapidos
+          materia={materia}
+          setMateria={setMateria}
+          materiasDisponibles={materiasDisponibles}
+          periodo={periodo}
+          setPeriodo={setPeriodo}
+          fecha={fecha}
+          setFecha={setFecha}
+          gradoActivo={gradoActivo}
+          setGradoActivo={setGradoActivo}
+          gradosDisponibles={gradosDisponibles}
+          obtenerPeriodoActual={obtenerPeriodoActual}
+        />
 
       {/* Tarjetas de resumen */}
       {estudiantes.length > 0 && (
