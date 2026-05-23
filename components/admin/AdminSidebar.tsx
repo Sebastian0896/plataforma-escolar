@@ -30,6 +30,7 @@ import {
   Eye,
   TrendingUp,
   CreditCard,
+  FileBarChart,
 } from 'lucide-react'
 
 export default function AdminSidebar() {
@@ -165,6 +166,12 @@ export default function AdminSidebar() {
         href: '/admin/docente/asistencia',
         label: 'Asistencia',
         icon: ClipboardCheck,
+        roles: ['docente'],
+      })
+      links.push({
+        href: '/admin/docente/evaluaciones',
+        label: 'Evaluaciones',
+        icon: FileBarChart,
         roles: ['docente'],
       })
       links.push({

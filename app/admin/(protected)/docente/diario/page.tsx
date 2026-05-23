@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
-import { CalendarDays, Sparkles, Search, Filter } from 'lucide-react'
+import { CalendarDays, Sparkles, Search, Filter, Save } from 'lucide-react'
 
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -272,7 +272,7 @@ export default function DiarioPage() {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-4 2xl:grid-cols-3 gap-5 pb-24">
+            <div className="grid grid-cols-1 md:grid-cols-4 2xl:grid-cols-3 gap-5">
               {estudiantesFiltrados.map((estudiante) => {
                 const registro =
                   registros[estudiante.id] || {
@@ -492,13 +492,13 @@ export default function DiarioPage() {
           )}
 
           {/* MOBILE FLOATING SAVE */}
-          <div className="fixed inset-x-0 bottom-0 z-40 border-t bg-background/95 p-4 backdrop-blur md:hidden">
+          <div className="bg-background/95 backdrop-blur md:hidden">
             <Button
               onClick={guardarTodos}
               disabled={saving}
-              className="h-12 w-full gap-2 rounded-xl text-sm font-semibold shadow-lg"
+              className="w-full gap-2 rounded-xl text-sm font-semibold shadow-lg"
             >
-              <Sparkles className="h-4 w-4" />
+              <Save className="h-4 w-4" />
 
               {saving
                 ? 'Guardando cambios...'
@@ -507,15 +507,14 @@ export default function DiarioPage() {
           </div>
 
           {/* DESKTOP FOOTER */}
-          <div className="hidden md:flex justify-end pt-2">
+          <div className="hidden md:flex">
             <Button
               onClick={guardarTodos}
               disabled={saving}
               size="lg"
-              className="gap-2 rounded-xl px-8 shadow-sm"
+              className="gap-2 rounded-xl px-4 shadow-sm"
             >
-              <Sparkles className="h-4 w-4" />
-
+              <Save className="h-4 w-4" />
               {saving
                 ? 'Guardando...'
                 : 'Guardar Todo'}

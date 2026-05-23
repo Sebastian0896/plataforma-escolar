@@ -129,7 +129,7 @@ export default function EvaluacionesPage() {
   };
 
   return (
-    <div className="space-y-8 pb-24">
+    <div className="space-y-8">
       {/* Header */}
       <div className="flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
         <div className="space-y-3">
@@ -225,8 +225,8 @@ export default function EvaluacionesPage() {
           </Card>
 
           {/* Footer Flotante de Persistencia */}
-          <div className="sticky bottom-4 z-30 flex justify-end">
-            <Button onClick={guardar} size="lg" className="h-12 rounded-2xl px-8 shadow-2xl">
+          <div className="flex">
+            <Button onClick={guardar} size="lg" className="w-full md:w-[200px] gap-2 rounded-xl px-4 shadow-sm">
               <Save className="mr-2 h-4 w-4" /> Guardar Evaluaciones
             </Button>
           </div>

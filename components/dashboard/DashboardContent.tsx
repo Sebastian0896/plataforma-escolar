@@ -43,7 +43,7 @@ export function DashboardContent({ data }: DashboardContentProps) {
       accesos.push(
         { href: '/admin/docente/diario', label: 'Diario del Docente', icon: CalendarDays, color: 'bg-blue-500' },
         { href: '/admin/docente/asistencia', label: 'Pase de Lista', icon: ClipboardCheck, color: 'bg-green-500' },
-        { href: '/admin/planificaciones/nueva', label: 'Nueva Planificación', icon: BookOpen, color: 'bg-purple-500' }
+        { href: '/admin/docente/planificaciones/nueva', label: 'Nueva Planificación', icon: BookOpen, color: 'bg-purple-500' }
       )
     }
     
@@ -173,7 +173,7 @@ export function DashboardContent({ data }: DashboardContentProps) {
         <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
           ⚡ Accesos rápidos
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {accesosRapidos.map((acceso) => (
             <Link key={acceso.href} href={acceso.href}>
               <Card className="cursor-pointer hover:shadow-md transition-all hover:-translate-y-1">
