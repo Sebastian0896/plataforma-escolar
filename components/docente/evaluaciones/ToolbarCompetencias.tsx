@@ -27,11 +27,11 @@ export function ToolbarCompetencias({
       <div className="space-y-1">
         <h3 className="font-semibold">Captura de notas</h3>
         <p className="text-sm text-muted-foreground">
-          Selecciona una competencia y registra las notas rápidamente.
+          Registra las notas rápidamente seleccionando la competencia correspondiente.
         </p>
       </div>
 
-      <div className="flex w-full flex-col gap-3 md:w-auto md:flex-row">
+     {/*  <div className="flex w-full flex-col gap-3 md:w-auto md:flex-row">
         <div className="flex items-center gap-2">
           <Button
             type="button"
@@ -64,7 +64,7 @@ export function ToolbarCompetencias({
             </option>
           ))}
         </select>
-      </div>
+      </div> */}
     </div>
   );
 }

@@ -214,8 +214,11 @@ export default function EvaluacionesPage() {
                   key={e.id}
                   estudiante={e}
                   resumen={resumen[e.id]}
-                  nota={notas[e.id]?.[competenciaActiva]}
-                  onNotaChange={(valor) => handleNotaChange(e.id, competenciaActiva, valor)}
+                  competencias={competencias}  // ✅ Todas las competencias
+                  notasEstudiante={notas[e.id]}  // ✅ Todas las notas del estudiante
+                  onNotaChange={(competenciaId, valor) => 
+                    handleNotaChange(e.id, competenciaId, valor)
+                  }
                 />
               ))}
             </div>
