@@ -2,6 +2,7 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Estudiante, ResumenEstudiante, Competencia } from './types';
+import { Input } from '@/components/ui/input';
 
 interface FilaEstudianteProps {
   estudiante: Estudiante;
@@ -77,7 +78,7 @@ export const FilaEstudiante = React.memo(function FilaEstudiante({
                 {nombreCorto}
               </span>
               
-              <input
+              <Input
                 type="number"
                 min="0"
                 max="100"
@@ -103,7 +104,7 @@ export const FilaEstudiante = React.memo(function FilaEstudiante({
                     inputs[index + 1]?.focus();
                   }
                 }}
-                className={`h-11 w-full rounded-xl border text-center text-sm font-bold shadow-sm outline-none transition-all duration-200 focus:scale-105 focus:ring-2 focus:ring-primary sm:w-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${getColorNota(notaActual)}`}
+                className={`h-11 w-full rounded-xl border text-center text-base font-bold shadow-sm outline-none transition-all duration-200 focus:scale-105 focus:ring-2 focus:ring-primary sm:w-16 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${getColorNota(notaActual)}`}
               />
             </div>
           );
