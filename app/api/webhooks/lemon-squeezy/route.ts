@@ -398,13 +398,14 @@ export async function POST(req: NextRequest) {
       console.log('❌ SUBSCRIPTION CANCELLED')
 
       if (subscriptionId) {
-        // Buscar la suscripción primero
+        // Buscar la suscripción
         const suscripcion = await prisma.suscripcion.findFirst({
           where: { lemonSubscriptionId: subscriptionId },
+          include: { usuario: true }
         })
 
         if (suscripcion) {
-          // Actualizar estado de la suscripción
+          // Actualizar suscripción
           await prisma.suscripcion.update({
             where: { id: suscripcion.id },
             data: {
@@ -414,7 +415,7 @@ export async function POST(req: NextRequest) {
             },
           })
 
-          // Actualizar el plan del usuario
+          // Actualizar usuario
           await prisma.suscripcion.update({
             where: { id: suscripcion.usuarioId },
             data: {
@@ -422,7 +423,13 @@ export async function POST(req: NextRequest) {
             },
           })
 
-          console.log('✅ Suscripción cancelada y usuario downgrade a gratis')
+          // ✅ Forzar actualización de la sesión (NextAuth)
+          // Opción 1: Invalidar la sesión actual
+          await prisma.session.deleteMany({
+            where: { userId: suscripcion.usuarioId }
+          })
+
+          console.log('✅ Suscripción cancelada, usuario downgrade y sesión invalidada')
         }
       }
     }

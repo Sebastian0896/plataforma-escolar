@@ -54,6 +54,7 @@ export function HistorialPagos() {
     cargarHistorial()
   }, [])
 
+  
   const handleCancelar = async () => {
     if (!confirm('¿Cancelar tu suscripción? Perderás acceso a funciones premium al final del período.')) return
     
@@ -64,8 +65,16 @@ export function HistorialPagos() {
       })
       
       if (res.ok) {
+        
         await update()
-        await cargarHistorial()
+        //await cargarHistorial()
+       
+        window.location.reload()
+        
+        // ✅ Disparar evento para otros componentes
+        /* window.dispatchEvent(new CustomEvent('subscription-cancelled', { 
+          detail: { cancelled: true } 
+          })) */
         toast.success('Suscripción cancelada exitosamente')
       } else {
         const data = await res.json()
@@ -76,29 +85,11 @@ export function HistorialPagos() {
       toast.error('Error al cancelar')
     } finally {
       setCancelando(false)
+
     }
   }
 
- /*  const handleSincronizar = async () => {
-    setSincronizando(true)
-    try {
-      const res = await fetch('/api/docente/sincronizar-suscripcion', {
-        method: 'POST',
-      })
-      const data = await res.json()
-      if (res.ok) {
-        await update()
-        await cargarHistorial()
-        alert('Estado sincronizado correctamente')
-      } else {
-        alert(data.error || 'Error al sincronizar')
-      }
-    } catch (error) {
-      alert('Error al sincronizar')
-    } finally {
-      setSincronizando(false)
-    }
-  } */
+
 
   const getPlanNombre = (plan: string) => {
     switch (plan) {

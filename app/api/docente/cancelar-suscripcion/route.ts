@@ -46,6 +46,7 @@ export async function POST(req: NextRequest) {
       where: { id: suscripcion.id },
       data: {
         estado: 'inactive',
+        plan: 'gratis',
         fechaFin: new Date(),
       },
     })
