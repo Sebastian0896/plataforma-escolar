@@ -28,12 +28,16 @@ export const metadata: Metadata = {
     title: 'Plataforma Educativa',
     description: 'Sistema de gestión educativa',
     images: '/og-image.png',
-  },
+  }
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es" suppressHydrationWarning className={cn("font-sans", geist.variable)}>
+      <head>
+        {/* Previene zoom en inputs en Safari iOS */}
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=yes" />
+      </head>
       <body className="bg-gray-50 dark:bg-slate-950 text-gray-900 dark:text-gray-100">
         <SessionProvider>
           <ThemeProvider>

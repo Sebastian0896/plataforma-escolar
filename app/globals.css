@@ -136,4 +136,39 @@
   html {
     @apply font-sans;
   }
+
+  a,
+  button,
+  [role="button"],
+  [role="tab"],
+  [role="menuitem"],
+  [role="link"],
+  .cursor-clickable,
+  .btn,
+  .card-clickable,
+  select,
+  summary {
+    cursor: pointer;
+  }
+  
+  /* Deshabilitar cursor pointer para elementos disabled */
+  button:disabled,
+  a:disabled,
+  [disabled],
+  .disabled {
+    cursor: not-allowed;
+  }
+
+  /* ========== 2. PREVENIR ZOOM EN INPUTS (Mobile) ========== */
+  input,
+  textarea,
+  select {
+    /* Previene zoom automático en iOS cuando el input tiene foco */
+    font-size: 16px;
+  }
+  
+  /* Para inputs number específicamente */
+  input[type="number"] {
+    font-size: 16px;
+  }
 }
