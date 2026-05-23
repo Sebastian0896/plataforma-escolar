@@ -300,7 +300,7 @@ export default function TomarAsistenciaPage() {
                     placeholder="Buscar estudiante..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="h-8 pl-7 text-xs w-full sm:w-48"
+                    className="h-8 pl-7 text-base w-full sm:w-48"
                   />
                 </div>
                 <Select value={filtroAsistencia} onValueChange={setFiltroAsistencia}>
@@ -372,7 +372,7 @@ export default function TomarAsistenciaPage() {
                         placeholder="Observación..." 
                         value={obs}
                         onChange={(e) => cambiarObservacion(est.id, e.target.value)}
-                        className="h-8 text-xs flex-1 sm:w-48"
+                        className="h-8 text-base flex-1 sm:w-48"
                       />
                       
                       <Button 

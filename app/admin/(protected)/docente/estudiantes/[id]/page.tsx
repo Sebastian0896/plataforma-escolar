@@ -235,10 +235,10 @@ export default function EstudianteFichaPage() {
                           {editando === (r.id || r._id) ? (
                             <>
                               <TableCell className="text-xs">{new Date(r.fecha).toLocaleDateString()}</TableCell>
-                              <TableCell><Input type="number" value={editValues.participacion} onChange={e => setEditValues({...editValues, participacion: +e.target.value})} className="w-16 h-8 mx-auto text-center"/></TableCell>
+                              <TableCell><Input type="number" value={editValues.participacion} onChange={e => setEditValues({...editValues, participacion: +e.target.value})} className="w-16 h-8 mx-auto text-center text-base"/></TableCell>
                               <TableCell className="text-center"><Checkbox checked={editValues.tarea} onCheckedChange={v => setEditValues({...editValues, tarea: !!v})}/></TableCell>
-                              <TableCell><Input type="number" value={editValues.puntosExtra} onChange={e => setEditValues({...editValues, puntosExtra: +e.target.value})} className="w-16 h-8 mx-auto text-center"/></TableCell>
-                              <TableCell><Input value={editValues.observacion} onChange={e => setEditValues({...editValues, observacion: e.target.value})} className="h-8 text-xs"/></TableCell>
+                              <TableCell><Input type="number" value={editValues.puntosExtra} onChange={e => setEditValues({...editValues, puntosExtra: +e.target.value})} className="w-16 h-8 mx-auto text-center text-base"/></TableCell>
+                              <TableCell><Input value={editValues.observacion} onChange={e => setEditValues({...editValues, observacion: e.target.value})} className="h-8 text-base"/></TableCell>
                               <TableCell className="flex gap-1 justify-end py-4 pr-4">
                                 <Button size="icon" variant="ghost" className="h-8 w-8 text-green-600" onClick={guardarEdicion}><Save className="h-4 w-4"/></Button>
                                 <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => setEditando(null)}><X className="h-4 w-4"/></Button>
