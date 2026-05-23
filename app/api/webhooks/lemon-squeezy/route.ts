@@ -394,27 +394,36 @@ export async function POST(req: NextRequest) {
     // CANCELLED
     // =====================================================
 
-    else if (
-      eventName ===
-      'subscription_cancelled'
-    ) {
-      console.log(
-        '❌ SUBSCRIPTION CANCELLED'
-      )
+    else if (eventName === 'subscription_cancelled') {
+      console.log('❌ SUBSCRIPTION CANCELLED')
 
       if (subscriptionId) {
-        await prisma.suscripcion.updateMany(
-          {
-            where: {
-              lemonSubscriptionId:
-                subscriptionId,
-            },
+        // Buscar la suscripción primero
+        const suscripcion = await prisma.suscripcion.findFirst({
+          where: { lemonSubscriptionId: subscriptionId },
+        })
+
+        if (suscripcion) {
+          // Actualizar estado de la suscripción
+          await prisma.suscripcion.update({
+            where: { id: suscripcion.id },
             data: {
               estado: 'inactive',
               fechaFin: new Date(),
+              plan: 'gratis',
             },
-          }
-        )
+          })
+
+          // Actualizar el plan del usuario
+          await prisma.suscripcion.update({
+            where: { id: suscripcion.usuarioId },
+            data: {
+              plan: 'gratis',
+            },
+          })
+
+          console.log('✅ Suscripción cancelada y usuario downgrade a gratis')
+        }
       }
     }
 
