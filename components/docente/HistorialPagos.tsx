@@ -1,7 +1,7 @@
 // components/docente/HistorialPagos.tsx
 'use client'
 
-import { useEffect, useState } from 'react' // ✅ Agregar useCallback
+import { useCallback, useEffect, useState } from 'react' // ✅ Agregar useCallback
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -40,21 +40,28 @@ export function HistorialPagos() {
   // ✅ Mover cargarHistorial ANTES de usarlo en useEffect
   
   // ✅ Ahora cargarHistorial ya está declarado
-  const cargarHistorial = async () => {
-    try {
-      const res = await fetch('/api/docente/pagos')
-      const data = await res.json()
-      setPagos(data.pagos || [])
-      setSuscripcion(data.suscripcion)
-    } catch (error) {
-      console.error('Error:', error)
-    } finally {
-      setLoading(false)
-    }
+  const cargarHistorial = useCallback(async () => {
+  try {
+    const res = await fetch('/api/docente/pagos')
+
+    const data = await res.json()
+
+    setPagos(data.pagos || [])
+    setSuscripcion(data.suscripcion)
+  } catch (error) {
+    console.error('Error:', error)
+  } finally {
+    setLoading(false)
   }
+}, [])
   useEffect(() => {
-    cargarHistorial()
-  }, [])
+    const init = async () =>{
+      await cargarHistorial()
+
+    }
+
+    init();
+  }, [cargarHistorial])
 
   
   const handleCancelar = async () => {
@@ -70,14 +77,6 @@ export function HistorialPagos() {
         
         await update()
         router.refresh();
-        //await cargarHistorial()
-       
-        //window.location.reload()
-        
-        // ✅ Disparar evento para otros componentes
-        /* window.dispatchEvent(new CustomEvent('subscription-cancelled', { 
-          detail: { cancelled: true } 
-          })) */
         toast.success('Suscripción cancelada exitosamente')
       } else {
         const data = await res.json()
