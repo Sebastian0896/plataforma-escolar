@@ -95,7 +95,31 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.ciclos = token.ciclos as string[]
         session.user.centroId = token.centroId as string
         session.user.centroNombre = token.centroNombre as string
+        
+        // 🔥 CONSULTAR PLAN ACTUAL EN TIEMPO REAL
+        const suscripcion =
+          await prisma.suscripcion.findFirst({
+            where: {
+              usuarioId: token.id as string,
+              estado: 'active',
+              OR: [
+                { fechaFin: null },
+                {
+                  fechaFin: {
+                    gt: new Date(),
+                  },
+                },
+              ],
+            },
+            orderBy: {
+              fechaInicio: 'desc',
+            },
+          })
+
+        session.user.plan =
+          suscripcion?.plan || 'gratis'
       }
+      
       return session
     },
     async redirect({ url, baseUrl }) {

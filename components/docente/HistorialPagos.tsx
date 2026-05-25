@@ -38,19 +38,19 @@ export function HistorialPagos() {
   // ✅ Mover cargarHistorial ANTES de usarlo en useEffect
   
   // ✅ Ahora cargarHistorial ya está declarado
-  useEffect(() => {
-    const cargarHistorial = async () => {
-      try {
-        const res = await fetch('/api/docente/pagos')
-        const data = await res.json()
-        setPagos(data.pagos || [])
-        setSuscripcion(data.suscripcion)
-      } catch (error) {
-        console.error('Error:', error)
-      } finally {
-        setLoading(false)
-      }
+  const cargarHistorial = async () => {
+    try {
+      const res = await fetch('/api/docente/pagos')
+      const data = await res.json()
+      setPagos(data.pagos || [])
+      setSuscripcion(data.suscripcion)
+    } catch (error) {
+      console.error('Error:', error)
+    } finally {
+      setLoading(false)
     }
+  }
+  useEffect(() => {
     cargarHistorial()
   }, [])
 
@@ -67,9 +67,9 @@ export function HistorialPagos() {
       if (res.ok) {
         
         await update()
-        //await cargarHistorial()
+        await cargarHistorial()
        
-        window.location.reload()
+        //window.location.reload()
         
         // ✅ Disparar evento para otros componentes
         /* window.dispatchEvent(new CustomEvent('subscription-cancelled', { 
