@@ -53,15 +53,29 @@ export function HistorialPagos() {
   } finally {
     setLoading(false)
   }
-}, [])
+  }, [])
+ 
   useEffect(() => {
-    const init = async () =>{
-      await cargarHistorial()
+    cargarHistorial()
 
-    }
+    const interval = setInterval(async () => {
+      const res = await fetch('/api/docente/pagos')
+      const data = await res.json()
 
-    init();
-  }, [cargarHistorial])
+      // Si aparece suscripción o pagos → actualizar UI
+      if (
+        data?.suscripcion ||
+        data?.pagos?.length > 0
+      ) {
+        setPagos(data.pagos || [])
+        setSuscripcion(data.suscripcion)
+
+        clearInterval(interval)
+      }
+    }, 3000)
+
+    return () => clearInterval(interval)
+  }, [])
 
   
   const handleCancelar = async () => {
