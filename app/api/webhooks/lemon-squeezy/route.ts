@@ -249,35 +249,43 @@ export async function POST(req: NextRequest) {
     // SUBSCRIPTION UPDATED
     // =====================================================
 
-    else if (
-      eventName ===
-      'subscription_updated'
-    ) {
-      console.log(
-        '♻️ SUBSCRIPTION UPDATED'
-      )
+    else if (eventName === 'subscription_updated') {
+      console.log('♻️ SUBSCRIPTION UPDATED')
 
       if (subscriptionId) {
-        await prisma.suscripcion.updateMany(
-          {
-            where: {
-              lemonSubscriptionId:
-                subscriptionId,
-            },
-            data: {
-              estado: 'active',
 
-              plan:
-                planDeterminado,
+        const cancelada = attributes.cancelled === true
 
-              fechaFin:
-                attributes.renews_at
-                  ? new Date(
-                      attributes.renews_at
-                    )
-                  : null,
-            },
-          }
+        await prisma.suscripcion.updateMany({
+          where: {
+            lemonSubscriptionId: subscriptionId,
+          },
+
+          data: {
+            estado: cancelada ? 'inactive' : 'active',
+
+            plan: cancelada
+              ? 'gratis'
+              : planDeterminado,
+
+            fechaFin: cancelada
+              ? (
+                  attributes.ends_at
+                    ? new Date(attributes.ends_at)
+                    : new Date()
+                )
+              : (
+                  attributes.renews_at
+                    ? new Date(attributes.renews_at)
+                    : null
+                ),
+          },
+        })
+
+        console.log(
+          cancelada
+            ? '✅ Suscripción marcada como cancelada'
+            : '✅ Suscripción actualizada'
         )
       }
     }
