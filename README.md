@@ -140,3 +140,17 @@ LEMON_VARIANT_DOCENTE_PREMIUM_ANUAL=...
 - Template de email profesional y responsive
 - Enlace seguro con expiración de 1 hora
 - Validación de token y manejo de errores
+
+
+
+## Seguimiento de los commits
+
+
+git add .
+git commit -m "Mensaje de actualización"
+git checkout develop
+git merge feature/docente-module
+git push origin develop
+git checkout main
+git merge develop
+git push origin main

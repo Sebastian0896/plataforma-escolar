@@ -413,22 +413,18 @@ export async function POST(req: NextRequest) {
 
         if (suscripcion) {
           // Actualizar suscripción
-          await prisma.suscripcion.update({
-            where: { id: suscripcion.id },
+          await prisma.suscripcion.updateMany({
+            where: {
+              usuarioId: suscripcion.usuarioId,
+              estado: 'active',
+            },
+
             data: {
               estado: 'inactive',
               fechaFin: new Date(),
               plan: 'gratis',
             },
           })
-
-          // Actualizar usuario
-          /* await prisma.suscripcion.update({
-            where: { id: suscripcion.usuarioId },
-            data: {
-              plan: 'gratis',
-            },
-          }) */
 
           console.log('✅ Suscripción cancelada, usuario downgrade y sesión invalidada')
         }
