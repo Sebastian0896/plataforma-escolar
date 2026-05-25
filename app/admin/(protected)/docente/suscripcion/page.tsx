@@ -1,4 +1,7 @@
 // app/admin/docente/suscripcion/page.tsx
+
+export const dynamic = 'force-dynamic'
+
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'

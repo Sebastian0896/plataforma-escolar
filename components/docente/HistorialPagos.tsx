@@ -1,13 +1,14 @@
 // components/docente/HistorialPagos.tsx
 'use client'
 
-import { useEffect, useState, useCallback } from 'react' // ✅ Agregar useCallback
+import { useEffect, useState } from 'react' // ✅ Agregar useCallback
+import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { CreditCard, AlertCircle, Loader2 } from 'lucide-react'
+import { CreditCard, AlertCircle } from 'lucide-react'
 import { toast } from 'sonner'
 import { Skeleton } from '../ui/skeleton'
 
@@ -35,6 +36,7 @@ export function HistorialPagos() {
   const [loading, setLoading] = useState(true)
   const [cancelando, setCancelando] = useState(false)
 
+  const router = useRouter()
   // ✅ Mover cargarHistorial ANTES de usarlo en useEffect
   
   // ✅ Ahora cargarHistorial ya está declarado
@@ -67,7 +69,8 @@ export function HistorialPagos() {
       if (res.ok) {
         
         await update()
-        await cargarHistorial()
+        router.refresh();
+        //await cargarHistorial()
        
         //window.location.reload()
         
