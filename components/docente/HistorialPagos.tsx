@@ -65,29 +65,60 @@ export function HistorialPagos() {
 
   
   const handleCancelar = async () => {
-    if (!confirm('¿Cancelar tu suscripción? Perderás acceso a funciones premium al final del período.')) return
-    
+    if (
+      !confirm(
+        '¿Cancelar tu suscripción? Perderás acceso a funciones premium al final del período.'
+      )
+    ) {
+      return
+    }
+
     setCancelando(true)
+
     try {
-      const res = await fetch('/api/docente/cancelar-suscripcion', {
-        method: 'POST',
-      })
-      
-      if (res.ok) {
-        
-        await update()
-        router.refresh();
-        toast.success('Suscripción cancelada exitosamente')
-      } else {
+      const res = await fetch(
+        '/api/docente/cancelar-suscripcion',
+        {
+          method: 'POST',
+        }
+      )
+
+      if (!res.ok) {
         const data = await res.json()
-        toast.error(data.error || 'Error al cancelar')
+
+        toast.error(
+          data.error || 'Error al cancelar'
+        )
+
+        return
       }
+
+      toast.success(
+        'Suscripción cancelada'
+      )
+
+      // ⏳ Esperar webhook y sincronización
+      await new Promise((resolve) =>
+        setTimeout(resolve, 2500)
+      )
+
+      // 🔄 Recargar historial
+      await cargarHistorial()
+
+      // 🔄 Actualizar sesión
+      await update()
+
+      // 🔄 Refrescar App Router
+      router.refresh()
+
     } catch (error) {
-      console.error("SG - ERROR: ", error)
-      toast.error('Error al cancelar')
+      console.error(error)
+
+      toast.error(
+        'Error al cancelar'
+      )
     } finally {
       setCancelando(false)
-
     }
   }
 
