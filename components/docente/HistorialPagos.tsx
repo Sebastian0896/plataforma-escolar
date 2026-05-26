@@ -40,42 +40,62 @@ export function HistorialPagos() {
   // ✅ Mover cargarHistorial ANTES de usarlo en useEffect
   
   // ✅ Ahora cargarHistorial ya está declarado
-  const cargarHistorial = useCallback(async () => {
-  try {
-    const res = await fetch('/api/docente/pagos')
+    const cargarHistorial = async () => {
+    try {
+      const res = await fetch('/api/docente/pagos', {
+        cache: 'no-store',
+      })
 
-    const data = await res.json()
+      const data = await res.json()
 
-    setPagos(data.pagos || [])
-    setSuscripcion(data.suscripcion)
-  } catch (error) {
-    console.error('Error:', error)
-  } finally {
-    setLoading(false)
+      setPagos(data.pagos || [])
+      setSuscripcion(data.suscripcion)
+    } catch (error) {
+      console.error('Error:', error)
+    } finally {
+      setLoading(false)
+    }
   }
-  }, [])
  
-  useEffect(() => {
+    useEffect(() => {
     cargarHistorial()
 
     const interval = setInterval(async () => {
-      const res = await fetch('/api/docente/pagos')
-      const data = await res.json()
+      try {
+        const res = await fetch('/api/docente/pagos', {
+          cache: 'no-store',
+        })
 
-      // Si aparece suscripción o pagos → actualizar UI
-      if (
-        data?.suscripcion ||
-        data?.pagos?.length > 0
-      ) {
-        setPagos(data.pagos || [])
-        setSuscripcion(data.suscripcion)
+        const data = await res.json()
 
-        clearInterval(interval)
+        // Estado actual local
+        const estadoActual = suscripcion?.estado || null
+        const pagosActuales = pagos.length
+
+        // Estado nuevo desde API
+        const nuevoEstado = data?.suscripcion?.estado || null
+        const nuevosPagos = data?.pagos?.length || 0
+
+        // ✅ Solo actualizar si hubo cambios reales
+        const cambioEstado = estadoActual !== nuevoEstado
+        const cambioPagos = pagosActuales !== nuevosPagos
+
+        if (cambioEstado || cambioPagos) {
+          setPagos(data.pagos || [])
+          setSuscripcion(data.suscripcion)
+        }
+
+        // ✅ Detener polling si ya está inactiva
+        if (!data?.suscripcion || nuevoEstado !== 'active') {
+          clearInterval(interval)
+        }
+      } catch (error) {
+        console.error('Error polling pagos:', error)
       }
     }, 3000)
 
     return () => clearInterval(interval)
-  }, [])
+  }, [suscripcion?.estado, pagos.length])
 
   
   const handleCancelar = async () => {
