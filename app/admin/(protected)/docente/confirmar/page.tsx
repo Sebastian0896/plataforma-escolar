@@ -67,7 +67,7 @@ export default function ConfirmarPagoPage() {
         if (terminadoInterval) {
           clearInterval(interval)
         }
-      }, 2500)
+      }, 4000)
 
       return () => clearInterval(interval)
     })
