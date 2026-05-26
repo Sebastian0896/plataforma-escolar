@@ -68,13 +68,18 @@ export function HistorialPagos() {
   // EFECTO DE CONTROL PRINCIPAL Y POLLING OPTIMIZADO
   // =====================================================
   useEffect(() => {
-    if (!esPostCompra) {
-      // Flujo normal: Carga inmediata y sin bucles si no viene de pagar
+    // 🕵️‍♂️ EXTRACCIÓN ULTRA-SEGURA NATIVA: Evita los problemas de hidratación de Next.js
+    const paramsNativos = new URLSearchParams(window.location.search)
+    const tieneSessionCheck = paramsNativos.get('session_check') === 'true'
+
+    if (!tieneSessionCheck) {
+      // Flujo normal: Si no viene de pagar, carga inmediata sin esperas
       cargarHistorial()
+      setSincronizando(false)
       return
     }
 
-    // Flujo inteligente: Solo si acaba de comprar
+    // Flujo inteligente: Activamos el loader explícitamente en el cliente
     setSincronizando(true)
     let intentos = 0
 
@@ -93,33 +98,33 @@ export function HistorialPagos() {
         setSyncPaso('¡Todo listo! Redirigiendo...')
         toast.success('¡Pago procesado con éxito! Gracias por tu compra.')
         
-        // Dar un breve respiro visual antes de quitar la pantalla completa
+        // Breve respiro visual antes de liberar la pantalla
         setTimeout(async () => {
-          await update() // Actualiza la sesión de Next-Auth en el cliente
+          await update() // Actualiza la sesión en Next-Auth
           setSincronizando(false)
-          router.replace('/admin/docente') // Limpia el ?session_check de la URL
+          router.replace('/admin/docente') // Limpia el ?session_check de la barra
           router.refresh()
         }, 1500)
         
-        return true // Detiene el flujo
+        return true 
       }
 
-      // Evitar bucle infinito si el webhook de Lemon Squeezy se tarda de más
+      // Evitar bucle infinito si el webhook se retrasa demasiado
       if (intentos >= 12) {
         setSincronizando(false)
         router.replace('/admin/docente')
-        toast.error('El pago está tomando más tiempo de lo normal en procesarse. Tu cuenta se actualizará automáticamente en unos minutos.')
+        toast.error('El pago está tomando más tiempo de lo normal. Tu cuenta se actualizará automáticamente en breve.')
         return true
       }
 
       return false
     }
 
-    // Ejecutar el primer chequeo de inmediato
+    // Arrancar el primer chequeo inmediatamente
     ejecutarPolling().then((terminado) => {
       if (terminado) return
 
-      // Si no ha terminado, iniciar el intervalo cada 2.5 segundos (tiempo ideal para el webhook)
+      // Si no ha impactado el pago, ejecutamos el intervalo cada 2.5 segundos
       const interval = setInterval(async () => {
         const terminadoInterval = await ejecutarPolling()
         if (terminadoInterval) {
@@ -130,7 +135,7 @@ export function HistorialPagos() {
       return () => clearInterval(interval)
     })
 
-  }, [esPostCompra, cargarHistorial, router, update])
+  }, [cargarHistorial, router, update])
 
   
   const handleCancelar = async () => {
