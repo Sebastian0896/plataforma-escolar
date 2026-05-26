@@ -40,6 +40,12 @@ export function HistorialPagos() {
   const [pagos, setPagos] = useState<Pago[]>([])
   const [suscripcion, setSuscripcion] = useState<Suscripcion | null>(null)
   const [loading, setLoading] = useState(true)
+
+  // 🕵️‍♂️ EL CHISMOSO: Pon esta línea aquí arriba
+  if (typeof window !== 'undefined') {
+    console.log("🔍 URL ACTUAL EN EL NAVEGADOR:", window.location.href);
+  }
+
   const [cancelando, setCancelando] = useState(false)
   
   // Estados para el Loader de Sincronización Inteligente
