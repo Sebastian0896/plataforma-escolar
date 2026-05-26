@@ -1,7 +1,7 @@
 // components/docente/HistorialPagos.tsx
 'use client'
 
-import { useCallback, useEffect, useState } from 'react' // ✅ Agregar useCallback
+import {  useEffect, useState } from 'react' // ✅ Agregar useCallback
 import { useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -58,44 +58,43 @@ export function HistorialPagos() {
   }
  
     useEffect(() => {
-    cargarHistorial()
+      cargarHistorial()
 
-    const interval = setInterval(async () => {
-      try {
-        const res = await fetch('/api/docente/pagos', {
-          cache: 'no-store',
-        })
+      let attempts = 0
 
-        const data = await res.json()
+      const interval = setInterval(async () => {
+        try {
+          attempts++
 
-        // Estado actual local
-        const estadoActual = suscripcion?.estado || null
-        const pagosActuales = pagos.length
+          const res = await fetch('/api/docente/pagos', {
+            cache: 'no-store',
+          })
 
-        // Estado nuevo desde API
-        const nuevoEstado = data?.suscripcion?.estado || null
-        const nuevosPagos = data?.pagos?.length || 0
+          const data = await res.json()
 
-        // ✅ Solo actualizar si hubo cambios reales
-        const cambioEstado = estadoActual !== nuevoEstado
-        const cambioPagos = pagosActuales !== nuevosPagos
-
-        if (cambioEstado || cambioPagos) {
           setPagos(data.pagos || [])
           setSuscripcion(data.suscripcion)
-        }
 
-        // ✅ Detener polling si ya está inactiva
-        if (!data?.suscripcion || nuevoEstado !== 'active') {
+          // ✅ Si ya llegaron pagos o la suscripción cambió
+          if (
+            data?.pagos?.length > 0 ||
+            data?.suscripcion?.estado !== 'active'
+          ) {
+            clearInterval(interval)
+          }
+
+          // ✅ Evitar polling infinito
+          if (attempts >= 15) {
+            clearInterval(interval)
+          }
+        } catch (error) {
+          console.error('Error polling pagos:', error)
           clearInterval(interval)
         }
-      } catch (error) {
-        console.error('Error polling pagos:', error)
-      }
-    }, 3000)
+      }, 1000) // 👈 cada 1 segundo
 
-    return () => clearInterval(interval)
-  }, [suscripcion?.estado, pagos.length])
+      return () => clearInterval(interval)
+    }, [])
 
   
   const handleCancelar = async () => {
