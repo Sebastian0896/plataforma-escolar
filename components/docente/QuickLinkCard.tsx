@@ -38,6 +38,7 @@ export function QuickLinkCard({
             <h3 className={`font-semibold ${bloqueado ? 'text-muted-foreground' : 'text-slate-900 dark:text-white'}`}>
               {title}
             </h3>
+            
             {isPremium && !hasAccess && (
               <Badge variant="outline" className="text-xs border-yellow-500 text-yellow-600">
                 <Crown className="h-3 w-3 mr-1" />
@@ -49,6 +50,11 @@ export function QuickLinkCard({
                 ✓ Disponible
               </Badge>
             )}
+
+            {!isPremium  && (<Badge variant="outline" className="text-xs border-gray-500 text-gray-600">
+              <Crown className="h-3 w-3 mr-1" />
+              Gratis
+            </Badge>)}
           </div>
 
           <p className="mt-1 text-sm text-muted-foreground">

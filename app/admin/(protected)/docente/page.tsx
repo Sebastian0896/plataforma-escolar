@@ -121,7 +121,7 @@ export default function DocenteDashboard() {
       description: 'Semana actual',
       href: '/admin/docente/semana',
       icon: LayoutDashboard,
-      premium: false,
+      premium: true,
     },
   ]
 
