@@ -1,14 +1,14 @@
 // components/docente/HistorialPagos.tsx
 'use client'
 
-import {  useEffect, useState } from 'react' // ✅ Agregar useCallback
-import { useRouter } from 'next/navigation'
+import { useEffect, useState, useCallback } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { CreditCard, AlertCircle } from 'lucide-react'
+import { CreditCard, AlertCircle, Loader2, CheckCircle2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Skeleton } from '../ui/skeleton'
 
@@ -31,131 +31,135 @@ interface Suscripcion {
 
 export function HistorialPagos() {
   const { data: session, update } = useSession()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  
+  // Detectar si el usuario viene redirigido desde el checkout exitoso
+  const esPostCompra = searchParams.get('session_check') === 'true'
+
   const [pagos, setPagos] = useState<Pago[]>([])
   const [suscripcion, setSuscripcion] = useState<Suscripcion | null>(null)
   const [loading, setLoading] = useState(true)
   const [cancelando, setCancelando] = useState(false)
-
-  const router = useRouter()
-  // ✅ Mover cargarHistorial ANTES de usarlo en useEffect
   
-  // ✅ Ahora cargarHistorial ya está declarado
-    const cargarHistorial = async () => {
+  // Estados para el Loader de Sincronización Inteligente
+  const [sincronizando, setSincronizando] = useState(esPostCompra)
+  const [syncPaso, setSyncPaso] = useState('Verificando pago con Lemon Squeezy...')
+
+  // ✅ Memorizar función de carga para evitar renders infinitos
+  const cargarHistorial = useCallback(async () => {
     try {
       const res = await fetch('/api/docente/pagos', {
         cache: 'no-store',
       })
-
       const data = await res.json()
-
       setPagos(data.pagos || [])
       setSuscripcion(data.suscripcion)
+      return data
     } catch (error) {
-      console.error('Error:', error)
+      console.error('Error cargando historial:', error)
+      return null
     } finally {
       setLoading(false)
     }
-  }
- 
-    useEffect(() => {
+  }, [])
+
+  // =====================================================
+  // EFECTO DE CONTROL PRINCIPAL Y POLLING OPTIMIZADO
+  // =====================================================
+  useEffect(() => {
+    if (!esPostCompra) {
+      // Flujo normal: Carga inmediata y sin bucles si no viene de pagar
       cargarHistorial()
+      return
+    }
 
-      let attempts = 0
+    // Flujo inteligente: Solo si acaba de comprar
+    setSincronizando(true)
+    let intentos = 0
 
+    const ejecutarPolling = async () => {
+      intentos++
+      
+      if (intentos === 4) setSyncPaso('Actualizando tu suscripción en el sistema...')
+      if (intentos === 8) setSyncPaso('Dando los últimos toques a tu cuenta...')
+
+      const data = await cargarHistorial()
+
+      // Condición de éxito: Si ya se registró el pago o la suscripción se activó
+      const pagoExitoso = data?.pagos?.length > 0 || data?.suscripcion?.estado === 'active'
+
+      if (pagoExitoso) {
+        setSyncPaso('¡Todo listo! Redirigiendo...')
+        toast.success('¡Pago procesado con éxito! Gracias por tu compra.')
+        
+        // Dar un breve respiro visual antes de quitar la pantalla completa
+        setTimeout(async () => {
+          await update() // Actualiza la sesión de Next-Auth en el cliente
+          setSincronizando(false)
+          router.replace('/admin/docente') // Limpia el ?session_check de la URL
+          router.refresh()
+        }, 1500)
+        
+        return true // Detiene el flujo
+      }
+
+      // Evitar bucle infinito si el webhook de Lemon Squeezy se tarda de más
+      if (intentos >= 12) {
+        setSincronizando(false)
+        router.replace('/admin/docente')
+        toast.error('El pago está tomando más tiempo de lo normal en procesarse. Tu cuenta se actualizará automáticamente en unos minutos.')
+        return true
+      }
+
+      return false
+    }
+
+    // Ejecutar el primer chequeo de inmediato
+    ejecutarPolling().then((terminado) => {
+      if (terminado) return
+
+      // Si no ha terminado, iniciar el intervalo cada 2.5 segundos (tiempo ideal para el webhook)
       const interval = setInterval(async () => {
-        try {
-          attempts++
-
-          const res = await fetch('/api/docente/pagos', {
-            cache: 'no-store',
-          })
-
-          const data = await res.json()
-
-          setPagos(data.pagos || [])
-          setSuscripcion(data.suscripcion)
-
-          // ✅ Si ya llegaron pagos o la suscripción cambió
-          if (
-            data?.pagos?.length > 0 ||
-            data?.suscripcion?.estado !== 'active'
-          ) {
-            clearInterval(interval)
-          }
-
-          // ✅ Evitar polling infinito
-          if (attempts >= 15) {
-            clearInterval(interval)
-          }
-        } catch (error) {
-          console.error('Error polling pagos:', error)
+        const terminadoInterval = await ejecutarPolling()
+        if (terminadoInterval) {
           clearInterval(interval)
         }
-      }, 1000) // 👈 cada 1 segundo
+      }, 2500)
 
       return () => clearInterval(interval)
-    }, [])
+    })
+
+  }, [esPostCompra, cargarHistorial, router, update])
 
   
   const handleCancelar = async () => {
-    if (
-      !confirm(
-        '¿Cancelar tu suscripción? Perderás acceso a funciones premium al final del período.'
-      )
-    ) {
+    if (!confirm('¿Cancelar tu suscripción? Perderás acceso a funciones premium al final del período.')) {
       return
     }
 
     setCancelando(true)
-
     try {
-      const res = await fetch(
-        '/api/docente/cancelar-suscripcion',
-        {
-          method: 'POST',
-        }
-      )
+      const res = await fetch('/api/docente/cancelar-suscripcion', { method: 'POST' })
 
       if (!res.ok) {
         const data = await res.json()
-
-        toast.error(
-          data.error || 'Error al cancelar'
-        )
-
+        toast.error(data.error || 'Error al cancelar')
         return
       }
 
-      toast.success(
-        'Suscripción cancelada'
-      )
-
-      // ⏳ Esperar webhook y sincronización
-      await new Promise((resolve) =>
-        setTimeout(resolve, 2500)
-      )
-
-      // 🔄 Recargar historial
+      toast.success('Suscripción cancelada')
+      await new Promise((resolve) => setTimeout(resolve, 2500))
       await cargarHistorial()
-
-      // 🔄 Actualizar sesión
       await update()
-
-      // 🔄 Refrescar App Router
       router.refresh()
-
     } catch (error) {
       console.error(error)
-
-      toast.error(
-        'Error al cancelar'
-      )
+      toast.error('Error al cancelar')
     } finally {
       setCancelando(false)
     }
   }
-
-
 
   const getPlanNombre = (plan: string) => {
     switch (plan) {
@@ -176,6 +180,30 @@ export function HistorialPagos() {
       default:
         return <Badge variant="secondary">{estado}</Badge>
     }
+  }
+
+  // =====================================================
+  // COMPONENTE VISUAL: LOADER DE PANTALLA COMPLETA
+  // =====================================================
+  if (sincronizando) {
+    return (
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-background/95 backdrop-blur-md transition-all duration-500">
+        <div className="flex flex-col items-center max-w-sm text-center px-6">
+          {syncPaso.includes('¡Todo listo!') ? (
+            <CheckCircle2 className="h-16 w-16 text-green-500 animate-bounce mb-4" />
+          ) : (
+            <div className="relative flex items-center justify-center mb-6">
+              <Loader2 className="h-16 w-16 text-primary animate-spin" />
+              <CreditCard className="h-6 w-6 text-primary absolute" />
+            </div>
+          )}
+          <h2 className="text-xl font-bold tracking-tight mb-2"> Procesando tu suscripción </h2>
+          <p className="text-sm text-muted-foreground animate-pulse font-medium">
+            {syncPaso}
+          </p>
+        </div>
+      </div>
+    )
   }
 
   if (loading) {
@@ -203,15 +231,6 @@ export function HistorialPagos() {
               <CreditCard className="h-5 w-5" />
               Suscripción actual
             </span>
-            {/* <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleSincronizar}
-              disabled={sincronizando}
-            >
-              <RefreshCw className={`h-4 w-4 mr-2 ${sincronizando ? 'animate-spin' : ''}`} />
-              Sincronizar
-            </Button> */}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
