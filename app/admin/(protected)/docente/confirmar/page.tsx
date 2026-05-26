@@ -39,7 +39,7 @@ export default function ConfirmarPagoPage() {
             await update() // Actualiza la sesión de Next-Auth
             router.push('/admin/docente') // Nos movemos al historial normal limpio
             router.refresh()
-          }, 1500)
+          }, 4000)
           
           return true // Detiene el bucle
         }
