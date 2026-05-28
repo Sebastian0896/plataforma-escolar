@@ -21,20 +21,42 @@ export const proxy = auth(async function proxy(req: NextRequest) {
     loginUrl.searchParams.set('callbackUrl', path)
     return NextResponse.redirect(loginUrl)
   }
-  
-      // ✅ No redirigir si ya está en /dashboard
-      if (path === '/dashboard') {
-        const rol = session?.user?.role
-        //const grado = session?.user?.grado
-        
-        const baseUrl = process.env.NODE_ENV === 'production' 
-      ? 'https://mieducacion.edu.do' 
-      : 'http://localhost:3000'
 
-    if (rol === 'estudiante') {
-      const grado = session?.user?.grado
-      return NextResponse.redirect(new URL(`/estudiante/${grado}`, baseUrl))
+
+  // ✅ Proteger rutas de centros (solo superadmin)
+  if (path.startsWith('/admin/centros')) {
+    const userRole = session?.user?.role
+    if (userRole !== 'superadmin') {
+      return NextResponse.redirect(new URL('/admin/usuarios', req.url))
     }
+  }
+
+  // ✅ Proteger rutas de admin/centro/[id] (solo admin_centro con su propio centro)
+  if (path.match(/^\/admin\/centro\/[^\/]+/)) {
+    const userRole = session?.user?.role
+    const centroIdFromUrl = path.split('/')[3] // /admin/centro/[centroId]/...
+    const userCentroId = session?.user?.centroId
+    
+    // Solo admin_centro puede acceder a su propio centro
+    if (userRole !== 'admin_centro' || centroIdFromUrl !== userCentroId) {
+      return NextResponse.redirect(new URL('/dashboard', req.url))
+    }
+  }
+
+  
+  // ✅ No redirigir si ya está en /dashboard
+  if (path === '/dashboard') {
+    const rol = session?.user?.role
+    //const grado = session?.user?.grado
+    
+    const baseUrl = process.env.NODE_ENV === 'production' 
+  ? 'https://mieducacion.edu.do' 
+  : 'http://localhost:3000'
+
+if (rol === 'estudiante') {
+  const grado = session?.user?.grado
+  return NextResponse.redirect(new URL(`/estudiante/${grado}`, baseUrl))
+}
     
     return NextResponse.next()
   }
