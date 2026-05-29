@@ -1,3 +1,4 @@
+// app/admin/(protected)/centro/[centroId]/usuarios/[id]/editar/page.tsx
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -46,18 +47,32 @@ const GRADOS: Record<string, string[]> = {
   'nivel-secundario-segundo-ciclo': ['4to-secundaria', '5to-secundaria', '6to-secundaria'],
 }
 
+// Roles permitidos para admin_centro
+const ROLES_PERMITIDOS_ADMIN_CENTRO = [
+  { value: 'estudiante', label: 'Estudiante' },
+  { value: 'docente', label: 'Docente' },
+  { value: 'admin_centro', label: 'Admin de Centro' },
+]
+
 export default function EditarUsuarioPage() {
   const router = useRouter()
-  const { id } = useParams()
+  const params = useParams()
   const { data: session } = useSession()
+  const centroId = params.centroId as string
+  const usuarioId = params.id as string
   
+  const userRole = session?.user?.role
+  const isAdminCentro = userRole === 'admin_centro'
+  const isSuperAdmin = userRole === 'superadmin' || userRole === 'admin'
+
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [centroInfo, setCentroInfo] = useState<{ nombre: string; codigo: string } | null>(null)
 
   const [form, setForm] = useState({
     nombre: '', email: '', password: '', genero: '', rol: '',
-    centroId: '', codigoCentro: '',
+    centroId: '',
     nivel: '', ciclo: '', grado: '', rne: '',
     categoriaDocente: '',
     materias: [] as string[],
@@ -70,28 +85,34 @@ export default function EditarUsuarioPage() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const res = await fetch(`/api/usuarios?id=${id}`)
+        // ✅ API corregida: usa centroId y usuarioId
+        const res = await fetch(`/api/admin/centro/${centroId}/usuarios/${usuarioId}`)
         if (!res.ok) throw new Error('Usuario no encontrado')
         const data = await res.json()
 
-        // Buscar código del centro para mostrarlo
-        let codigoCentro = ''
-        if (data.centroId) {
-          const resC = await fetch(`/api/centros?id=${data.centroId}`)
-          if (resC.ok) {
-            const cData = await resC.json()
-            codigoCentro = cData.codigo
-          }
+        // Cargar información del centro (para mostrar)
+        const resCentro = await fetch(`/api/centros/${centroId}`)
+        if (resCentro.ok) {
+          const centroData = await resCentro.json()
+          setCentroInfo({ nombre: centroData.nombre, codigo: centroData.codigo })
         }
 
         setForm({
-          ...data,
-          password: '', // Password siempre vacío en edición por seguridad
-          codigoCentro: codigoCentro || '',
+          nombre: data.nombre || '',
+          email: data.email || '',
+          password: '',
+          genero: data.genero || '',
+          rol: data.rol || '',
+          centroId: data.centroId || centroId,
+          nivel: data.nivel || '',
+          ciclo: data.ciclo || '',
+          grado: data.grado || '',
+          rne: data.rne || '',
+          categoriaDocente: data.categoriaDocente || '',
           materias: data.materias || [],
           niveles: data.niveles || [],
           ciclos: data.ciclos || {},
-          grados: data.grados || []
+          grados: data.grados || [],
         })
       } catch (err: any) {
         setError(err.message)
@@ -100,7 +121,7 @@ export default function EditarUsuarioPage() {
       }
     }
     fetchUserData()
-  }, [id])
+  }, [centroId, usuarioId])
 
   const toggleArray = (campo: 'niveles' | 'materias' | 'grados', valor: string) => {
     setForm(prev => ({
@@ -117,29 +138,28 @@ export default function EditarUsuarioPage() {
     setError('')
 
     try {
-      let centroIdFinal = form.centroId
-
-      // Validar centro si el admin cambió el código
-      if (['admin', 'superadmin'].includes(session?.user?.role || '') && form.codigoCentro) {
-        const resCentro = await fetch(`/api/centros?codigo=${form.codigoCentro.toUpperCase()}`)
-        if (resCentro.ok) {
-          const centroData = await resCentro.json()
-          centroIdFinal = centroData._id
-        }
+      // ✅ Siempre usar el centroId de la URL (validado por el layout y proxy)
+      const body: any = { 
+        ...form, 
+        centroId: centroId,
+        id: usuarioId
       }
-
-      const body: any = { ...form, id, centroId: centroIdFinal }
       if (!body.password) delete body.password
 
-      const res = await fetch('/api/usuarios', {
+      // ✅ API corregida
+      const res = await fetch(`/api/admin/centro/${centroId}/usuarios/${usuarioId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       })
 
-      if (!res.ok) throw new Error('Error al actualizar el perfil')
+      if (!res.ok) {
+        const errorData = await res.json()
+        throw new Error(errorData.error || 'Error al actualizar el perfil')
+      }
 
-      router.push('/admin/usuarios/centros')
+      // ✅ Redirigir a la lista de usuarios del centro
+      router.push(`/admin/centro/${centroId}/usuarios`)
       router.refresh()
     } catch (err: any) {
       setError(err.message)
@@ -161,7 +181,9 @@ export default function EditarUsuarioPage() {
             <ChevronLeft className="h-4 w-4 mr-1" /> Volver
           </Button>
           <h1 className="text-3xl font-bold tracking-tight">Editar Perfil</h1>
-          <p className="text-muted-foreground text-sm">Actualiza la información y permisos del usuario.</p>
+          <p className="text-muted-foreground text-sm">
+            {isAdminCentro && centroInfo && `Centro: ${centroInfo.nombre} (${centroInfo.codigo})`}
+          </p>
         </div>
       </div>
 
@@ -200,31 +222,30 @@ export default function EditarUsuarioPage() {
           </CardContent>
         </Card>
 
-        {/* Card: Rol y Centro */}
+        {/* Card: Rol (sin selector de centro para admin_centro) */}
         <Card className="border-blue-100 dark:border-blue-900 bg-blue-50/20">
-          <CardContent className="pt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-             <div className="space-y-2">
+          <CardContent className="pt-6">
+            <div className="space-y-2">
               <Label>Rol del Sistema</Label>
-              <Select value={form.rol} onValueChange={(v) => setForm({...form, rol: v})}>
-                <SelectTrigger className="bg-white dark:bg-slate-950"><SelectValue /></SelectTrigger>
+              <Select 
+                value={form.rol} 
+                onValueChange={(v) => setForm({...form, rol: v})}
+              >
+                <SelectTrigger className="bg-white dark:bg-slate-950">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="estudiante">Estudiante</SelectItem>
-                  <SelectItem value="docente">Docente</SelectItem>
-                  <SelectItem value="admin_centro">Admin de Centro</SelectItem>
-                  <SelectItem value="admin">Administrador</SelectItem>
+                  {ROLES_PERMITIDOS_ADMIN_CENTRO.map(rol => (
+                    <SelectItem key={rol.value} value={rol.value}>
+                      {rol.label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground mt-1">
+                {isAdminCentro && "Nota: Solo puedes asignar roles de Estudiante, Docente o Admin de Centro"}
+              </p>
             </div>
-            {['admin', 'superadmin'].includes(session?.user?.role || '') && (
-              <div className="space-y-2">
-                <Label>Centro Educativo (Código)</Label>
-                <Input 
-                  value={form.codigoCentro} 
-                  className="font-mono bg-white dark:bg-slate-950" 
-                  onChange={(e) => setForm({...form, codigoCentro: e.target.value.toUpperCase()})} 
-                />
-              </div>
-            )}
           </CardContent>
         </Card>
 
@@ -306,7 +327,6 @@ export default function EditarUsuarioPage() {
                 </div>
               </div>
 
-              {/* Materias */}
               {form.categoriaDocente && (
                 <div className="space-y-3">
                   <Label>Materias Asignadas</Label>
@@ -327,7 +347,6 @@ export default function EditarUsuarioPage() {
                 </div>
               )}
 
-              {/* Selección de Grados para Docente */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {form.niveles.map(nivel => (
                   <div key={nivel} className="p-4 border rounded-lg space-y-3 bg-slate-50/50">
@@ -373,7 +392,6 @@ export default function EditarUsuarioPage() {
           </Alert>
         )}
 
-        {/* Footer Actions */}
         <div className="flex items-center justify-end gap-4 pt-4">
           <Button variant="outline" type="button" onClick={() => router.back()} disabled={saving}>
             <X className="h-4 w-4 mr-2" /> Cancelar
