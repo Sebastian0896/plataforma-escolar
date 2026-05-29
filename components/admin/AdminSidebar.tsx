@@ -121,19 +121,19 @@ export default function AdminSidebar() {
         roles: ['admin_centro'],
       })
       
-      links.push({
+      /* links.push({
         href: '/admin/usuarios/centros',
         label: 'Gestionar Usuarios',
         icon: Users,
-        roles: ['admin_centro'],
-      })
+        roles: ['superadmin'],
+      }) */
       
-      links.push({
+      /* links.push({
         href: '/admin/centros/plan',
         label: 'Planes',
         icon: Crown,
         roles: ['admin_centro'],
-      })
+      }) */
     }
 
     // Coordinador - Solo supervisión (NO gestión)
