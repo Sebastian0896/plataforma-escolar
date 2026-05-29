@@ -3,11 +3,6 @@ import { auth } from '@/auth'
 import { prisma } from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 
-// app/api/admin/centro/[centroId]/usuarios/[id]/route.ts
-import { auth } from '@/auth'
-import { prisma } from '@/lib/prisma'
-import { NextResponse } from 'next/server'
-
 export async function GET(
   req: Request,
   { params }: { params: Promise<{ centroId: string; id: string }> }
