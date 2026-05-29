@@ -309,7 +309,7 @@ export default async function UsuariosPage({
                             asChild
                           >
                             <Link
-                              href={`/admin/usuarios/editar/${u.id}`}
+                              href={`/admin/usuarios/${u.id}/editar`}
                               className="cursor-pointer"
                             >
                               <Edit2 className="mr-2 h-4 w-4" />

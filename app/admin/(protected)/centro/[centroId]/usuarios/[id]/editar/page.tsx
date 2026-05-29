@@ -22,7 +22,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, Save, X, ChevronLeft, User, School, BookOpen } from "lucide-react"
 
-// --- Datos Maestros (Igual que en NuevoUsuario) ---
+// --- Datos Maestros ---
 const MATERIAS_DISPONIBLES = [
   { slug: 'frances', label: 'Francés' },
   { slug: 'ingles', label: 'Inglés' },
@@ -58,12 +58,12 @@ export default function EditarUsuarioPage() {
   const router = useRouter()
   const params = useParams()
   const { data: session } = useSession()
+  
   const centroId = params.centroId as string
   const usuarioId = params.id as string
   
   const userRole = session?.user?.role
   const isAdminCentro = userRole === 'admin_centro'
-  const isSuperAdmin = userRole === 'superadmin' || userRole === 'admin'
 
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -85,9 +85,12 @@ export default function EditarUsuarioPage() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        // ✅ API corregida: usa centroId y usuarioId
+        // ✅ API CORRECTA
         const res = await fetch(`/api/admin/centro/${centroId}/usuarios/${usuarioId}`)
-        if (!res.ok) throw new Error('Usuario no encontrado')
+        if (!res.ok) {
+          const errorData = await res.json()
+          throw new Error(errorData.error || 'Usuario no encontrado')
+        }
         const data = await res.json()
 
         // Cargar información del centro (para mostrar)
@@ -120,7 +123,10 @@ export default function EditarUsuarioPage() {
         setLoading(false)
       }
     }
-    fetchUserData()
+    
+    if (centroId && usuarioId) {
+      fetchUserData()
+    }
   }, [centroId, usuarioId])
 
   const toggleArray = (campo: 'niveles' | 'materias' | 'grados', valor: string) => {
@@ -138,15 +144,13 @@ export default function EditarUsuarioPage() {
     setError('')
 
     try {
-      // ✅ Siempre usar el centroId de la URL (validado por el layout y proxy)
       const body: any = { 
         ...form, 
         centroId: centroId,
-        id: usuarioId
       }
       if (!body.password) delete body.password
 
-      // ✅ API corregida
+      // ✅ API CORRECTA
       const res = await fetch(`/api/admin/centro/${centroId}/usuarios/${usuarioId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -158,7 +162,6 @@ export default function EditarUsuarioPage() {
         throw new Error(errorData.error || 'Error al actualizar el perfil')
       }
 
-      // ✅ Redirigir a la lista de usuarios del centro
       router.push(`/admin/centro/${centroId}/usuarios`)
       router.refresh()
     } catch (err: any) {
@@ -222,7 +225,7 @@ export default function EditarUsuarioPage() {
           </CardContent>
         </Card>
 
-        {/* Card: Rol (sin selector de centro para admin_centro) */}
+        {/* Card: Rol */}
         <Card className="border-blue-100 dark:border-blue-900 bg-blue-50/20">
           <CardContent className="pt-6">
             <div className="space-y-2">
@@ -255,37 +258,14 @@ export default function EditarUsuarioPage() {
             <CardHeader>
               <CardTitle className="text-lg flex items-center gap-2"><School className="h-5 w-5" /> Datos Estudiantiles</CardTitle>
             </CardHeader>
-            <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="space-y-2">
-                <Label>Nivel</Label>
-                <Select value={form.nivel} onValueChange={(v) => setForm({...form, nivel: v, ciclo: '', grado: ''})}>
-                  <SelectTrigger><SelectValue placeholder="Nivel" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="nivel-primario">Primario</SelectItem>
-                    <SelectItem value="nivel-secundario">Secundario</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label>Ciclo</Label>
-                <Select disabled={!form.nivel} value={form.ciclo} onValueChange={(v) => setForm({...form, ciclo: v, grado: ''})}>
-                  <SelectTrigger><SelectValue placeholder="Ciclo" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="primer-ciclo">Primer Ciclo</SelectItem>
-                    <SelectItem value="segundo-ciclo">Segundo Ciclo</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <CardContent>
               <div className="space-y-2">
                 <Label>Grado</Label>
-                <Select disabled={!form.ciclo} value={form.grado} onValueChange={(v) => setForm({...form, grado: v})}>
-                  <SelectTrigger><SelectValue placeholder="Grado" /></SelectTrigger>
-                  <SelectContent>
-                    {GRADOS[`${form.nivel}-${form.ciclo}`]?.map(g => (
-                      <SelectItem key={g} value={g}>{g.replace('-', ' ')}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Input 
+                  value={form.grado || ''} 
+                  onChange={(e) => setForm({...form, grado: e.target.value})}
+                  placeholder="Ej: 1ro-secundaria"
+                />
               </div>
             </CardContent>
           </Card>
@@ -347,40 +327,20 @@ export default function EditarUsuarioPage() {
                 </div>
               )}
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {form.niveles.map(nivel => (
-                  <div key={nivel} className="p-4 border rounded-lg space-y-3 bg-slate-50/50">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-bold uppercase">{nivel.split('-')[1]}</span>
-                      <Select 
-                        value={form.ciclos[nivel] || ''} 
-                        onValueChange={(v) => setForm({...form, ciclos: {...form.ciclos, [nivel]: v}})}
-                      >
-                        <SelectTrigger className="w-32 h-8 text-xs"><SelectValue placeholder="Ciclo" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="primer-ciclo">1er Ciclo</SelectItem>
-                          <SelectItem value="segundo-ciclo">2do Ciclo</SelectItem>
-                        </SelectContent>
-                      </Select>
+              <div className="space-y-2">
+                <Label>Grados que atiende</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {['1ro-primaria', '2do-primaria', '3ro-primaria', '4to-primaria', '5to-primaria', '6to-primaria', '1ro-secundaria', '2do-secundaria', '3ro-secundaria', '4to-secundaria', '5to-secundaria', '6to-secundaria'].map(g => (
+                    <div key={g} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={g} 
+                        checked={form.grados.includes(g)} 
+                        onCheckedChange={() => toggleArray('grados', g)} 
+                      />
+                      <label htmlFor={g} className="text-xs cursor-pointer">{g.replace('-', ' ')}</label>
                     </div>
-                    {form.ciclos[nivel] && (
-                      <div className="grid grid-cols-2 gap-2">
-                        {GRADOS[`${nivel}-${form.ciclos[nivel]}`].map(g => (
-                          <div key={g} className="flex items-center space-x-2 bg-white p-2 rounded border shadow-sm">
-                            <Checkbox 
-                              id={g} 
-                              checked={form.grados.includes(g)} 
-                              onCheckedChange={() => toggleArray('grados', g)} 
-                            />
-                            <label htmlFor={g} className="text-[11px] font-medium leading-none cursor-pointer">
-                              {g.replace('-', ' ')}
-                            </label>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </CardContent>
           </Card>
