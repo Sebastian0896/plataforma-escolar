@@ -86,7 +86,7 @@ export default function EditarUsuarioPage() {
     const fetchUserData = async () => {
       try {
         // ✅ API CORRECTA
-        const res = await fetch(`/api/admin/centro/${centroId}/usuarios/${usuarioId}`)
+        const res = await fetch(`/api/centro/${centroId}/usuarios/${usuarioId}`)
         if (!res.ok) {
           const errorData = await res.json()
           throw new Error(errorData.error || 'Usuario no encontrado')
@@ -151,7 +151,7 @@ export default function EditarUsuarioPage() {
       if (!body.password) delete body.password
 
       // ✅ API CORRECTA
-      const res = await fetch(`/api/admin/centro/${centroId}/usuarios/${usuarioId}`, {
+      const res = await fetch(`/api/centro/${centroId}/usuarios/${usuarioId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
