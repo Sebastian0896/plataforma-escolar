@@ -6,6 +6,8 @@ import type { NextRequest } from 'next/server'
 export const proxy = auth(async function proxy(req: NextRequest) {
   const session = await auth()
   const path = req.nextUrl.pathname
+
+  
   
   // ✅ Rutas públicas (no requieren autenticación)
   const publicPaths = ['/login', '/auth/login', '/api/auth']
@@ -79,6 +81,7 @@ if (rol === 'estudiante') {
     if (rol === 'admin' || rol === 'superadmin') {
       return NextResponse.redirect(new URL('/admin', req.url))
     }
+  
   }
   
   return NextResponse.next()
