@@ -25,6 +25,23 @@ export const proxy = auth(async function proxy(req: NextRequest) {
   const userCentroId = session?.user?.centroId
 
   // ========== REGLAS PARA ADMIN_CENTRO ==========
+
+  
+  // Redirigir /admin/centro a /admin/centro/[centroId]
+  if (path === '/admin/centro') {
+    const userRole = session?.user?.role
+    const centroId = session?.user?.centroId
+    
+    if (userRole === 'admin_centro' && centroId) {
+      return NextResponse.redirect(new URL(`/admin/centro/${centroId}`, req.url))
+    }
+    
+    if (userRole === 'superadmin' || userRole === 'admin') {
+      return NextResponse.redirect(new URL('/admin/centros', req.url))
+    }
+    
+    return NextResponse.redirect(new URL('/dashboard', req.url))
+  }
   
   // 1. Bloquear acceso a cualquier ruta que contenga "centros" (plural) - solo superadmin
   if (path.includes('/centros') && userRole !== 'superadmin') {
